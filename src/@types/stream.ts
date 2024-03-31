@@ -1,6 +1,7 @@
 import { Readable, Transform, Writable } from 'stream'
 import {
   TAnyCallback,
+  TErrorCallback,
   TFilterCallback,
   TMapCallback,
   TReduceCallback,
@@ -36,6 +37,7 @@ export interface IStreamObject<T> extends AsyncIterable<T> {
   finalize(callback: TAnyCallback): IStreamObject<T>
   delay(ms: number): IStreamObject<T>
   chain(stream: CanBeStream<T>): IStreamObject<T>
+  catchError(callback: TErrorCallback): IStreamObject<T>
 }
 
 export type Iter<T> = AsyncIterable<T> | Iterable<T>

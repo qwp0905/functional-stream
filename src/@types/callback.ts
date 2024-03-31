@@ -7,3 +7,5 @@ export type TTapCallback<T> = (arg: T, index?: number) => void
 export type TReduceCallback<A, C> = (acc: A, cur: C, index?: number) => A
 
 export type TAnyCallback = () => any
+
+export type TErrorCallback = (err: Error) => any

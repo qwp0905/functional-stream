@@ -3,6 +3,7 @@ import { CanBeStream, IStreamObject, IStreamReadOptions, Iter } from '../@types/
 import { isAsyncIterable, isIterable } from './functions'
 import {
   TAnyCallback,
+  TErrorCallback,
   TFilterCallback,
   TMapCallback,
   TReduceCallback,
@@ -24,6 +25,7 @@ import { ObjectPassThrough } from './operators/transform'
 export class StreamObject<T> implements IStreamObject<T> {
   private source: Readable
   private chaining: (Writable | Transform)[] = []
+  private end = false
 
   constructor(stream: Readable) {
     this.source = stream
@@ -46,6 +48,10 @@ export class StreamObject<T> implements IStreamObject<T> {
   }
 
   private pipe<R = T>(next: Writable | Transform): IStreamObject<R> {
+    if (this.end) {
+      throw new Error('stream already ended')
+    }
+
     this.chaining.push(next)
     return this as unknown as StreamObject<R>
   }
@@ -54,6 +60,7 @@ export class StreamObject<T> implements IStreamObject<T> {
     const stream = this.chaining.length
       ? pipeline(this.source as any, ...(this.chaining as any), () => {})
       : this.source
+    this.end = true
     return stream
   }
 
@@ -208,6 +215,24 @@ export class StreamObject<T> implements IStreamObject<T> {
             pass.end()
           }
         })
+      }
+    })
+
+    return StreamObject.from(pass)
+  }
+
+  catchError(callback: TErrorCallback): IStreamObject<T> {
+    const pass = new ObjectPassThrough()
+    this.read({
+      next(data) {
+        pass.push(data)
+      },
+      async error(err) {
+        await callback(err)
+        pass.destroy(err)
+      },
+      complete() {
+        pass.end()
       }
     })
 
