@@ -23,17 +23,14 @@ import { delay } from './operators/delay'
 import { ObjectPassThrough } from './operators/transform'
 
 export class StreamObject<T> implements IStreamObject<T> {
-  private source: Readable
   private chaining: (Writable | Transform)[] = []
   private end = false
 
-  constructor(stream: Readable) {
-    this.source = stream
-  }
+  constructor(private readonly source: Readable) {}
 
   static from<T>(stream: CanBeStream<T>): IStreamObject<T> {
     if (stream instanceof StreamObject) {
-      return stream
+      return stream as IStreamObject<T>
     }
 
     if (stream instanceof Readable) {
@@ -45,6 +42,14 @@ export class StreamObject<T> implements IStreamObject<T> {
     }
 
     throw new Error('stream type is not supported')
+  }
+
+  static merge<T>(...streams: CanBeStream<T>[]): IStreamObject<T> {
+    return StreamObject.from(streams).mergeAll()
+  }
+
+  static concat<T>(...streams: CanBeStream<T>[]): IStreamObject<T> {
+    return StreamObject.from(streams).concatAll()
   }
 
   private pipe<R = T>(next: Writable | Transform): IStreamObject<R> {
@@ -71,8 +76,10 @@ export class StreamObject<T> implements IStreamObject<T> {
     stream.on('close', complete)
   }
 
-  [Symbol.asyncIterator](): AsyncIterator<T, any, undefined> {
-    throw new Error('Method not implemented.')
+  async *[Symbol.asyncIterator]() {
+    for await (const data of this.toStream() as Readable) {
+      yield data
+    }
   }
 
   promise(): Promise<T> {
@@ -137,7 +144,7 @@ export class StreamObject<T> implements IStreamObject<T> {
     return this.pipe(bufferCount(count))
   }
 
-  mergeAll(): IStreamObject<T extends CanBeStream<infer K> ? K : any> {
+  mergeAll(): IStreamObject<T extends CanBeStream<infer K> ? K : never> {
     const pass = new ObjectPassThrough()
     this.read({
       next(data) {
@@ -154,7 +161,7 @@ export class StreamObject<T> implements IStreamObject<T> {
     return (StreamObject.from(pass) as StreamObject<T>).pipe(mergeAll())
   }
 
-  concatAll(): IStreamObject<T extends CanBeStream<infer K> ? K : any> {
+  concatAll(): IStreamObject<T extends CanBeStream<infer K> ? K : never> {
     return this.pipe(concatAll())
   }
 
