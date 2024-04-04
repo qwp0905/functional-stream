@@ -1,5 +1,5 @@
 export function isAsyncIterable(v: any): boolean {
-  return isIterable(v) || (typeof v?.[Symbol.asyncIterator] === 'function' ?? false)
+  return typeof v?.[Symbol.asyncIterator] === 'function' ?? false
 }
 
 export function isIterable(v: any): boolean {

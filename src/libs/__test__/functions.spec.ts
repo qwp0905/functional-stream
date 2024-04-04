@@ -5,7 +5,7 @@ describe('functions', () => {
   it('array', () => {
     const arr = []
     expect(isIterable(arr)).toBeTruthy()
-    expect(isAsyncIterable(arr)).toBeTruthy()
+    expect(isAsyncIterable(arr)).toBeFalsy()
   })
 
   it('stream', () => {
@@ -17,7 +17,7 @@ describe('functions', () => {
   it('map', () => {
     const map = new Map()
     expect(isIterable(map)).toBeTruthy()
-    expect(isAsyncIterable(map)).toBeTruthy()
+    expect(isAsyncIterable(map)).toBeFalsy()
   })
 
   it('object', () => {
@@ -29,12 +29,12 @@ describe('functions', () => {
   it('set', () => {
     const set = new Set()
     expect(isIterable(set)).toBeTruthy()
-    expect(isAsyncIterable(set)).toBeTruthy()
+    expect(isAsyncIterable(set)).toBeFalsy()
   })
 
   it('string', () => {
     const str = 'sdlkfjls'
-    expect(isAsyncIterable(str)).toBeTruthy()
+    expect(isAsyncIterable(str)).toBeFalsy()
     expect(isIterable(str)).toBeTruthy()
   })
 

@@ -38,6 +38,7 @@ export interface IStreamObject<T> extends AsyncIterable<T> {
   delay(ms: number): IStreamObject<T>
   chain(stream: CanBeStream<T>): IStreamObject<T>
   catchError(callback: TErrorCallback): IStreamObject<T>
+  copy(count: number): IStreamObject<T>[]
 }
 
 export type Iter<T> = AsyncIterable<T> | Iterable<T>

@@ -23,7 +23,7 @@ import { delay } from './operators/delay'
 import { ObjectPassThrough } from './operators/transform'
 
 export class StreamObject<T> implements IStreamObject<T> {
-  private chaining: (Writable | Transform)[] = []
+  private readonly chaining: (Writable | Transform)[] = []
   private end = false
 
   constructor(private readonly source: Readable) {}
@@ -244,5 +244,22 @@ export class StreamObject<T> implements IStreamObject<T> {
     })
 
     return StreamObject.from(pass)
+  }
+
+  copy(count: number): IStreamObject<T>[] {
+    const pass = new Array(count).fill(null).map(() => new ObjectPassThrough())
+    this.read({
+      next(data) {
+        pass.forEach((s) => s.push(data))
+      },
+      error(err) {
+        pass.forEach((s) => s.destroy(err))
+      },
+      complete() {
+        pass.forEach((s) => s.end())
+      }
+    })
+
+    return pass.map((s) => StreamObject.from(s))
   }
 }
