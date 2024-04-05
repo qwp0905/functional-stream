@@ -21,6 +21,7 @@ import { concatAll, concatMap } from './operators/concat'
 import { finalize } from './operators/finalize'
 import { delay } from './operators/delay'
 import { ObjectPassThrough } from './operators/transform'
+import { ifEmpty } from './operators/empty'
 
 export class StreamObject<T> implements IStreamObject<T> {
   private readonly chaining: (Writable | Transform)[] = []
@@ -52,6 +53,16 @@ export class StreamObject<T> implements IStreamObject<T> {
     return StreamObject.from(streams).concatAll()
   }
 
+  static range(count: number): IStreamObject<number> {
+    return StreamObject.from({
+      *[Symbol.iterator]() {
+        for (let i = 0; i < count; i++) {
+          yield i
+        }
+      }
+    })
+  }
+
   private pipe<R = T>(next: Writable | Transform): IStreamObject<R> {
     if (this.end) {
       throw new Error('stream already ended')
@@ -69,7 +80,7 @@ export class StreamObject<T> implements IStreamObject<T> {
     return stream
   }
 
-  read({ next, error = () => {}, complete = () => {} }: IStreamReadOptions<T>) {
+  watch({ next, error = () => {}, complete = () => {} }: IStreamReadOptions<T>) {
     const stream = this.toStream()
     stream.on('data', next)
     stream.on('error', error)
@@ -85,7 +96,7 @@ export class StreamObject<T> implements IStreamObject<T> {
   promise(): Promise<T> {
     return new Promise((resolve, reject) => {
       let result: T
-      this.read({
+      this.watch({
         next(data) {
           result = data
         },
@@ -102,7 +113,7 @@ export class StreamObject<T> implements IStreamObject<T> {
   array(): Promise<T[]> {
     return new Promise((resolve, reject) => {
       const result = []
-      this.read({
+      this.watch({
         next(data) {
           result.push(data)
         },
@@ -133,7 +144,19 @@ export class StreamObject<T> implements IStreamObject<T> {
   }
 
   take(count: number): IStreamObject<T> {
-    return this.pipe(take(count))
+    const pass = new ObjectPassThrough()
+    this.pipe(take(count)).watch({
+      next(data) {
+        pass.push(data)
+      },
+      error(err) {
+        pass.destroy(err)
+      },
+      complete() {
+        pass.end()
+      }
+    })
+    return StreamObject.from(pass)
   }
 
   skip(count: number): IStreamObject<T> {
@@ -146,7 +169,7 @@ export class StreamObject<T> implements IStreamObject<T> {
 
   mergeAll(): IStreamObject<T extends CanBeStream<infer K> ? K : never> {
     const pass = new ObjectPassThrough()
-    this.read({
+    this.watch({
       next(data) {
         pass.push(data)
       },
@@ -170,7 +193,7 @@ export class StreamObject<T> implements IStreamObject<T> {
     concurrency: number = 5
   ): IStreamObject<R extends Promise<infer K> ? K : R> {
     const pass = new ObjectPassThrough()
-    this.read({
+    this.watch({
       next(data) {
         pass.push(data)
       },
@@ -203,7 +226,7 @@ export class StreamObject<T> implements IStreamObject<T> {
 
   chain(stream: CanBeStream<T>): IStreamObject<T> {
     const pass = new ObjectPassThrough()
-    this.read({
+    this.watch({
       next(data) {
         pass.push(data)
       },
@@ -211,7 +234,7 @@ export class StreamObject<T> implements IStreamObject<T> {
         pass.destroy(err)
       },
       complete() {
-        StreamObject.from(stream).read({
+        StreamObject.from(stream).watch({
           next(data) {
             pass.push(data)
           },
@@ -230,13 +253,21 @@ export class StreamObject<T> implements IStreamObject<T> {
 
   catchError(callback: TErrorCallback): IStreamObject<T> {
     const pass = new ObjectPassThrough()
-    this.read({
+    this.watch({
       next(data) {
         pass.push(data)
       },
       async error(err) {
-        await callback(err)
-        pass.destroy(err)
+        try {
+          const e = await Promise.resolve(callback(err))
+          if (!e) {
+            return
+          }
+
+          throw e
+        } catch (e) {
+          pass.destroy(e)
+        }
       },
       complete() {
         pass.end()
@@ -248,7 +279,7 @@ export class StreamObject<T> implements IStreamObject<T> {
 
   copy(count: number): IStreamObject<T>[] {
     const pass = new Array(count).fill(null).map(() => new ObjectPassThrough())
-    this.read({
+    this.watch({
       next(data) {
         pass.forEach((s) => s.push(data))
       },
@@ -261,5 +292,9 @@ export class StreamObject<T> implements IStreamObject<T> {
     })
 
     return pass.map((s) => StreamObject.from(s))
+  }
+
+  ifEmpty(callback: TAnyCallback): IStreamObject<T> {
+    return this.pipe(ifEmpty(callback))
   }
 }

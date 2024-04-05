@@ -4,11 +4,11 @@ import { ObjectTransform } from './transform'
 
 export const concatAll = () => {
   return new ObjectTransform({
-    async transform(chunk, _, done) {
-      await StreamObject.from(chunk)
+    transform(chunk, _, done) {
+      StreamObject.from(chunk)
         .tap((e) => this.push(e))
         .promise()
-      done()
+        .then(() => done())
     }
   })
 }

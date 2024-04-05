@@ -5,10 +5,9 @@ export const take = (count: number) => {
   return new ObjectTransform({
     transform(chunk, _, done) {
       if (index++ < count) {
-        done(null, chunk)
-      } else {
-        this.destroy()
+        return done(null, chunk)
       }
+      done()
     }
   })
 }

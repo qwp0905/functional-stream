@@ -1,4 +1,4 @@
-import EventEmitter from 'events'
+import { EventEmitter } from 'events'
 import { ObjectTransform } from './transform'
 import { StreamObject } from '..'
 import { TMapCallback } from '../../@types/callback'
@@ -45,7 +45,7 @@ export const mergeMap = <T, R>(
   const queue = []
   const event = new EventEmitter()
   const is_done = new Promise((resolve) => {
-    event.on('done', () => {
+    event.on(DONE, () => {
       if (running > 0 || queue.length > 0) {
         return
       }
@@ -79,7 +79,7 @@ export const mergeMap = <T, R>(
               const buffered = queue.shift()
               buffered()
             }
-            event.emit('done')
+            event.emit(DONE)
           })
           .catch((err) => this.destroy(err))
 

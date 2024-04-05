@@ -15,7 +15,7 @@ export interface IStreamReadOptions<T> {
 }
 
 export interface IStreamObject<T> extends AsyncIterable<T> {
-  read(options: IStreamReadOptions<T>): any
+  watch(options: IStreamReadOptions<T>): any
   promise(): Promise<T>
   array(): Promise<T[]>
   map<R>(callback: TMapCallback<T, R>): IStreamObject<R>
@@ -39,6 +39,7 @@ export interface IStreamObject<T> extends AsyncIterable<T> {
   chain(stream: CanBeStream<T>): IStreamObject<T>
   catchError(callback: TErrorCallback): IStreamObject<T>
   copy(count: number): IStreamObject<T>[]
+  ifEmpty(callback: TAnyCallback): IStreamObject<T>
 }
 
 export type Iter<T> = AsyncIterable<T> | Iterable<T>
