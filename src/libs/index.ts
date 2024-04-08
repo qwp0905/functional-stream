@@ -16,7 +16,7 @@ import { reduce } from './operators/reduce'
 import { take } from './operators/take'
 import { skip } from './operators/skip'
 import { bufferCount } from './operators/buffer-count'
-import { mergeAll, mergeMap } from './operators/merge'
+import { mergeAll } from './operators/merge'
 import { concatAll, concatMap } from './operators/concat'
 import { finalize } from './operators/finalize'
 import { delay } from './operators/delay'
@@ -193,21 +193,20 @@ export class StreamObject<T> implements IStreamObject<T> {
     concurrency: number = 5
   ): IStreamObject<R extends Promise<infer K> ? K : R> {
     const pass = new ObjectPassThrough()
-    this.watch({
-      next(data) {
-        pass.push(data)
-      },
-      error(err) {
-        pass.destroy(err)
-      },
-      complete() {
-        pass.end()
-      }
-    })
-
-    return (StreamObject.from(pass) as StreamObject<T>).pipe(
-      mergeMap(callback, concurrency)
+    const s = this.toStream()[Symbol.asyncIterator]() as AsyncIterator<T>
+    let index = 0
+    Promise.all(
+      new Array(concurrency).fill(null).map(async () => {
+        for (let data = await s.next(); !data.done; data = await s.next()) {
+          const r = await callback(data.value, index++)
+          pass.push(r)
+        }
+      })
     )
+      .then(() => pass.end())
+      .catch((err) => pass.destroy(err))
+
+    return StreamObject.from(pass)
   }
 
   concatMap<R = T>(
