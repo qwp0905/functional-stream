@@ -1,4 +1,4 @@
-import { ObjectTransform } from './transform'
+import { ObjectTransform } from '../object'
 
 export const skip = (count: number) => {
   let index = 0

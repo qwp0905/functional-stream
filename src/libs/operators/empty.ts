@@ -1,5 +1,5 @@
 import { TAnyCallback } from '../../@types/callback'
-import { ObjectTransform } from './transform'
+import { ObjectTransform } from '../object'
 
 export const ifEmpty = (callback: TAnyCallback) => {
   let is_empty = true

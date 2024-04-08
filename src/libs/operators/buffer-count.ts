@@ -1,4 +1,4 @@
-import { ObjectTransform } from './transform'
+import { ObjectTransform } from '../object'
 
 export const bufferCount = <T>(count: number) => {
   let queue: T[] = []

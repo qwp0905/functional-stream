@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events'
-import { ObjectTransform } from './transform'
+import { ObjectTransform } from '../object'
 import { StreamObject } from '..'
 import { TMapCallback } from '../../@types/callback'
 

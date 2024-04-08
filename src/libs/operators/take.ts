@@ -1,4 +1,4 @@
-import { ObjectTransform } from './transform'
+import { ObjectTransform } from '../object'
 
 export const take = (count: number) => {
   let index = 0

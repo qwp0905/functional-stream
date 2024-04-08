@@ -1,6 +1,6 @@
 import { StreamObject } from '..'
 import { TMapCallback } from '../../@types/callback'
-import { ObjectTransform } from './transform'
+import { ObjectTransform } from '../object'
 
 export const concatAll = () => {
   return new ObjectTransform({

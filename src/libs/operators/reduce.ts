@@ -1,5 +1,5 @@
 import { TReduceCallback } from '../../@types/callback'
-import { ObjectTransform } from './transform'
+import { ObjectTransform } from '../object'
 
 export const reduce = <A, C>(callback: TReduceCallback<A, C>, initialValue?: A) => {
   let index = 0
@@ -8,7 +8,9 @@ export const reduce = <A, C>(callback: TReduceCallback<A, C>, initialValue?: A) 
       try {
         initialValue = callback(initialValue || chunk, chunk, index++)
         done()
-      } catch (err) {}
+      } catch (err) {
+        done(err)
+      }
     },
     flush(done) {
       done(null, initialValue)

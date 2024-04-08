@@ -20,7 +20,7 @@ import { mergeAll, mergeMap } from './operators/merge'
 import { concatAll, concatMap } from './operators/concat'
 import { finalize } from './operators/finalize'
 import { delay } from './operators/delay'
-import { ObjectPassThrough } from './operators/transform'
+import { ObjectPassThrough } from './object'
 import { ifEmpty } from './operators/empty'
 
 export class StreamObject<T> implements IStreamObject<T> {
