@@ -1,16 +1,19 @@
-import { EventEmitter } from 'events'
-
 export class Worker {
   running: Promise<void>[] = []
-  event = new EventEmitter()
 
-  constructor(private readonly concurrency: number) {
-    this.event.on('data', () => {})
-  }
+  constructor(private readonly concurrency: number) {}
 
   run(fn: () => Promise<void>) {
-    const p = this.concurrency > this.running.length ? null : this.running.shift()
-    Promise.resolve(p).then(() => {
+    if (this.concurrency > this.running.length) {
+      this.running.push(
+        new Promise((resolve) => {
+          fn().then(() => resolve())
+        })
+      )
+      return
+    }
+
+    this.running.shift().then(() => {
       this.running.push(
         new Promise((resolve) => {
           fn().then(() => resolve())
