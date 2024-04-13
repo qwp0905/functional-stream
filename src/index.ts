@@ -233,7 +233,8 @@ export class StreamObject<T> implements IStreamObject<T> {
     let index = 0
     Promise.all(
       new Array(concurrency).fill(null).map(async () => {
-        for (let data = await s.next(); !data.done; data = await s.next()) {
+        let data: IteratorResult<T>
+        while (null !== (data = await s.next())) {
           const r = await callback(data.value, index++)
           pass.push(r)
         }
