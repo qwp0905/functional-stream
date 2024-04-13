@@ -1,7 +1,7 @@
 import { EventEmitter } from 'events'
-import { ObjectTransform } from '../object'
+import { ObjectTransform } from '../stream/object'
 import { StreamObject } from '..'
-import { TMapCallback } from '../../@types/callback'
+import { TMapCallback } from '../@types/callback'
 
 const DONE = Symbol('done')
 

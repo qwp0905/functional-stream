@@ -1,5 +1,5 @@
-import { TMapCallback } from '../../@types/callback'
-import { ObjectTransform } from '../object'
+import { TMapCallback } from '../@types/callback'
+import { ObjectTransform } from '../stream/object'
 
 export const map = <T, R>(callback: TMapCallback<T, R>) => {
   let index = 0

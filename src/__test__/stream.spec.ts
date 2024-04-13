@@ -1,4 +1,4 @@
-import { IStreamObject } from '../../@types/stream'
+import { IStreamObject } from '../@types/stream'
 import { StreamObject } from '..'
 
 describe('number', () => {

@@ -1,5 +1,5 @@
-import { TFilterCallback } from '../../@types/callback'
-import { ObjectTransform } from '../object'
+import { TFilterCallback } from '../@types/callback'
+import { ObjectTransform } from '../stream/object'
 
 export const filter = <T>(callback: TFilterCallback<T>) => {
   let index = 0

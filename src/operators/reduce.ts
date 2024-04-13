@@ -1,5 +1,5 @@
-import { TReduceCallback } from '../../@types/callback'
-import { ObjectTransform } from '../object'
+import { TReduceCallback } from '../@types/callback'
+import { ObjectTransform } from '../stream/object'
 
 export const reduce = <A, C>(callback: TReduceCallback<A, C>, initialValue?: A) => {
   let index = 0

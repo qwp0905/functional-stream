@@ -1,5 +1,5 @@
-import { TTapCallback } from '../../@types/callback'
-import { ObjectTransform } from '../object'
+import { TTapCallback } from '../@types/callback'
+import { ObjectTransform } from '../stream/object'
 
 export const tap = <T>(callback: TTapCallback<T>) => {
   let index = 0

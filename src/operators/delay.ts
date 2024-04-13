@@ -1,4 +1,4 @@
-import { ObjectTransform } from '../object'
+import { ObjectTransform } from '../stream/object'
 
 export const delay = (ms: number) => {
   return new ObjectTransform({
