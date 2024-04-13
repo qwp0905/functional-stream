@@ -19,5 +19,10 @@ describe('merge', () => {
         .array()
       await expect(stream).resolves.toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
     })
+
+    it('empty', async () => {
+      const stream = StreamObject.from([[]]).mergeAll().array()
+      await expect(stream).resolves.toEqual([])
+    })
   })
 })

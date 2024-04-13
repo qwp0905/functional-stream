@@ -17,7 +17,6 @@ import { take } from './operators/take'
 import { skip } from './operators/skip'
 import { bufferCount } from './operators/buffer-count'
 import { concatAll, concatMap } from './operators/concat'
-import { finalize } from './operators/finalize'
 import { delay } from './operators/delay'
 import { ObjectPassThrough } from './stream/object'
 import { ifEmpty } from './operators/empty'
@@ -268,7 +267,24 @@ export class StreamObject<T> implements IStreamObject<T> {
   }
 
   finalize(callback: TAnyCallback): IStreamObject<T> {
-    return this.pipe(finalize(callback))
+    const pass = new ObjectPassThrough()
+    this.watch({
+      next(data) {
+        pass.push(data)
+      },
+      error(err) {
+        pass.destroy(err)
+      },
+      async complete() {
+        try {
+          await callback()
+          pass.end()
+        } catch (err) {
+          pass.destroy(err)
+        }
+      }
+    })
+    return StreamObject.from(pass)
   }
 
   delay(ms: number): IStreamObject<T> {
