@@ -16,7 +16,6 @@ import { reduce } from './operators/reduce'
 import { take } from './operators/take'
 import { skip } from './operators/skip'
 import { bufferCount } from './operators/buffer-count'
-import { mergeAll } from './operators/merge'
 import { concatAll, concatMap } from './operators/concat'
 import { finalize } from './operators/finalize'
 import { delay } from './operators/delay'
@@ -205,19 +204,36 @@ export class StreamObject<T> implements IStreamObject<T> {
 
   mergeAll(): IStreamObject<T extends CanBeStream<infer K> ? K : never> {
     const pass = new ObjectPassThrough()
+    let count = 0
+    let is_done = false
     this.watch({
       next(data) {
-        pass.push(data)
+        count++
+        StreamObject.from(data as CanBeStream<any>).watch({
+          next(e) {
+            pass.push(e)
+          },
+          error(err) {
+            pass.destroy(err)
+          },
+          complete() {
+            count--
+            if (count || !is_done) {
+              return
+            }
+            pass.end()
+          }
+        })
       },
       error(err) {
         pass.destroy(err)
       },
       complete() {
-        pass.end()
+        is_done = true
       }
     })
 
-    return (StreamObject.from(pass) as StreamObject<T>).pipe(mergeAll())
+    return StreamObject.from(pass)
   }
 
   concatAll(): IStreamObject<T extends CanBeStream<infer K> ? K : never> {
@@ -233,8 +249,7 @@ export class StreamObject<T> implements IStreamObject<T> {
     let index = 0
     Promise.all(
       new Array(concurrency).fill(null).map(async () => {
-        let data: IteratorResult<T>
-        while (null !== (data = await s.next())) {
+        for (let data = await s.next(); !data.done; data = await s.next()) {
           const r = await callback(data.value, index++)
           pass.push(r)
         }
