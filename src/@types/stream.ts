@@ -27,8 +27,8 @@ export interface IStreamObject<T> extends AsyncIterable<T> {
   take(count: number): IStreamObject<T>
   skip(count: number): IStreamObject<T>
   bufferCount(count: number): IStreamObject<T[]>
-  mergeAll(): IStreamObject<T extends CanBeStream<infer K> ? K : never>
-  concatAll(): IStreamObject<T extends CanBeStream<infer K> ? K : never>
+  mergeAll(): IStreamObject<T extends StreamLike<infer K> ? K : never>
+  concatAll(): IStreamObject<T extends StreamLike<infer K> ? K : never>
   mergeMap<R = T>(
     callback: TMapCallback<T, R>,
     concurrency?: number
@@ -38,7 +38,7 @@ export interface IStreamObject<T> extends AsyncIterable<T> {
   ): IStreamObject<R extends Promise<infer K> ? K : R>
   finalize(callback: TAnyCallback): IStreamObject<T>
   delay(ms: number): IStreamObject<T>
-  chain(stream: CanBeStream<T>): IStreamObject<T>
+  chain(stream: StreamLike<T>): IStreamObject<T>
   catchError(callback: TErrorCallback): IStreamObject<T>
   copy(count: number): IStreamObject<T>[]
   ifEmpty(callback: TAnyCallback): IStreamObject<T>
@@ -46,4 +46,10 @@ export interface IStreamObject<T> extends AsyncIterable<T> {
 
 export type Iter<T> = AsyncIterable<T> | Iterable<T>
 
-export type CanBeStream<T> = Readable | Writable | Transform | Iter<T> | IStreamObject<T>
+export type StreamLike<T> =
+  | Readable
+  | Writable
+  | Transform
+  | Iter<T>
+  | IStreamObject<T>
+  | Promise<T>

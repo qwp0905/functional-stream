@@ -1,5 +1,5 @@
 import { Readable, Transform, Writable, pipeline } from 'stream'
-import { CanBeStream, IStreamObject, IStreamReadOptions, Iter } from './@types/stream'
+import { StreamLike, IStreamObject, IStreamReadOptions, Iter } from './@types/stream'
 import { isAsyncIterable, isIterable } from './stream/functions'
 import {
   TAnyCallback,
@@ -27,7 +27,7 @@ export class StreamObject<T> implements IStreamObject<T> {
 
   constructor(private readonly source: Readable) {}
 
-  static from<T>(stream: CanBeStream<T>): IStreamObject<T> {
+  static from<T>(stream: StreamLike<T>): IStreamObject<T> {
     if (stream instanceof StreamObject) {
       return stream as IStreamObject<T>
     }
@@ -40,14 +40,23 @@ export class StreamObject<T> implements IStreamObject<T> {
       return new StreamObject(Readable.from(stream as Iter<T>, { objectMode: true }))
     }
 
+    if (stream instanceof Promise) {
+      const pass = new ObjectPassThrough()
+      stream
+        .then((data) => pass.push(data))
+        .then(() => pass.end())
+        .catch((err) => pass.destroy(err))
+      return new StreamObject(pass)
+    }
+
     throw new Error('stream type is not supported')
   }
 
-  static merge<T>(...streams: CanBeStream<T>[]): IStreamObject<T> {
+  static merge<T>(...streams: StreamLike<T>[]): IStreamObject<T> {
     return StreamObject.from(streams).mergeAll()
   }
 
-  static concat<T>(...streams: CanBeStream<T>[]): IStreamObject<T> {
+  static concat<T>(...streams: StreamLike<T>[]): IStreamObject<T> {
     return StreamObject.from(streams).concatAll()
   }
 
@@ -201,14 +210,14 @@ export class StreamObject<T> implements IStreamObject<T> {
     return this.pipe(bufferCount(count))
   }
 
-  mergeAll(): IStreamObject<T extends CanBeStream<infer K> ? K : never> {
+  mergeAll(): IStreamObject<T extends StreamLike<infer K> ? K : never> {
     const pass = new ObjectPassThrough()
     let count = 0
     let is_done = false
     this.watch({
       next(data) {
         count++
-        StreamObject.from(data as CanBeStream<any>).watch({
+        StreamObject.from(data as StreamLike<any>).watch({
           next(e) {
             pass.push(e)
           },
@@ -235,7 +244,7 @@ export class StreamObject<T> implements IStreamObject<T> {
     return StreamObject.from(pass)
   }
 
-  concatAll(): IStreamObject<T extends CanBeStream<infer K> ? K : never> {
+  concatAll(): IStreamObject<T extends StreamLike<infer K> ? K : never> {
     return this.pipe(concatAll())
   }
 
@@ -291,7 +300,7 @@ export class StreamObject<T> implements IStreamObject<T> {
     return this.pipe(delay(ms))
   }
 
-  chain(stream: CanBeStream<T>): IStreamObject<T> {
+  chain(stream: StreamLike<T>): IStreamObject<T> {
     const pass = new ObjectPassThrough()
     this.watch({
       next(data) {
