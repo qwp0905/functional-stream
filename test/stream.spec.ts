@@ -1,5 +1,5 @@
-import { IStreamObject } from '../@types/stream'
-import { StreamObject } from '..'
+import { IStreamObject } from '../src/@types/stream'
+import { StreamObject } from '../src'
 
 describe('number', () => {
   const arr = new Array(10).fill(null).map((_, i) => i)

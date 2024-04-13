@@ -5,8 +5,8 @@
   "main": "src/index.ts",
   "scripts": {
     "build": "rimraf dist && tsc --build tsconfig.json",
-    "format": "prettier --config .prettierrc --write \"src/**/*.{ts,js}\"",
-    "lint": "eslint \"src/**/*.{ts,js}\"",
+    "format": "prettier --config .prettierrc --write \"{src,test}/**/*.{ts,js}\"",
+    "lint": "eslint \"{src,test}/**/*.{ts,js}\"",
     "test": "jest"
   },
   "repository": {
@@ -40,7 +40,7 @@
       "json",
       "ts"
     ],
-    "rootDir": "src",
+    "rootDir": "test",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
