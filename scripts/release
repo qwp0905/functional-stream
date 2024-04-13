@@ -7,10 +7,10 @@ if ! echo $VERSION | grep -E "^[0-9]+\.[0-9]+\.[0-9]+$"; then
   exit 1
 fi
 
+npm pkg set version=$VERSION
+
 npm ci --silent
 npm run build
-
-npm pkg set version=$VERSION
 
 npm config set "//npm.pkg.github.com/:_authToken=$GITHUB_TOKEN"
 npm config set "@${REGISTRY_NAME}:registry=https://npm.pkg.github.com"
