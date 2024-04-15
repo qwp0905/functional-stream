@@ -8,4 +8,6 @@ export type TReduceCallback<A, C> = (acc: A, cur: C, index?: number) => A
 
 export type TAnyCallback = () => any
 
+export type TVoidCallback = () => void | Promise<void>
+
 export type TErrorCallback = (err: Error) => Error | Promise<Error> | void

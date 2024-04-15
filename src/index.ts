@@ -7,7 +7,8 @@ import {
   TFilterCallback,
   TMapCallback,
   TReduceCallback,
-  TTapCallback
+  TTapCallback,
+  TVoidCallback
 } from './@types/callback'
 import { map } from './operators/map'
 import { filter } from './operators/filter'
@@ -275,7 +276,7 @@ export class StreamObject<T> implements IStreamObject<T> {
     return this.pipe(concatMap(callback))
   }
 
-  finalize(callback: TAnyCallback): IStreamObject<T> {
+  finalize(callback: TVoidCallback): IStreamObject<T> {
     const pass = new ObjectPassThrough()
     this.watch({
       next(data) {
@@ -284,13 +285,10 @@ export class StreamObject<T> implements IStreamObject<T> {
       error(err) {
         pass.destroy(err)
       },
-      async complete() {
-        try {
-          await callback()
-          pass.end()
-        } catch (err) {
-          pass.destroy(err)
-        }
+      complete() {
+        Promise.resolve(callback())
+          .then(() => pass.end())
+          .catch((err) => pass.destroy(err))
       }
     })
     return StreamObject.from(pass)
@@ -333,17 +331,15 @@ export class StreamObject<T> implements IStreamObject<T> {
       next(data) {
         pass.push(data)
       },
-      async error(err) {
-        try {
-          const e = await Promise.resolve(callback(err))
-          if (!e) {
-            return
-          }
-
-          throw e
-        } catch (e) {
-          pass.destroy(e)
-        }
+      error(err) {
+        Promise.resolve(callback(err))
+          .then((e) => {
+            if (!e) {
+              return
+            }
+            throw e
+          })
+          .catch((err) => pass.destroy(err))
       },
       complete() {
         pass.end()
