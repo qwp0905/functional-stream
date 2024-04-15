@@ -211,36 +211,22 @@ export class StreamObject<T> implements IStreamObject<T> {
     return this.pipe(bufferCount(count))
   }
 
-  mergeAll(): IStreamObject<T extends StreamLike<infer K> ? K : never> {
+  mergeAll(
+    concurrency: number = -1
+  ): IStreamObject<T extends StreamLike<infer K> ? K : never> {
     const pass = new ObjectPassThrough()
-    let count = 0
-    let is_done = false
-    this.watch({
-      next(data) {
-        count++
-        StreamObject.from(data as StreamLike<any>).watch({
-          next(e) {
-            pass.push(e)
-          },
-          error(err) {
-            pass.destroy(err)
-          },
-          complete() {
-            count--
-            if (count || !is_done) {
-              return
-            }
-            pass.end()
-          }
-        })
-      },
-      error(err) {
-        pass.destroy(err)
-      },
-      complete() {
-        is_done = true
-      }
-    })
+    const s = this.toStream()[Symbol.asyncIterator]() as AsyncIterator<T>
+    Promise.all(
+      new Array(concurrency).fill(null).map(async () => {
+        for (let data = await s.next(); !data.done; data = await s.next()) {
+          await StreamObject.from(data.value)
+            .tap((e) => pass.push(e))
+            .promise()
+        }
+      })
+    )
+      .finally(() => pass.end())
+      .catch((err) => pass.destroy(err))
 
     return StreamObject.from(pass)
   }
@@ -265,7 +251,7 @@ export class StreamObject<T> implements IStreamObject<T> {
         }
       })
     )
-      .then(() => pass.end())
+      .finally(() => pass.end())
       .catch((err) => pass.destroy(err))
 
     return StreamObject.from(pass)

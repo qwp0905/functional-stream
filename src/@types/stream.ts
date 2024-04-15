@@ -27,7 +27,7 @@ export interface IStreamObject<T> extends AsyncIterable<T> {
   take(count: number): IStreamObject<T>
   skip(count: number): IStreamObject<T>
   bufferCount(count: number): IStreamObject<T[]>
-  mergeAll(): IStreamObject<T extends StreamLike<infer K> ? K : never>
+  mergeAll(concurrency?: number): IStreamObject<T extends StreamLike<infer K> ? K : never>
   concatAll(): IStreamObject<T extends StreamLike<infer K> ? K : never>
   mergeMap<R = T>(
     callback: TMapCallback<T, R>,
