@@ -45,7 +45,7 @@ export class StreamObject<T> implements IStreamObject<T> {
       const pass = new ObjectPassThrough()
       stream
         .then((data) => pass.push(data))
-        .then(() => pass.end())
+        .finally(() => pass.end())
         .catch((err) => pass.destroy(err))
       return new StreamObject(pass)
     }
@@ -252,15 +252,16 @@ export class StreamObject<T> implements IStreamObject<T> {
   mergeMap<R = T>(
     callback: TMapCallback<T, R>,
     concurrency: number = 5
-  ): IStreamObject<R extends Promise<infer K> ? K : R> {
+  ): IStreamObject<R extends StreamLike<infer K> ? K : never> {
     const pass = new ObjectPassThrough()
     const s = this.toStream()[Symbol.asyncIterator]() as AsyncIterator<T>
     let index = 0
     Promise.all(
       new Array(concurrency).fill(null).map(async () => {
         for (let data = await s.next(); !data.done; data = await s.next()) {
-          const r = await callback(data.value, index++)
-          pass.push(r)
+          await StreamObject.from(callback(data.value, index++) as any)
+            .tap((e) => pass.push(e))
+            .promise()
         }
       })
     )
@@ -270,10 +271,10 @@ export class StreamObject<T> implements IStreamObject<T> {
     return StreamObject.from(pass)
   }
 
-  concatMap<R = T>(
+  concatMap<R>(
     callback: TMapCallback<T, R>
-  ): IStreamObject<R extends Promise<infer K> ? K : R> {
-    return this.pipe(concatMap(callback))
+  ): IStreamObject<R extends StreamLike<infer K> ? K : never> {
+    return this.pipe(concatMap(callback as any))
   }
 
   finalize(callback: TVoidCallback): IStreamObject<T> {

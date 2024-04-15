@@ -1,5 +1,6 @@
 import { StreamObject } from '..'
 import { TMapCallback } from '../@types/callback'
+import { StreamLike } from '../@types/stream'
 import { ObjectTransform } from '../stream/object'
 
 export const concatAll = () => {
@@ -13,13 +14,14 @@ export const concatAll = () => {
   })
 }
 
-export const concatMap = <T, R>(callback: TMapCallback<T, R>) => {
+export const concatMap = <T, R>(callback: TMapCallback<T, StreamLike<R>>) => {
   let index = 0
   return new ObjectTransform({
     transform(chunk, _, done) {
-      Promise.resolve(callback(chunk, index++))
-        .then((out) => done(null, out))
-        .catch((err) => done(err))
+      StreamObject.from(callback(chunk, index++))
+        .tap((e) => this.push(e))
+        .promise()
+        .then(() => done())
     }
   })
 }

@@ -32,10 +32,10 @@ export interface IStreamObject<T> extends AsyncIterable<T> {
   mergeMap<R = T>(
     callback: TMapCallback<T, R>,
     concurrency?: number
-  ): IStreamObject<R extends Promise<infer K> ? K : R>
+  ): IStreamObject<R extends StreamLike<infer K> ? K : never>
   concatMap<R = T>(
     callback: TMapCallback<T, R>
-  ): IStreamObject<R extends Promise<infer K> ? K : R>
+  ): IStreamObject<R extends StreamLike<infer K> ? K : never>
   finalize(callback: TAnyCallback): IStreamObject<T>
   delay(ms: number): IStreamObject<T>
   chain(stream: StreamLike<T>): IStreamObject<T>
