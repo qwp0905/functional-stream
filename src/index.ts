@@ -89,7 +89,7 @@ export class StreamObject<T> implements IStreamObject<T> {
     return stream
   }
 
-  private finish(): StreamObject<T> {
+  private pipeToNew(): StreamObject<T> {
     const pass = new ObjectPassThrough()
     this.watch({
       next(data) {
@@ -233,7 +233,7 @@ export class StreamObject<T> implements IStreamObject<T> {
     concurrency: number = -1
   ): IStreamObject<T extends StreamLike<infer K> ? K : never> {
     if (concurrency < 0) {
-      return this.finish().pipe(mergeAll())
+      return this.pipeToNew().pipe(mergeAll())
     }
 
     const pass = new ObjectPassThrough()
@@ -262,7 +262,7 @@ export class StreamObject<T> implements IStreamObject<T> {
     concurrency: number = -1
   ): IStreamObject<R extends StreamLike<infer K> ? K : never> {
     if (concurrency < 0) {
-      return this.finish().pipe(mergeMap(callback as any))
+      return this.pipeToNew().pipe(mergeMap(callback as any))
     }
 
     const pass = new ObjectPassThrough()
