@@ -20,6 +20,7 @@ export interface IStreamObject<T> extends AsyncIterable<T> {
   array(): Promise<T[]>
   some(callback: TFilterCallback<T>): Promise<boolean>
   every(callback: TFilterCallback<T>): Promise<boolean>
+
   map<R>(callback: TMapCallback<T, R>): IStreamObject<R>
   filter(callback: TFilterCallback<T>): IStreamObject<T>
   tap(callback: TTapCallback<T>): IStreamObject<T>
