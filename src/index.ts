@@ -21,6 +21,7 @@ import { concatAll, concatMap } from './operators/concat'
 import { delay } from './operators/delay'
 import { ObjectPassThrough } from './stream/object'
 import { ifEmpty } from './operators/empty'
+import { mergeAll, mergeMap } from './operators/merge'
 
 export class StreamObject<T> implements IStreamObject<T> {
   private readonly chaining: (Writable | Transform)[] = []
@@ -45,8 +46,8 @@ export class StreamObject<T> implements IStreamObject<T> {
       const pass = new ObjectPassThrough()
       stream
         .then((data) => pass.push(data))
-        .finally(() => pass.end())
         .catch((err) => pass.destroy(err))
+        .finally(() => pass.end())
       return new StreamObject(pass)
     }
 
@@ -86,6 +87,23 @@ export class StreamObject<T> implements IStreamObject<T> {
       : this.source
     this.end = true
     return stream
+  }
+
+  private toPass(): StreamObject<T> {
+    const pass = new ObjectPassThrough()
+    this.watch({
+      next(data) {
+        pass.push(data)
+      },
+      error(err) {
+        pass.destroy(err)
+      },
+      complete() {
+        pass.end()
+      }
+    })
+
+    return StreamObject.from(pass) as StreamObject<T>
   }
 
   watch({ next, error = () => {}, complete = () => {} }: IStreamReadOptions<T>) {
@@ -214,6 +232,10 @@ export class StreamObject<T> implements IStreamObject<T> {
   mergeAll(
     concurrency: number = -1
   ): IStreamObject<T extends StreamLike<infer K> ? K : never> {
+    if (concurrency < 0) {
+      return this.toPass().pipe(mergeAll())
+    }
+
     const pass = new ObjectPassThrough()
     const s = this.toStream()[Symbol.asyncIterator]() as AsyncIterator<T>
     Promise.all(
@@ -225,8 +247,8 @@ export class StreamObject<T> implements IStreamObject<T> {
         }
       })
     )
-      .finally(() => pass.end())
       .catch((err) => pass.destroy(err))
+      .finally(() => pass.end())
 
     return StreamObject.from(pass)
   }
@@ -237,8 +259,12 @@ export class StreamObject<T> implements IStreamObject<T> {
 
   mergeMap<R = T>(
     callback: TMapCallback<T, R>,
-    concurrency: number = 5
+    concurrency: number = -1
   ): IStreamObject<R extends StreamLike<infer K> ? K : never> {
+    if (concurrency < 0) {
+      return this.toPass().pipe(mergeMap(callback as any))
+    }
+
     const pass = new ObjectPassThrough()
     const s = this.toStream()[Symbol.asyncIterator]() as AsyncIterator<T>
     let index = 0
