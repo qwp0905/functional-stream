@@ -237,10 +237,10 @@ export class StreamObject<T> implements IStreamObject<T> {
     }
 
     const pass = new ObjectPassThrough()
-    const s = this.toStream()[Symbol.asyncIterator]() as AsyncIterator<T>
+    const iter = this.toStream()[Symbol.asyncIterator]() as AsyncIterator<T>
     Promise.all(
       new Array(concurrency).fill(null).map(async () => {
-        for (let data = await s.next(); !data.done; data = await s.next()) {
+        for (let data = await iter.next(); !data.done; data = await iter.next()) {
           await StreamObject.from(data.value)
             .tap((e) => pass.push(e))
             .promise()
@@ -266,11 +266,11 @@ export class StreamObject<T> implements IStreamObject<T> {
     }
 
     const pass = new ObjectPassThrough()
-    const s = this.toStream()[Symbol.asyncIterator]() as AsyncIterator<T>
+    const iter = this.toStream()[Symbol.asyncIterator]() as AsyncIterator<T>
     let index = 0
     Promise.all(
       new Array(concurrency).fill(null).map(async () => {
-        for (let data = await s.next(); !data.done; data = await s.next()) {
+        for (let data = await iter.next(); !data.done; data = await iter.next()) {
           await StreamObject.from(callback(data.value, index++) as any)
             .tap((e) => pass.push(e))
             .promise()
