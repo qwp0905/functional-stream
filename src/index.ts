@@ -1,4 +1,4 @@
-import { Readable, Transform, Writable, pipeline } from 'stream'
+import { Readable, Transform, Writable } from 'stream'
 import { StreamLike, IStreamObject, IStreamReadOptions, Iter } from './@types/stream'
 import { isAsyncIterable, isIterable } from './stream/functions'
 import {
@@ -82,9 +82,7 @@ export class StreamObject<T> implements IStreamObject<T> {
   }
 
   private toStream() {
-    const stream = this.chaining.length
-      ? pipeline(this.source as any, ...(this.chaining as any), () => {})
-      : this.source
+    const stream = this.chaining.reduce((a, c) => a.pipe(c) as Readable, this.source)
     this.end = true
     return stream
   }
