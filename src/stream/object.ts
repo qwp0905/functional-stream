@@ -1,4 +1,10 @@
-import { PassThrough, Transform, TransformOptions } from 'stream'
+import {
+  PassThrough,
+  Transform,
+  TransformOptions,
+  Writable,
+  WritableOptions
+} from 'stream'
 
 export class ObjectPassThrough extends PassThrough {
   constructor(options: TransformOptions = {}) {
@@ -7,6 +13,12 @@ export class ObjectPassThrough extends PassThrough {
 }
 export class ObjectTransform extends Transform {
   constructor(options: TransformOptions = {}) {
+    super({ objectMode: true, ...options })
+  }
+}
+
+export class ObjectWritable extends Writable {
+  constructor(options: WritableOptions) {
     super({ objectMode: true, ...options })
   }
 }
