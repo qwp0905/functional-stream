@@ -87,6 +87,10 @@ export class StreamObject<T> implements IStreamObject<T> {
     return stream
   }
 
+  private iter(): AsyncIterator<T> {
+    return this.toStream()[Symbol.asyncIterator]()
+  }
+
   private pipeToNew(): StreamObject<T> {
     const pass = new ObjectPassThrough()
     this.watch({
@@ -235,7 +239,7 @@ export class StreamObject<T> implements IStreamObject<T> {
     }
 
     const pass = new ObjectPassThrough()
-    const iter = this.toStream()[Symbol.asyncIterator]() as AsyncIterator<T>
+    const iter = this.iter()
     Promise.all(
       new Array(concurrency).fill(null).map(async () => {
         for (let data = await iter.next(); !data.done; data = await iter.next()) {
@@ -264,7 +268,7 @@ export class StreamObject<T> implements IStreamObject<T> {
     }
 
     const pass = new ObjectPassThrough()
-    const iter = this.toStream()[Symbol.asyncIterator]() as AsyncIterator<T>
+    const iter = this.iter()
     let index = 0
     Promise.all(
       new Array(concurrency).fill(null).map(async () => {
