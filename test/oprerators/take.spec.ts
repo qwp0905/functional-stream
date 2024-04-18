@@ -20,4 +20,13 @@ describe('take', () => {
     const data = new Array(98).fill(null).map((_, i) => i)
     await expect(StreamObject.range(100).take(98).array()).resolves.toStrictEqual(data)
   })
+
+  it('take 5', async () => {
+    let count = 0
+    await StreamObject.range(10)
+      .take(5)
+      .tap(() => count++)
+      .promise()
+    expect(count).toBe(5)
+  })
 })
