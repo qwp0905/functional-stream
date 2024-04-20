@@ -1,42 +1,190 @@
+enum EventKind {
+  next,
+  error,
+  complete
+}
+
+type Event<T> = NextEvent<T> | ErrorEvent | CompleteEvent
+
+class NextEvent<T> {
+  readonly kind = EventKind.next
+  constructor(readonly payload: T) {}
+}
+class ErrorEvent {
+  readonly kind = EventKind.error
+  constructor(readonly payload: Error) {}
+}
+class CompleteEvent {
+  readonly kind = EventKind.complete
+}
+
 export class Subject<T> {
-  private observer: IObserver<T> = null
-  private readonly queue = []
+  private observer: IObserver<T> | null = null
+  private queue: Event<T>[] = []
   private end = false
 
   add(observer: IObserver<T>) {
     this.observer = observer
-    while (this.queue.length > 0) {
-      const event = this.queue.shift()
-      this.observer.next(event)
+    while (this.queue.length !== 0) {
+      const event = this.queue.shift()!
+      switch (event.kind) {
+        case EventKind.next:
+          this.publish(event.payload)
+          continue
+        case EventKind.error:
+          return this.abort(event.payload)
+        case EventKind.complete:
+          return this.commit()
+      }
     }
   }
 
   publish(event: T) {
     if (this.end) {
-      throw new Error()
+      return
     }
 
     if (!this.observer) {
-      this.queue.push(event)
+      this.queue.push(new NextEvent(event))
       return
     }
 
     this.observer.next(event)
   }
 
-  commit(err?: Error) {
-    if (err) {
-      this.observer.error?.call(this.observer, err)
+  abort(err: Error) {
+    if (this.end) {
+      return
     }
 
-    this.observer.complete?.call(this.observer, this)
+    if (!this.observer) {
+      this.queue.push(new ErrorEvent(err))
+      return
+    }
+
+    this.observer.error?.(err)
+    this.clear()
+  }
+
+  commit() {
+    if (this.end) {
+      return
+    }
+
+    if (!this.observer) {
+      this.queue.push(new CompleteEvent())
+      return
+    }
+
+    this.observer.complete?.()
+    this.clear()
+  }
+
+  private clear() {
     this.end = true
     this.observer = null
+    this.queue = []
   }
 }
 
-export interface IObserver<T> {
-  next(event: T): any
-  error?(err: Error): any
-  complete?(): any
+export interface IObserver<T, R = any> {
+  next(this: R, event: T): any
+  error?(this: R, err: Error): any
+  complete?(this: R): any
+}
+
+export class Pipeline<T, R = T> extends Subject<R> implements IObserver<T> {
+  constructor(private readonly observe: IObserver<T, Pipeline<T, R>>) {
+    super()
+  }
+
+  [Symbol.asyncIterator](): AsyncIterator<R> {
+    let is_done = false
+    let error: Error | null = null
+    const queue: R[] = []
+    const promise: [
+      (v: IteratorResult<R> | PromiseLike<IteratorResult<R>>) => void,
+      (reason: any) => void
+    ][] = []
+
+    const handleError = (err: Error) => {
+      error = err
+      while (promise.length > 0) {
+        const [, reject] = promise.shift()!
+        reject(err)
+      }
+    }
+
+    const handleComplete = () => {
+      is_done = true
+      while (promise.length > 0) {
+        const [resolve] = promise.shift()!
+        resolve({ value: undefined, done: true })
+      }
+    }
+
+    this.watch({
+      next(event) {
+        if (promise.length) {
+          const [resolve] = promise.shift()!
+          resolve({ value: event, done: false })
+        } else {
+          queue.push(event)
+        }
+      },
+      error: handleError,
+      complete: handleComplete
+    })
+
+    return {
+      async next() {
+        if (queue.length) {
+          return Promise.resolve({ value: queue.shift()!, done: false })
+        }
+
+        if (is_done) {
+          return Promise.resolve({ value: undefined, done: true })
+        }
+
+        if (error) {
+          return Promise.reject(error)
+        }
+
+        return new Promise((resolve, reject) => {
+          promise.push([resolve, reject])
+        })
+      },
+      throw: (e) => {
+        handleError(e)
+        return Promise.reject(e)
+      },
+      return() {
+        handleComplete()
+        return Promise.resolve({ value: undefined, done: true })
+      }
+    }
+  }
+
+  next(event: T) {
+    this.observe.next.call(this, event)
+  }
+
+  async error?(err: Error) {
+    await this.observe.error?.call(this, err)
+    this.abort(err)
+  }
+
+  async complete?() {
+    await this.observe.complete?.call(this)
+    this.commit()
+  }
+
+  watch(observer: IObserver<R>) {
+    setTimeout(() => this.add(observer))
+  }
+
+  pipe<K>(pipe: Pipeline<R, K>) {
+    this.watch(pipe)
+    return pipe
+  }
 }
