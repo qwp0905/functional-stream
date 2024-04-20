@@ -29,6 +29,10 @@ export class StreamObject<T> implements IStreamObject<T> {
 
   constructor(private readonly source: Readable) {}
 
+  static of<T>(...values: T[]) {
+    return StreamObject.from(values)
+  }
+
   static from<T>(stream: StreamLike<T>): IStreamObject<T> {
     if (stream instanceof StreamObject) {
       return stream as IStreamObject<T>
