@@ -76,7 +76,7 @@ export class Pipeline<T, R = T> extends Subject<R> implements IObserver<T> {
 
   next(event: T) {
     try {
-      return this.observe?.next
+      this.observe?.next
         ? this.observe.next.call(this, event)
         : this.publish(event as any)
     } catch (err) {

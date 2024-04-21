@@ -7,7 +7,6 @@ import { Subject } from '../observer'
 export const mergeAll = <T>(): Pipeline<StreamLike<T>, T> => {
   let start = 0
   let end = 0
-  let is_empty = true
   const trigger = new Subject<void>()
   const is_done = new Promise<void>((resolve) => {
     trigger.add({
@@ -26,17 +25,13 @@ export const mergeAll = <T>(): Pipeline<StreamLike<T>, T> => {
   return new Pipeline({
     next(event) {
       start++
-      if (is_empty) {
-        is_empty = false
-      }
-
       FStream.from(event)
         .tap((e) => this.publish(e))
         .promise()
         .then(() => trigger.publish())
     },
     async complete() {
-      if (is_empty) {
+      if (!start) {
         trigger.commit()
         return
       }
