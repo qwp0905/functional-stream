@@ -1,7 +1,7 @@
 import { Readable } from 'stream'
 import { IFStream, IStreamReadOptions, Iter, StreamLike } from './@types/stream'
 import { Pipeline, fromIterable, fromPromise, fromStream } from './observer/pipeline'
-import { isAsyncIterable, isIterable } from './stream/functions'
+import { isAsyncIterable, isIterable } from './functions'
 import {
   TAnyCallback,
   TErrorCallback,
