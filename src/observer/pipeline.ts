@@ -1,4 +1,3 @@
-import { Readable } from 'stream'
 import { IObserver, Subject } from '.'
 import { Iter } from '../@types/stream'
 
@@ -106,14 +105,6 @@ export class Pipeline<T, R = T> extends Subject<R> implements IObserver<T> {
     this.add(pipe)
     return pipe
   }
-}
-
-export function fromStream<T>(stream: Readable): Pipeline<T> {
-  const subject = new Pipeline<T>()
-  stream.on('data', (data) => subject.publish(data))
-  stream.on('error', (err) => subject.abort(err))
-  stream.on('end', () => subject.commit())
-  return subject
 }
 
 export function fromIterable<T>(iter: Iter<T>): Pipeline<T> {

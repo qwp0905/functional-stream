@@ -1,6 +1,5 @@
-import { Readable } from 'stream'
 import { IFs, IStreamReadOptions, Iter, StreamLike } from './@types/stream'
-import { Pipeline, fromIterable, fromPromise, fromStream } from './observer/pipeline'
+import { Pipeline, fromIterable, fromPromise } from './observer/pipeline'
 import { isAsyncIterable, isIterable } from './functions'
 import {
   TAnyCallback,
@@ -36,10 +35,6 @@ export class Fs<T> implements IFs<T> {
 
     if (like instanceof Pipeline) {
       return new Fs(like)
-    }
-
-    if (like instanceof Readable) {
-      return new Fs(fromStream<T>(like))
     }
 
     if (isAsyncIterable(like) || isIterable(like)) {
