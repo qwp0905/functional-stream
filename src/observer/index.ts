@@ -125,7 +125,7 @@ export class Subject<T> {
     })
 
     return {
-      async next() {
+      next() {
         if (queue.length) {
           return Promise.resolve({ value: queue.shift()!, done: false })
         }
@@ -142,7 +142,7 @@ export class Subject<T> {
           promise.push([resolve, reject])
         })
       },
-      throw: (e) => {
+      throw(e) {
         handleError(e)
         return Promise.reject(e)
       },
