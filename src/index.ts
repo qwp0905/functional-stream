@@ -26,9 +26,10 @@ import { mergeAll, mergeMap } from './operators/merge'
 import { delay } from './operators/delay'
 import { catchError } from './operators/error'
 import { ifEmpty } from './operators/empty'
+import { Subject } from './observer'
 
 export class Fs<T> implements IFs<T> {
-  constructor(private source: Pipeline<any, T>) {}
+  constructor(private source: Subject<T>) {}
 
   static of<T>(...v: T[]): IFs<T> {
     return Fs.from(v)
@@ -39,7 +40,7 @@ export class Fs<T> implements IFs<T> {
       return like as IFs<T>
     }
 
-    if (like instanceof Pipeline) {
+    if (like instanceof Subject) {
       return new Fs(like)
     }
 
@@ -87,8 +88,9 @@ export class Fs<T> implements IFs<T> {
   }
 
   private pipe<R>(pipeline: Pipeline<T, R>): IFs<R> {
+    this.source.add(pipeline)
     const next = this as unknown as Fs<R>
-    next.source = this.source.pipe(pipeline)
+    next.source = pipeline
     return next
   }
 
@@ -203,7 +205,7 @@ export class Fs<T> implements IFs<T> {
       return this.pipe(mergeAll() as any)
     }
 
-    const sub = new Pipeline<T, any>()
+    const sub = new Subject<any>()
     const iter = this.iter()
 
     Promise.all(
@@ -233,7 +235,7 @@ export class Fs<T> implements IFs<T> {
       return this.pipe(mergeMap(callback as any))
     }
 
-    const sub = new Pipeline<T, any>()
+    const sub = new Subject<any>()
     const iter = this.iter()
     let index = 0
     Promise.all(
@@ -258,7 +260,7 @@ export class Fs<T> implements IFs<T> {
   }
 
   finalize(callback: TAnyCallback): IFs<T> {
-    const sub = new Pipeline<T>()
+    const sub = new Subject<T>()
     this.watch({
       next(data) {
         sub.publish(data)
@@ -279,7 +281,7 @@ export class Fs<T> implements IFs<T> {
   }
 
   chain(stream: StreamLike<T>): IFs<T> {
-    const sub = new Pipeline<T>()
+    const sub = new Subject<T>()
     this.watch({
       next(data) {
         sub.publish(data)
@@ -310,7 +312,7 @@ export class Fs<T> implements IFs<T> {
   }
 
   copy(count: number): IFs<T>[] {
-    const pass = new Array(count).fill(null).map(() => new Pipeline<T>())
+    const pass = new Array(count).fill(null).map(() => new Subject<T>())
     this.watch({
       next(data) {
         pass.forEach((s) => s.publish(data))

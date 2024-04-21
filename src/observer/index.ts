@@ -85,6 +85,73 @@ export class Subject<T> {
     this.observer = null
     this.queue = []
   }
+
+  [Symbol.asyncIterator](): AsyncIterator<T> {
+    let is_done = false
+    let error: Error | null = null
+    const queue: T[] = []
+    const promise: [
+      (v: IteratorResult<T> | PromiseLike<IteratorResult<T>>) => void,
+      (reason: any) => void
+    ][] = []
+
+    const handleError = (err: Error) => {
+      error = err
+      while (promise.length > 0) {
+        const [, reject] = promise.shift()!
+        reject(err)
+      }
+    }
+
+    const handleComplete = () => {
+      is_done = true
+      while (promise.length > 0) {
+        const [resolve] = promise.shift()!
+        resolve({ value: undefined, done: true })
+      }
+    }
+
+    this.add({
+      next(event) {
+        if (promise.length) {
+          const [resolve] = promise.shift()!
+          resolve({ value: event, done: false })
+        } else {
+          queue.push(event)
+        }
+      },
+      error: handleError,
+      complete: handleComplete
+    })
+
+    return {
+      async next() {
+        if (queue.length) {
+          return Promise.resolve({ value: queue.shift()!, done: false })
+        }
+
+        if (is_done) {
+          return Promise.resolve({ value: undefined, done: true })
+        }
+
+        if (error) {
+          return Promise.reject(error)
+        }
+
+        return new Promise((resolve, reject) => {
+          promise.push([resolve, reject])
+        })
+      },
+      throw: (e) => {
+        handleError(e)
+        return Promise.reject(e)
+      },
+      return() {
+        handleComplete()
+        return Promise.resolve({ value: undefined, done: true })
+      }
+    }
+  }
 }
 
 export interface IObserver<T, R = any> {
