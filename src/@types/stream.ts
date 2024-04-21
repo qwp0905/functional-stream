@@ -16,8 +16,8 @@ export interface IStreamReadOptions<T> {
 
 export interface IFs<T> extends AsyncIterable<T> {
   watch(options: IStreamReadOptions<T>): void
-  promise(): Promise<T>
-  array(): Promise<T[]>
+  toPromise(): Promise<T>
+  toArray(): Promise<T[]>
   some(callback: TFilterCallback<T>): Promise<boolean>
   every(callback: TFilterCallback<T>): Promise<boolean>
 

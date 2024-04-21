@@ -27,7 +27,7 @@ export const mergeAll = <T>(): Pipeline<StreamLike<T>, T> => {
       start++
       Fs.from(event)
         .tap((e) => this.publish(e))
-        .promise()
+        .toPromise()
         .then(() => trigger.publish())
     },
     async complete() {
@@ -71,7 +71,7 @@ export const mergeMap = <T, R>(
 
       Fs.from(callback(event, index++))
         .tap((e) => this.publish(e))
-        .promise()
+        .toPromise()
         .then(() => trigger.publish())
     },
     async complete() {

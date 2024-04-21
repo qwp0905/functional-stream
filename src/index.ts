@@ -100,7 +100,7 @@ export class Fs<T> implements IFs<T> {
     return this.source.add(options)
   }
 
-  promise(): Promise<T> {
+  toPromise(): Promise<T> {
     return new Promise((resolve, reject) => {
       let result: T
       this.watch({
@@ -117,7 +117,7 @@ export class Fs<T> implements IFs<T> {
     })
   }
 
-  array(): Promise<T[]> {
+  toArray(): Promise<T[]> {
     return new Promise((resolve, reject) => {
       const result: T[] = []
       this.watch({
@@ -211,7 +211,7 @@ export class Fs<T> implements IFs<T> {
         for (let data = await iter.next(); !data.done; data = await iter.next()) {
           await Fs.from(data.value as any)
             .tap((e) => sub.publish(e))
-            .promise()
+            .toPromise()
         }
       })
     )
@@ -241,7 +241,7 @@ export class Fs<T> implements IFs<T> {
         for (let data = await iter.next(); !data.done; data = await iter.next()) {
           await Fs.from(callback(data.value, index++) as any)
             .tap((e) => sub.publish(e))
-            .promise()
+            .toPromise()
         }
       })
     )

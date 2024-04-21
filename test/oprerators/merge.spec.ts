@@ -4,7 +4,7 @@ describe('merge', () => {
   describe('mergeAll', () => {
     it('simple1', async () => {
       const arr = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [9]]
-      const stream = Fs.from(arr).mergeAll(1).array()
+      const stream = Fs.from(arr).mergeAll(1).toArray()
       await expect(stream).resolves.toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
     })
 
@@ -16,17 +16,17 @@ describe('merge', () => {
           return e
         }, 1)
         .mergeAll()
-        .array()
+        .toArray()
       await expect(stream).resolves.toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
     })
 
     it('empty', async () => {
-      const stream = Fs.from([[]]).mergeAll().array()
+      const stream = Fs.from([[]]).mergeAll().toArray()
       await expect(stream).resolves.toEqual([])
     })
 
     it('empty2', async () => {
-      const stream = Fs.from([]).mergeAll().array()
+      const stream = Fs.from([]).mergeAll().toArray()
       await expect(stream).resolves.toEqual([])
     })
   })
