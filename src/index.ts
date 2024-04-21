@@ -81,10 +81,8 @@ export class Fs<T> implements IFs<T> {
     })
   }
 
-  async *[Symbol.asyncIterator]() {
-    for await (const data of this.source) {
-      yield data
-    }
+  [Symbol.asyncIterator]() {
+    return this.source[Symbol.asyncIterator]()
   }
 
   private pipe<R>(pipeline: Pipeline<T, R>): IFs<R> {
