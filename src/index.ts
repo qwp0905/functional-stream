@@ -18,7 +18,6 @@ import { skip } from './operators/skip'
 import { bufferCount } from './operators/buffer-count'
 import { take } from './operators/take'
 import { mergeAll, mergeMap } from './operators/merge'
-import { concatAll, concatMap } from './operators/concat'
 import { delay } from './operators/delay'
 import { catchError } from './operators/error'
 import { ifEmpty } from './operators/empty'
@@ -202,16 +201,17 @@ export class FStream<T> implements IFStream<T> {
           await FStream.from(data.value as any)
             .tap((e) => sub.publish(e))
             .promise()
-            .catch((err) => sub.abort(err))
-            .finally(() => sub.complete())
         }
       })
     )
+      .catch((err) => sub.abort(err))
+      .finally(() => sub.commit())
+
     return FStream.from(sub)
   }
 
   concatAll(): IFStream<T extends StreamLike<infer K> ? K : never> {
-    return this.pipe(concatAll() as any)
+    return this.mergeAll(1)
   }
 
   mergeMap<R = T>(
@@ -243,7 +243,7 @@ export class FStream<T> implements IFStream<T> {
   concatMap<R = T>(
     callback: TMapCallback<T, R>
   ): IFStream<R extends StreamLike<infer K> ? K : never> {
-    return this.pipe(concatMap(callback as any))
+    return this.mergeMap(callback, 1)
   }
 
   finalize(callback: TAnyCallback): IFStream<T> {
