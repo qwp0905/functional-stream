@@ -1,3 +1,3 @@
 # functional-stream
 
-Stream based on functional programming for javascript/typescript.
+A stream implemented based on functional programming for javascript/typescript.
