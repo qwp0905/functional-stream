@@ -1,4 +1,3 @@
-import { Readable, Transform, Writable } from 'stream'
 import {
   TAnyCallback,
   TErrorCallback,
@@ -46,13 +45,10 @@ export interface IFs<T> extends AsyncIterable<T> {
   ifEmpty(callback: TAnyCallback): IFs<T>
 }
 
-export type Iter<T> = AsyncIterable<T> | Iterable<T>
-
 export type StreamLike<T> =
-  | Readable
-  | Writable
-  | Transform
-  | Iter<T>
+  | ReadableStream<T>
+  | AsyncIterable<T>
+  | Iterable<T>
   | IFs<T>
   | Pipeline<T>
   | Promise<T>

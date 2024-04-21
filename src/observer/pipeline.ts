@@ -1,5 +1,4 @@
 import { IObserver, Subject } from '.'
-import { Iter } from '../@types/stream'
 
 export class Pipeline<T, R = T> extends Subject<R> implements IObserver<T> {
   constructor(private readonly observe?: IObserver<T, Pipeline<T, R>>) {
@@ -107,7 +106,20 @@ export class Pipeline<T, R = T> extends Subject<R> implements IObserver<T> {
   }
 }
 
-export function fromIterable<T>(iter: Iter<T>): Pipeline<T> {
+export function fromIterable<T>(iter: Iterable<T>): Pipeline<T> {
+  const subject = new Pipeline<T>()
+  Promise.resolve()
+    .then(() => {
+      for (const data of iter) {
+        subject.publish(data)
+      }
+    })
+    .catch((err) => subject.abort(err))
+    .finally(() => subject.commit())
+  return subject
+}
+
+export function fromAsyncIterable<T>(iter: AsyncIterable<T>): Pipeline<T> {
   const subject = new Pipeline<T>()
   Promise.resolve()
     .then(async () => {
@@ -126,4 +138,19 @@ export function fromPromise<T>(p: Promise<T>): Pipeline<T> {
     .catch((err) => subject.abort(err))
     .finally(() => subject.commit())
   return subject
+}
+
+export function fromReadable<T>(readable: ReadableStream<T>): Pipeline<T> {
+  return fromAsyncIterable({
+    async *[Symbol.asyncIterator]() {
+      const reader = readable.getReader()
+      try {
+        for (let data = await reader.read(); !data.done; data = await reader.read()) {
+          yield data.value
+        }
+      } finally {
+        reader.releaseLock()
+      }
+    }
+  })
 }
