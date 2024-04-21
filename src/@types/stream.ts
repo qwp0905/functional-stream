@@ -15,35 +15,35 @@ export interface IStreamReadOptions<T> {
   complete?(): any
 }
 
-export interface IFStream<T> extends AsyncIterable<T> {
+export interface IFs<T> extends AsyncIterable<T> {
   watch(options: IStreamReadOptions<T>): void
   promise(): Promise<T>
   array(): Promise<T[]>
   some(callback: TFilterCallback<T>): Promise<boolean>
   every(callback: TFilterCallback<T>): Promise<boolean>
 
-  map<R>(callback: TMapCallback<T, R>): IFStream<R>
-  filter(callback: TFilterCallback<T>): IFStream<T>
-  tap(callback: TTapCallback<T>): IFStream<T>
-  reduce<A = T>(callback: TReduceCallback<A, T>, initialValue?: A): IFStream<A>
-  take(count: number): IFStream<T>
-  skip(count: number): IFStream<T>
-  bufferCount(count: number): IFStream<T[]>
-  mergeAll(concurrency?: number): IFStream<T extends StreamLike<infer K> ? K : never>
-  concatAll(): IFStream<T extends StreamLike<infer K> ? K : never>
+  map<R>(callback: TMapCallback<T, R>): IFs<R>
+  filter(callback: TFilterCallback<T>): IFs<T>
+  tap(callback: TTapCallback<T>): IFs<T>
+  reduce<A = T>(callback: TReduceCallback<A, T>, initialValue?: A): IFs<A>
+  take(count: number): IFs<T>
+  skip(count: number): IFs<T>
+  bufferCount(count: number): IFs<T[]>
+  mergeAll(concurrency?: number): IFs<T extends StreamLike<infer K> ? K : never>
+  concatAll(): IFs<T extends StreamLike<infer K> ? K : never>
   mergeMap<R = T>(
     callback: TMapCallback<T, R>,
     concurrency?: number
-  ): IFStream<R extends StreamLike<infer K> ? K : never>
+  ): IFs<R extends StreamLike<infer K> ? K : never>
   concatMap<R = T>(
     callback: TMapCallback<T, R>
-  ): IFStream<R extends StreamLike<infer K> ? K : never>
-  finalize(callback: TAnyCallback): IFStream<T>
-  delay(ms: number): IFStream<T>
-  chain(stream: StreamLike<T>): IFStream<T>
-  catchError(callback: TErrorCallback): IFStream<T>
-  copy(count: number): IFStream<T>[]
-  ifEmpty(callback: TAnyCallback): IFStream<T>
+  ): IFs<R extends StreamLike<infer K> ? K : never>
+  finalize(callback: TAnyCallback): IFs<T>
+  delay(ms: number): IFs<T>
+  chain(stream: StreamLike<T>): IFs<T>
+  catchError(callback: TErrorCallback): IFs<T>
+  copy(count: number): IFs<T>[]
+  ifEmpty(callback: TAnyCallback): IFs<T>
 }
 
 export type Iter<T> = AsyncIterable<T> | Iterable<T>
@@ -53,6 +53,6 @@ export type StreamLike<T> =
   | Writable
   | Transform
   | Iter<T>
-  | IFStream<T>
+  | IFs<T>
   | Pipeline<T>
   | Promise<T>

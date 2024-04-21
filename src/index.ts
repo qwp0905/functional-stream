@@ -1,5 +1,5 @@
 import { Readable } from 'stream'
-import { IFStream, IStreamReadOptions, Iter, StreamLike } from './@types/stream'
+import { IFs, IStreamReadOptions, Iter, StreamLike } from './@types/stream'
 import { Pipeline, fromIterable, fromPromise, fromStream } from './observer/pipeline'
 import { isAsyncIterable, isIterable } from './functions'
 import {
@@ -22,43 +22,47 @@ import { delay } from './operators/delay'
 import { catchError } from './operators/error'
 import { ifEmpty } from './operators/empty'
 
-export class FStream<T> implements IFStream<T> {
+export class Fs<T> implements IFs<T> {
   constructor(private source: Pipeline<any, T>) {}
 
-  static from<T>(like: StreamLike<T>): IFStream<T> {
-    if (like instanceof FStream) {
-      return like as IFStream<T>
+  static of<T>(...v: T[]): IFs<T> {
+    return Fs.from(v)
+  }
+
+  static from<T>(like: StreamLike<T>): IFs<T> {
+    if (like instanceof Fs) {
+      return like as IFs<T>
     }
 
     if (like instanceof Pipeline) {
-      return new FStream(like)
+      return new Fs(like)
     }
 
     if (like instanceof Readable) {
-      return new FStream(fromStream<T>(like))
+      return new Fs(fromStream<T>(like))
     }
 
     if (isAsyncIterable(like) || isIterable(like)) {
-      return new FStream(fromIterable(like as Iter<T>))
+      return new Fs(fromIterable(like as Iter<T>))
     }
 
     if (like instanceof Promise) {
-      return new FStream(fromPromise(like))
+      return new Fs(fromPromise(like))
     }
 
     throw new Error('stream type is not supported')
   }
 
-  static merge<T>(...streams: StreamLike<T>[]): IFStream<T> {
-    return FStream.from(streams).mergeAll()
+  static merge<T>(...streams: StreamLike<T>[]): IFs<T> {
+    return Fs.from(streams).mergeAll()
   }
 
-  static concat<T>(...streams: StreamLike<T>[]): IFStream<T> {
-    return FStream.from(streams).concatAll()
+  static concat<T>(...streams: StreamLike<T>[]): IFs<T> {
+    return Fs.from(streams).concatAll()
   }
 
-  static range(count: number, start = 0): IFStream<number> {
-    return FStream.from({
+  static range(count: number, start = 0): IFs<number> {
+    return Fs.from({
       *[Symbol.iterator]() {
         for (let i = start; i < count; i++) {
           yield i
@@ -73,8 +77,8 @@ export class FStream<T> implements IFStream<T> {
     }
   }
 
-  private pipe<R>(pipeline: Pipeline<T, R>): IFStream<R> {
-    const next = this as unknown as FStream<R>
+  private pipe<R>(pipeline: Pipeline<T, R>): IFs<R> {
+    const next = this as unknown as Fs<R>
     next.source = this.source.pipe(pipeline)
     return next
   }
@@ -157,37 +161,35 @@ export class FStream<T> implements IFStream<T> {
     })
   }
 
-  map<R>(callback: TMapCallback<T, R>): IFStream<R> {
+  map<R>(callback: TMapCallback<T, R>): IFs<R> {
     return this.pipe(map(callback))
   }
 
-  filter(callback: TFilterCallback<T>): IFStream<T> {
+  filter(callback: TFilterCallback<T>): IFs<T> {
     return this.pipe(filter(callback))
   }
 
-  tap(callback: TTapCallback<T>): IFStream<T> {
+  tap(callback: TTapCallback<T>): IFs<T> {
     return this.pipe(tap(callback))
   }
 
-  reduce<A = T>(callback: TReduceCallback<A, T>, initialValue?: A): IFStream<A> {
+  reduce<A = T>(callback: TReduceCallback<A, T>, initialValue?: A): IFs<A> {
     return this.pipe(reduce(callback, initialValue))
   }
 
-  take(count: number): IFStream<T> {
+  take(count: number): IFs<T> {
     return this.pipe(take(count))
   }
 
-  skip(count: number): IFStream<T> {
+  skip(count: number): IFs<T> {
     return this.pipe(skip(count))
   }
 
-  bufferCount(count: number): IFStream<T[]> {
+  bufferCount(count: number): IFs<T[]> {
     return this.pipe(bufferCount(count))
   }
 
-  mergeAll(
-    concurrency: number = -1
-  ): IFStream<T extends StreamLike<infer K> ? K : never> {
+  mergeAll(concurrency: number = -1): IFs<T extends StreamLike<infer K> ? K : never> {
     if (concurrency < 0) {
       return this.pipe(mergeAll() as any)
     }
@@ -198,7 +200,7 @@ export class FStream<T> implements IFStream<T> {
     Promise.all(
       new Array(concurrency).fill(null).map(async () => {
         for (let data = await iter.next(); !data.done; data = await iter.next()) {
-          await FStream.from(data.value as any)
+          await Fs.from(data.value as any)
             .tap((e) => sub.publish(e))
             .promise()
         }
@@ -207,17 +209,17 @@ export class FStream<T> implements IFStream<T> {
       .catch((err) => sub.abort(err))
       .finally(() => sub.commit())
 
-    return FStream.from(sub)
+    return Fs.from(sub)
   }
 
-  concatAll(): IFStream<T extends StreamLike<infer K> ? K : never> {
+  concatAll(): IFs<T extends StreamLike<infer K> ? K : never> {
     return this.mergeAll(1)
   }
 
   mergeMap<R = T>(
     callback: TMapCallback<T, R>,
     concurrency: number = -1
-  ): IFStream<R extends StreamLike<infer K> ? K : never> {
+  ): IFs<R extends StreamLike<infer K> ? K : never> {
     if (concurrency < 0) {
       return this.pipe(mergeMap(callback as any))
     }
@@ -228,7 +230,7 @@ export class FStream<T> implements IFStream<T> {
     Promise.all(
       new Array(concurrency).fill(null).map(async () => {
         for (let data = await iter.next(); !data.done; data = await iter.next()) {
-          await FStream.from(callback(data.value, index++) as any)
+          await Fs.from(callback(data.value, index++) as any)
             .tap((e) => sub.publish(e))
             .promise()
         }
@@ -237,16 +239,16 @@ export class FStream<T> implements IFStream<T> {
       .catch((err) => sub.abort(err))
       .finally(() => sub.commit())
 
-    return FStream.from(sub)
+    return Fs.from(sub)
   }
 
   concatMap<R = T>(
     callback: TMapCallback<T, R>
-  ): IFStream<R extends StreamLike<infer K> ? K : never> {
+  ): IFs<R extends StreamLike<infer K> ? K : never> {
     return this.mergeMap(callback, 1)
   }
 
-  finalize(callback: TAnyCallback): IFStream<T> {
+  finalize(callback: TAnyCallback): IFs<T> {
     const sub = new Pipeline<T>()
     this.watch({
       next(data) {
@@ -260,14 +262,14 @@ export class FStream<T> implements IFStream<T> {
       }
     })
 
-    return FStream.from(sub)
+    return Fs.from(sub)
   }
 
-  delay(ms: number): IFStream<T> {
+  delay(ms: number): IFs<T> {
     return this.pipe(delay(ms))
   }
 
-  chain(stream: StreamLike<T>): IFStream<T> {
+  chain(stream: StreamLike<T>): IFs<T> {
     const sub = new Pipeline<T>()
     this.watch({
       next(data) {
@@ -277,7 +279,7 @@ export class FStream<T> implements IFStream<T> {
         sub.abort(err)
       },
       complete() {
-        FStream.from(stream).watch({
+        Fs.from(stream).watch({
           next(data: T) {
             sub.publish(data)
           },
@@ -291,14 +293,14 @@ export class FStream<T> implements IFStream<T> {
       }
     })
 
-    return FStream.from(sub)
+    return Fs.from(sub)
   }
 
-  catchError(callback: TErrorCallback): IFStream<T> {
+  catchError(callback: TErrorCallback): IFs<T> {
     return this.pipe(catchError(callback))
   }
 
-  copy(count: number): IFStream<T>[] {
+  copy(count: number): IFs<T>[] {
     const pass = new Array(count).fill(null).map(() => new Pipeline<T>())
     this.watch({
       next(data) {
@@ -312,10 +314,10 @@ export class FStream<T> implements IFStream<T> {
       }
     })
 
-    return pass.map((s) => FStream.from(s))
+    return pass.map((s) => Fs.from(s))
   }
 
-  ifEmpty(callback: TAnyCallback): IFStream<T> {
+  ifEmpty(callback: TAnyCallback): IFs<T> {
     return this.pipe(ifEmpty(callback))
   }
 }

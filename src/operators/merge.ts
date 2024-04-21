@@ -1,6 +1,6 @@
 import { StreamLike } from '../@types/stream'
 import { TMapCallback } from '../@types/callback'
-import { FStream } from '..'
+import { Fs } from '..'
 import { Pipeline } from '../observer/pipeline'
 import { Subject } from '../observer'
 
@@ -25,7 +25,7 @@ export const mergeAll = <T>(): Pipeline<StreamLike<T>, T> => {
   return new Pipeline({
     next(event) {
       start++
-      FStream.from(event)
+      Fs.from(event)
         .tap((e) => this.publish(e))
         .promise()
         .then(() => trigger.publish())
@@ -69,7 +69,7 @@ export const mergeMap = <T, R>(
         is_empty = false
       }
 
-      FStream.from(callback(event, index++))
+      Fs.from(callback(event, index++))
         .tap((e) => this.publish(e))
         .promise()
         .then(() => trigger.publish())
