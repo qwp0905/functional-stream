@@ -1,19 +1,17 @@
 import { TReduceCallback } from '../@types/callback'
-import { ObjectTransform } from '../stream/object'
+import { Pipeline } from '../observer/pipeline'
 
-export const reduce = <A, C>(callback: TReduceCallback<A, C>, initialValue?: A) => {
+export const reduce = <A, C = A>(
+  callback: TReduceCallback<A, C>,
+  initialValue?: A
+): Pipeline<C, A> => {
   let index = 0
-  return new ObjectTransform({
-    transform(chunk, _, done) {
-      try {
-        initialValue = callback(initialValue || chunk, chunk, index++)
-        done()
-      } catch (err) {
-        done(err)
-      }
+  return new Pipeline({
+    next(event) {
+      initialValue = callback(initialValue || (event as any), event, index++)
     },
-    flush(done) {
-      done(null, initialValue)
+    complete() {
+      this.publish(initialValue!)
     }
   })
 }

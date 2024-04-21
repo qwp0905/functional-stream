@@ -1,19 +1,18 @@
-import { ObjectTransform } from '../stream/object'
+import { Pipeline } from '../observer/pipeline'
 
-export const bufferCount = <T>(count: number) => {
+export const bufferCount = <T>(count: number): Pipeline<T, T[]> => {
   let queue: T[] = []
-  return new ObjectTransform({
-    transform(chunk, _, done) {
-      queue.push(chunk)
+  return new Pipeline({
+    next(event) {
+      queue.push(event)
       if (queue.length < count) {
-        return done()
+        return
       }
-      done(null, queue)
+      this.publish(queue)
       queue = []
     },
-    flush(done) {
-      queue.length && this.push(queue)
-      done()
+    complete() {
+      queue.length && this.publish(queue)
     }
   })
 }

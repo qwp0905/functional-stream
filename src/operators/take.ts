@@ -1,13 +1,13 @@
-import { ObjectTransform } from '../stream/object'
+import { Pipeline } from '../observer/pipeline'
 
-export const take = (count: number) => {
+export const take = <T>(count: number): Pipeline<T> => {
   let index = 0
-  return new ObjectTransform({
-    transform(chunk, _, done) {
+  return new Pipeline({
+    next(event) {
       if (index++ < count) {
-        return done(null, chunk)
+        return this.publish(event)
       }
-      done()
+      this.commit()
     }
   })
 }

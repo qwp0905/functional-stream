@@ -1,9 +1,9 @@
-import { ObjectTransform } from '../stream/object'
+import { Pipeline } from '../observer/pipeline'
 
-export const delay = (ms: number) => {
-  return new ObjectTransform({
-    transform(chunk, _, done) {
-      setTimeout(() => done(null, chunk), ms)
+export const delay = <T>(ms: number): Pipeline<T> => {
+  return new Pipeline({
+    next(event) {
+      setTimeout(() => this.publish(event), ms)
     }
   })
 }

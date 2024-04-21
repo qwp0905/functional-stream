@@ -1,14 +1,14 @@
-import { ObjectTransform } from '../stream/object'
+import { Pipeline } from '../observer/pipeline'
 
-export const skip = (count: number) => {
+export const skip = <T>(count: number): Pipeline<T> => {
   let index = 0
-  return new ObjectTransform({
-    transform(chunk, _, done) {
+
+  return new Pipeline({
+    next(event) {
       if (index++ < count) {
-        done()
-      } else {
-        done(null, chunk)
+        return
       }
+      this.publish(event)
     }
   })
 }

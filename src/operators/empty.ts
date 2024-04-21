@@ -1,19 +1,17 @@
 import { TAnyCallback } from '../@types/callback'
-import { ObjectTransform } from '../stream/object'
+import { Pipeline } from '../observer/pipeline'
 
-export const ifEmpty = (callback: TAnyCallback) => {
+export const ifEmpty = <T>(callback: TAnyCallback): Pipeline<T> => {
   let is_empty = true
-  return new ObjectTransform({
-    transform(chunk, _, done) {
+  return new Pipeline({
+    next(event) {
       if (is_empty) {
         is_empty = false
       }
-      done(chunk)
+      this.publish(event)
     },
-    flush(done) {
-      Promise.resolve(callback())
-        .then(() => done())
-        .catch((err) => done(err))
+    complete() {
+      return Promise.resolve(callback())
     }
   })
 }

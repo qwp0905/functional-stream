@@ -1,15 +1,11 @@
 import { TFilterCallback } from '../@types/callback'
-import { ObjectTransform } from '../stream/object'
+import { Pipeline } from '../observer/pipeline'
 
-export const filter = <T>(callback: TFilterCallback<T>) => {
+export const filter = <T>(callback: TFilterCallback<T>): Pipeline<T> => {
   let index = 0
-  return new ObjectTransform({
-    transform(chunk, _, done) {
-      try {
-        callback(chunk, index++) ? done(null, chunk) : done()
-      } catch (err) {
-        done(err)
-      }
+  return new Pipeline({
+    next(event) {
+      callback(event, index++) && this.publish(event)
     }
   })
 }

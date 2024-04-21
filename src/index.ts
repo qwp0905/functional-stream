@@ -1,5 +1,6 @@
-import { Readable, Transform, Writable } from 'stream'
-import { StreamLike, IStreamObject, IStreamReadOptions, Iter } from './@types/stream'
+import { Readable } from 'stream'
+import { IFStream, IStreamReadOptions, Iter, StreamLike } from './@types/stream'
+import { Pipeline, fromIterable, fromPromise, fromStream } from './observer/pipeline'
 import { isAsyncIterable, isIterable } from './stream/functions'
 import {
   TAnyCallback,
@@ -7,130 +8,92 @@ import {
   TFilterCallback,
   TMapCallback,
   TReduceCallback,
-  TTapCallback,
-  TVoidCallback
+  TTapCallback
 } from './@types/callback'
 import { map } from './operators/map'
 import { filter } from './operators/filter'
 import { tap } from './operators/tap'
 import { reduce } from './operators/reduce'
-import { take } from './operators/take'
 import { skip } from './operators/skip'
 import { bufferCount } from './operators/buffer-count'
+import { take } from './operators/take'
+import { mergeAll, mergeMap } from './operators/merge'
 import { concatAll, concatMap } from './operators/concat'
 import { delay } from './operators/delay'
-import { ObjectPassThrough } from './stream/object'
+import { catchError } from './operators/error'
 import { ifEmpty } from './operators/empty'
-import { mergeAll, mergeMap } from './operators/merge'
 
-export class StreamObject<T> implements IStreamObject<T> {
-  private readonly chaining: (Writable | Transform)[] = []
-  private end = false
+export class FStream<T> implements IFStream<T> {
+  constructor(private source: Pipeline<any, T>) {}
 
-  constructor(private readonly source: Readable) {}
-
-  static of<T>(...values: T[]) {
-    return StreamObject.from(values)
-  }
-
-  static from<T>(stream: StreamLike<T>): IStreamObject<T> {
-    if (stream instanceof StreamObject) {
-      return stream as IStreamObject<T>
+  static from<T>(like: StreamLike<T>): IFStream<T> {
+    if (like instanceof FStream) {
+      return like as IFStream<T>
     }
 
-    if (stream instanceof Readable) {
-      return new StreamObject(stream)
+    if (like instanceof Pipeline) {
+      return new FStream(like)
     }
 
-    if (isAsyncIterable(stream) || isIterable(stream)) {
-      return new StreamObject(Readable.from(stream as Iter<T>, { objectMode: true }))
+    if (like instanceof Readable) {
+      return new FStream(fromStream<T>(like))
     }
 
-    if (stream instanceof Promise) {
-      const pass = new ObjectPassThrough()
-      stream
-        .then((data) => pass.push(data))
-        .catch((err) => pass.destroy(err))
-        .finally(() => pass.end())
-      return new StreamObject(pass)
+    if (isAsyncIterable(like) || isIterable(like)) {
+      return new FStream(fromIterable(like as Iter<T>))
+    }
+
+    if (like instanceof Promise) {
+      return new FStream(fromPromise(like))
     }
 
     throw new Error('stream type is not supported')
   }
 
-  static merge<T>(...streams: StreamLike<T>[]): IStreamObject<T> {
-    return StreamObject.from(streams).mergeAll()
+  static merge<T>(...streams: StreamLike<T>[]): IFStream<T> {
+    return FStream.from(streams).mergeAll()
   }
 
-  static concat<T>(...streams: StreamLike<T>[]): IStreamObject<T> {
-    return StreamObject.from(streams).concatAll()
+  static concat<T>(...streams: StreamLike<T>[]): IFStream<T> {
+    return FStream.from(streams).concatAll()
   }
 
-  static range(count: number): IStreamObject<number> {
-    return StreamObject.from({
+  static range(count: number, start = 0): IFStream<number> {
+    return FStream.from({
       *[Symbol.iterator]() {
-        for (let i = 0; i < count; i++) {
+        for (let i = start; i < count; i++) {
           yield i
         }
       }
     })
   }
 
-  private pipe<R = T>(next: Writable | Transform): IStreamObject<R> {
-    if (this.end) {
-      throw new Error('stream already ended')
+  async *[Symbol.asyncIterator]() {
+    for await (const data of this.source) {
+      yield data
     }
-
-    this.chaining.push(next)
-    return this as unknown as StreamObject<R>
   }
 
-  private toStream() {
-    const stream = this.chaining.reduce((a, c) => a.pipe(c) as Readable, this.source)
-    this.end = true
-    return stream
+  private pipe<R>(pipeline: Pipeline<T, R>): IFStream<R> {
+    const next = this as unknown as FStream<R>
+    next.source = this.source.pipe(pipeline)
+    return next
   }
 
   private iter(): AsyncIterator<T> {
-    return this.toStream()[Symbol.asyncIterator]()
+    return this[Symbol.asyncIterator]()
   }
 
-  private pipeToNew(): StreamObject<T> {
-    const pass = new ObjectPassThrough()
-    this.watch({
-      next(data) {
-        pass.push(data)
-      },
-      error(err) {
-        pass.destroy(err)
-      },
-      complete() {
-        pass.end()
-      }
-    })
-
-    return StreamObject.from(pass) as StreamObject<T>
-  }
-
-  watch({ next, error = () => {}, complete = () => {} }: IStreamReadOptions<T>) {
-    const stream = this.toStream()
-    stream.on('data', next)
-    stream.on('error', error)
-    stream.on('close', complete)
-  }
-
-  async *[Symbol.asyncIterator]() {
-    for await (const data of this.toStream() as Readable) {
-      yield data
-    }
+  watch(options: IStreamReadOptions<T>) {
+    return this.source.add(options)
   }
 
   promise(): Promise<T> {
     return new Promise((resolve, reject) => {
       let result: T
       this.watch({
-        next(data) {
-          result = data
+        next(event) {
+          result = event
         },
         error(err) {
           reject(err)
@@ -144,10 +107,10 @@ export class StreamObject<T> implements IStreamObject<T> {
 
   array(): Promise<T[]> {
     return new Promise((resolve, reject) => {
-      const result = []
+      const result: T[] = []
       this.watch({
-        next(data) {
-          result.push(data)
+        next(event) {
+          result.push(event)
         },
         error(err) {
           reject(err)
@@ -195,197 +158,164 @@ export class StreamObject<T> implements IStreamObject<T> {
     })
   }
 
-  map<R>(callback: TMapCallback<T, R>): IStreamObject<R> {
+  map<R>(callback: TMapCallback<T, R>): IFStream<R> {
     return this.pipe(map(callback))
   }
 
-  filter(callback: TFilterCallback<T>): IStreamObject<T> {
+  filter(callback: TFilterCallback<T>): IFStream<T> {
     return this.pipe(filter(callback))
   }
 
-  tap(callback: TTapCallback<T>): IStreamObject<T> {
+  tap(callback: TTapCallback<T>): IFStream<T> {
     return this.pipe(tap(callback))
   }
 
-  reduce<A = T>(callback: TReduceCallback<A, T>, initialValue?: A): IStreamObject<A> {
+  reduce<A = T>(callback: TReduceCallback<A, T>, initialValue?: A): IFStream<A> {
     return this.pipe(reduce(callback, initialValue))
   }
 
-  take(count: number): IStreamObject<T> {
-    const pass = new ObjectPassThrough()
-    this.pipe(take(count)).watch({
-      next(data) {
-        pass.push(data)
-      },
-      error(err) {
-        pass.destroy(err)
-      },
-      complete() {
-        pass.end()
-      }
-    })
-    return StreamObject.from(pass)
+  take(count: number): IFStream<T> {
+    return this.pipe(take(count))
   }
 
-  skip(count: number): IStreamObject<T> {
+  skip(count: number): IFStream<T> {
     return this.pipe(skip(count))
   }
 
-  bufferCount(count: number): IStreamObject<T[]> {
+  bufferCount(count: number): IFStream<T[]> {
     return this.pipe(bufferCount(count))
   }
 
   mergeAll(
     concurrency: number = -1
-  ): IStreamObject<T extends StreamLike<infer K> ? K : never> {
+  ): IFStream<T extends StreamLike<infer K> ? K : never> {
     if (concurrency < 0) {
-      return this.pipeToNew().pipe(mergeAll())
+      return this.pipe(mergeAll() as any)
     }
 
-    const pass = new ObjectPassThrough()
+    const sub = new Pipeline<T, any>()
     const iter = this.iter()
+
     Promise.all(
       new Array(concurrency).fill(null).map(async () => {
         for (let data = await iter.next(); !data.done; data = await iter.next()) {
-          await StreamObject.from(data.value)
-            .tap((e) => pass.push(e))
+          await FStream.from(data.value as any)
+            .tap((e) => sub.publish(e))
             .promise()
+            .catch((err) => sub.abort(err))
+            .finally(() => sub.complete())
         }
       })
     )
-      .catch((err) => pass.destroy(err))
-      .finally(() => pass.end())
-
-    return StreamObject.from(pass)
+    return FStream.from(sub)
   }
 
-  concatAll(): IStreamObject<T extends StreamLike<infer K> ? K : never> {
-    return this.pipe(concatAll())
+  concatAll(): IFStream<T extends StreamLike<infer K> ? K : never> {
+    return this.pipe(concatAll() as any)
   }
 
   mergeMap<R = T>(
     callback: TMapCallback<T, R>,
     concurrency: number = -1
-  ): IStreamObject<R extends StreamLike<infer K> ? K : never> {
+  ): IFStream<R extends StreamLike<infer K> ? K : never> {
     if (concurrency < 0) {
-      return this.pipeToNew().pipe(mergeMap(callback as any))
+      return this.pipe(mergeMap(callback as any))
     }
 
-    const pass = new ObjectPassThrough()
+    const sub = new Pipeline<T, any>()
     const iter = this.iter()
     let index = 0
     Promise.all(
       new Array(concurrency).fill(null).map(async () => {
         for (let data = await iter.next(); !data.done; data = await iter.next()) {
-          await StreamObject.from(callback(data.value, index++) as any)
-            .tap((e) => pass.push(e))
+          await FStream.from(callback(data.value, index++) as any)
+            .tap((e) => sub.publish(e))
             .promise()
         }
       })
     )
-      .finally(() => pass.end())
-      .catch((err) => pass.destroy(err))
+      .catch((err) => sub.abort(err))
+      .finally(() => sub.commit())
 
-    return StreamObject.from(pass)
+    return FStream.from(sub)
   }
 
-  concatMap<R>(
+  concatMap<R = T>(
     callback: TMapCallback<T, R>
-  ): IStreamObject<R extends StreamLike<infer K> ? K : never> {
+  ): IFStream<R extends StreamLike<infer K> ? K : never> {
     return this.pipe(concatMap(callback as any))
   }
 
-  finalize(callback: TVoidCallback): IStreamObject<T> {
-    const pass = new ObjectPassThrough()
+  finalize(callback: TAnyCallback): IFStream<T> {
+    const sub = new Pipeline<T>()
     this.watch({
       next(data) {
-        pass.push(data)
+        sub.publish(data)
       },
       error(err) {
-        pass.destroy(err)
+        sub.abort(err)
       },
       complete() {
-        Promise.resolve(callback())
-          .then(() => pass.end())
-          .catch((err) => pass.destroy(err))
+        return Promise.resolve(callback())
       }
     })
-    return StreamObject.from(pass)
+
+    return FStream.from(sub)
   }
 
-  delay(ms: number): IStreamObject<T> {
+  delay(ms: number): IFStream<T> {
     return this.pipe(delay(ms))
   }
 
-  chain(stream: StreamLike<T>): IStreamObject<T> {
-    const pass = new ObjectPassThrough()
+  chain(stream: StreamLike<T>): IFStream<T> {
+    const sub = new Pipeline<T>()
     this.watch({
       next(data) {
-        pass.push(data)
+        sub.publish(data)
       },
       error(err) {
-        pass.destroy(err)
+        sub.abort(err)
       },
       complete() {
-        StreamObject.from(stream).watch({
-          next(data) {
-            pass.push(data)
+        FStream.from(stream).watch({
+          next(data: T) {
+            sub.publish(data)
           },
           error(err) {
-            pass.destroy(err)
+            sub.abort(err)
           },
           complete() {
-            pass.end()
+            sub.commit()
           }
         })
       }
     })
 
-    return StreamObject.from(pass)
+    return FStream.from(sub)
   }
 
-  catchError(callback: TErrorCallback): IStreamObject<T> {
-    const pass = new ObjectPassThrough()
+  catchError(callback: TErrorCallback): IFStream<T> {
+    return this.pipe(catchError(callback))
+  }
+
+  copy(count: number): IFStream<T>[] {
+    const pass = new Array(count).fill(null).map(() => new Pipeline<T>())
     this.watch({
       next(data) {
-        pass.push(data)
+        pass.forEach((s) => s.publish(data))
       },
       error(err) {
-        Promise.resolve(callback(err))
-          .then((e) => {
-            if (!e) {
-              return
-            }
-            throw e
-          })
-          .catch((err) => pass.destroy(err))
+        pass.forEach((s) => s.abort(err))
       },
       complete() {
-        pass.end()
+        pass.forEach((s) => s.commit())
       }
     })
 
-    return StreamObject.from(pass)
+    return pass.map((s) => FStream.from(s))
   }
 
-  copy(count: number): IStreamObject<T>[] {
-    const pass = new Array(count).fill(null).map(() => new ObjectPassThrough())
-    this.watch({
-      next(data) {
-        pass.forEach((s) => s.push(data))
-      },
-      error(err) {
-        pass.forEach((s) => s.destroy(err))
-      },
-      complete() {
-        pass.forEach((s) => s.end())
-      }
-    })
-
-    return pass.map((s) => StreamObject.from(s))
-  }
-
-  ifEmpty(callback: TAnyCallback): IStreamObject<T> {
+  ifEmpty(callback: TAnyCallback): IFStream<T> {
     return this.pipe(ifEmpty(callback))
   }
 }
