@@ -27,6 +27,7 @@ import { delay } from './operators/delay'
 import { catchError } from './operators/error'
 import { ifEmpty } from './operators/empty'
 import { Subject } from './observer'
+import { groupBy } from './operators/group'
 
 export class Fs<T> implements IFs<T> {
   constructor(private source: Subject<T>) {}
@@ -225,12 +226,12 @@ export class Fs<T> implements IFs<T> {
     return this.mergeAll(1)
   }
 
-  mergeMap<R = T>(
-    callback: TMapCallback<T, R>,
+  mergeMap<R>(
+    callback: TMapCallback<T, StreamLike<R>>,
     concurrency: number = -1
-  ): IFs<R extends StreamLike<infer K> ? K : never> {
+  ): IFs<R> {
     if (concurrency < 0) {
-      return this.pipe(mergeMap(callback as any))
+      return this.pipe(mergeMap(callback))
     }
 
     const sub = new Subject<any>()
@@ -251,9 +252,7 @@ export class Fs<T> implements IFs<T> {
     return Fs.from(sub)
   }
 
-  concatMap<R = T>(
-    callback: TMapCallback<T, R>
-  ): IFs<R extends StreamLike<infer K> ? K : never> {
+  concatMap<R>(callback: TMapCallback<T, StreamLike<R>>): IFs<R> {
     return this.mergeMap(callback, 1)
   }
 
@@ -279,30 +278,7 @@ export class Fs<T> implements IFs<T> {
   }
 
   chain(stream: StreamLike<T>): IFs<T> {
-    const sub = new Subject<T>()
-    this.watch({
-      next(data) {
-        sub.publish(data)
-      },
-      error(err) {
-        sub.abort(err)
-      },
-      complete() {
-        Fs.from(stream).watch({
-          next(data: T) {
-            sub.publish(data)
-          },
-          error(err) {
-            sub.abort(err)
-          },
-          complete() {
-            sub.commit()
-          }
-        })
-      }
-    })
-
-    return Fs.from(sub)
+    return Fs.concat(this, stream)
   }
 
   catchError(callback: TErrorCallback): IFs<T> {
@@ -310,23 +286,27 @@ export class Fs<T> implements IFs<T> {
   }
 
   copy(count: number): IFs<T>[] {
-    const pass = new Array(count).fill(null).map(() => new Subject<T>())
+    const sub = new Array(count).fill(null).map(() => new Subject<T>())
     this.watch({
       next(data) {
-        pass.forEach((s) => s.publish(data))
+        sub.forEach((s) => s.publish(data))
       },
       error(err) {
-        pass.forEach((s) => s.abort(err))
+        sub.forEach((s) => s.abort(err))
       },
       complete() {
-        pass.forEach((s) => s.commit())
+        sub.forEach((s) => s.commit())
       }
     })
 
-    return pass.map((s) => Fs.from(s))
+    return sub.map((s) => Fs.from(s))
   }
 
   ifEmpty(callback: TAnyCallback): IFs<T> {
     return this.pipe(ifEmpty(callback))
+  }
+
+  groupBy<R>(callback: TMapCallback<T, R>): IFs<IFs<T>> {
+    return this.pipe(groupBy(callback))
   }
 }
