@@ -118,20 +118,7 @@ export class Fs<T> implements IFs<T> {
   }
 
   toArray(): Promise<T[]> {
-    return new Promise((resolve, reject) => {
-      const result: T[] = []
-      this.watch({
-        next(event) {
-          result.push(event)
-        },
-        error(err) {
-          reject(err)
-        },
-        complete() {
-          resolve(result)
-        }
-      })
-    })
+    return this.reduce((acc, cur) => acc.concat([cur]), [] as T[]).toPromise()
   }
 
   some(callback: TFilterCallback<T>): IFs<boolean> {
