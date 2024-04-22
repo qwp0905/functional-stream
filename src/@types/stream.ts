@@ -18,9 +18,9 @@ export interface IFs<T> extends AsyncIterable<T> {
   watch(options: IStreamReadOptions<T>): void
   toPromise(): Promise<T>
   toArray(): Promise<T[]>
-  some(callback: TFilterCallback<T>): Promise<boolean>
-  every(callback: TFilterCallback<T>): Promise<boolean>
 
+  some(callback: TFilterCallback<T>): IFs<boolean>
+  every(callback: TFilterCallback<T>): IFs<boolean>
   map<R>(callback: TMapCallback<T, R>): IFs<R>
   filter(callback: TFilterCallback<T>): IFs<T>
   tap(callback: TTapCallback<T>): IFs<T>

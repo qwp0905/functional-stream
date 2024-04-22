@@ -135,40 +135,12 @@ export class Fs<T> implements IFs<T> {
     })
   }
 
-  some(callback: TFilterCallback<T>): Promise<boolean> {
-    let index = 0
-    return new Promise((resolve, reject) => {
-      let result = false
-      this.watch({
-        next(data) {
-          result ||= callback(data, index++)
-        },
-        error(err) {
-          reject(err)
-        },
-        complete() {
-          resolve(result)
-        }
-      })
-    })
+  some(callback: TFilterCallback<T>): IFs<boolean> {
+    return this.reduce((acc, cur, i) => acc || callback(cur, i), false)
   }
 
-  every(callback: TFilterCallback<T>): Promise<boolean> {
-    let index = 0
-    return new Promise((resolve, reject) => {
-      let result = true
-      this.watch({
-        next(data) {
-          result &&= callback(data, index++)
-        },
-        error(err) {
-          reject(err)
-        },
-        complete() {
-          resolve(result)
-        }
-      })
-    })
+  every(callback: TFilterCallback<T>): IFs<boolean> {
+    return this.reduce((acc, cur, i) => acc && callback(cur, i), true)
   }
 
   map<R>(callback: TMapCallback<T, R>): IFs<R> {
