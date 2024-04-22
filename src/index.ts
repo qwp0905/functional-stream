@@ -23,7 +23,6 @@ import { skip } from './operators/skip'
 import { bufferCount } from './operators/buffer-count'
 import { take } from './operators/take'
 import { mergeAll, mergeMap } from './operators/merge'
-import { delay } from './operators/delay'
 import { catchError } from './operators/error'
 import { ifEmpty } from './operators/empty'
 import { Subject } from './observer'
@@ -246,7 +245,10 @@ export class Fs<T> implements IFs<T> {
   }
 
   delay(ms: number): IFs<T> {
-    return this.pipe(delay(ms))
+    return this.concatMap(async (e) => {
+      await new Promise((resolve) => setTimeout(resolve, ms))
+      return e
+    })
   }
 
   chain(stream: StreamLike<T>): IFs<T> {
