@@ -232,10 +232,9 @@ export class Fs<T> implements IFs<T> {
   }
 
   delay(ms: number): IFs<T> {
-    return this.concatMap(async (e) => {
-      await new Promise((resolve) => setTimeout(resolve, ms))
-      return e
-    })
+    return this.concatMap(
+      (e) => new Promise((resolve) => setTimeout(() => resolve(e), ms))
+    )
   }
 
   chain(stream: StreamLike<T>): IFs<T> {
