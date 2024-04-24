@@ -13,7 +13,8 @@ export const mergeAll = <T>(): Pipeline<StreamLike<T>, T> => {
       Fs.from(event)
         .tap((e) => this.publish(e))
         .toPromise()
-        .then(() => wg.done())
+        .catch((err) => this.abort(err))
+        .finally(() => wg.done())
     },
     complete() {
       return wg.wait()
@@ -33,7 +34,8 @@ export const mergeMap = <T, R>(
       Fs.from(callback(event, index++))
         .tap((e) => this.publish(e))
         .toPromise()
-        .then(() => wg.done())
+        .catch((err) => this.abort(err))
+        .finally(() => wg.done())
     },
     complete() {
       return wg.wait()
