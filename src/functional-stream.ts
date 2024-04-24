@@ -6,7 +6,7 @@ import {
   fromPromise,
   fromReadable
 } from './observer/pipeline'
-import { isAsyncIterable, isIterable } from './functions'
+import { isAsyncIterable, isIterable } from './utils/functions'
 import {
   TAnyCallback,
   TErrorCallback,
@@ -27,6 +27,7 @@ import { catchError } from './operators/error'
 import { ifEmpty } from './operators/empty'
 import { Subject } from './observer'
 import { groupBy } from './operators/group'
+import { delay } from './operators/delay'
 
 export class Fs<T> implements IFs<T> {
   constructor(private source: Subject<T>) {}
@@ -232,9 +233,7 @@ export class Fs<T> implements IFs<T> {
   }
 
   delay(ms: number): IFs<T> {
-    return this.concatMap(
-      (e) => new Promise((resolve) => setTimeout(() => resolve(e), ms))
-    )
+    return this.pipe(delay(ms))
   }
 
   chain(stream: StreamLike<T>): IFs<T> {

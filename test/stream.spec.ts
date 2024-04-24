@@ -11,4 +11,18 @@ describe('number', () => {
     const r = Fs.from(arr).toArray()
     await expect(r).resolves.toStrictEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
   })
+
+  it('complex', async () => {
+    const r = Fs.range(10)
+      .bufferCount(2)
+      .map((e) => Promise.resolve(e))
+      .delay(10)
+      .concatAll()
+      .skip(1)
+      .map((e) => e.reduce((a, c) => a + c, 0))
+      .map((e) => Promise.resolve(e))
+      .mergeAll(1)
+      .toArray()
+    await expect(r).resolves.toEqual([5, 9, 13, 17])
+  })
 })

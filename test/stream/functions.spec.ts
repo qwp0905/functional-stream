@@ -1,5 +1,5 @@
 import { Readable } from 'stream'
-import { isAsyncIterable, isIterable } from '../../src/functions'
+import { isAsyncIterable, isIterable } from '../../src/utils/functions'
 
 describe('functions', () => {
   it('array', () => {
