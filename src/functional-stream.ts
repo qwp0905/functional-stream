@@ -1,11 +1,10 @@
 import { IFs, IStreamReadOptions, StreamLike } from './@types/stream'
 import {
-  Pipeline,
   fromAsyncIterable,
   fromIterable,
   fromPromise,
   fromReadable
-} from './observer/pipeline'
+} from './observer/index'
 import { isAsyncIterable, isIterable } from './utils/functions'
 import {
   TAnyCallback,
@@ -28,6 +27,7 @@ import { ifEmpty } from './operators/empty'
 import { Subject } from './observer'
 import { groupBy } from './operators/group'
 import { delay } from './operators/delay'
+import { Pipeline } from './observer/pipeline'
 
 export class Fs<T> implements IFs<T> {
   constructor(private source: Subject<T>) {}
