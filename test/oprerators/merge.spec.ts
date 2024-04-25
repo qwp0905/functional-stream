@@ -12,7 +12,7 @@ describe('merge', () => {
       const arr = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [9]]
       const stream = Fs.from(arr)
         .mergeMap(async (e, i) => {
-          await new Promise((r) => setTimeout(r, i * 500))
+          await new Promise((r) => setTimeout(r, i * 100))
           return e
         }, 1)
         .mergeAll()
