@@ -18,6 +18,9 @@ class CompleteEvent {
   readonly kind = EventKind.complete
 }
 
+type ResolveFunction<T> = (v: IteratorResult<T> | PromiseLike<IteratorResult<T>>) => void
+type RejectFunction = (reason: any) => void
+
 export class Subject<T> {
   private observer: IObserver<T> | null = null
   private queue: Event<T>[] = []
@@ -90,10 +93,7 @@ export class Subject<T> {
     let is_done = false
     let error: Error | null = null
     const queue: T[] = []
-    const promise: [
-      (v: IteratorResult<T> | PromiseLike<IteratorResult<T>>) => void,
-      (reason: any) => void
-    ][] = []
+    const promise: [ResolveFunction<T>, RejectFunction][] = []
 
     const handleError = (err: Error) => {
       error = err
