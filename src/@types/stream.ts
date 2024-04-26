@@ -37,8 +37,9 @@ export interface IFs<T> extends AsyncIterable<T> {
   chain(stream: StreamLike<T>): IFs<T>
   catchError(callback: TErrorCallback): IFs<T>
   copy(count: number): IFs<T>[]
-  ifEmpty(callback: TAnyCallback): IFs<T>
   groupBy<R>(callback: TMapCallback<T, R>): IFs<IFs<T>>
+  defaultIfEmpty(v: T): IFs<T>
+  throwIfEmpty(err: any): IFs<T>
 }
 
 export type StreamLike<T> =

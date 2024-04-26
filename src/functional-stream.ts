@@ -23,7 +23,7 @@ import { bufferCount } from './operators/buffer-count'
 import { take } from './operators/take'
 import { mergeAll, mergeMap } from './operators/merge'
 import { catchError } from './operators/error'
-import { ifEmpty } from './operators/empty'
+import { defaultIfEmpty, throwIfEmpty } from './operators/empty'
 import { Subject } from './observer'
 import { groupBy } from './operators/group'
 import { delay } from './operators/delay'
@@ -261,8 +261,12 @@ export class Fs<T> implements IFs<T> {
     return sub.map((s) => Fs.from(s))
   }
 
-  ifEmpty(callback: TAnyCallback): IFs<T> {
-    return this.pipe(ifEmpty(callback))
+  defaultIfEmpty(v: T): IFs<T> {
+    return this.pipe(defaultIfEmpty(v))
+  }
+
+  throwIfEmpty(err: any): IFs<T> {
+    return this.pipe(throwIfEmpty(err))
   }
 
   groupBy<R>(callback: TMapCallback<T, R>): IFs<IFs<T>> {
