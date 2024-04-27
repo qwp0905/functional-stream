@@ -2,22 +2,23 @@ import { StreamLike } from '../@types/stream'
 import { TMapCallback } from '../@types/callback'
 import { Fs } from '..'
 import { Pipeline } from '../observer/pipeline'
-import { WaitGroup } from '../utils/waitgroup'
 
 export const mergeAll = <T>(): Pipeline<StreamLike<T>, T> => {
-  const wg = new WaitGroup()
-
+  const queue: Promise<void>[] = []
   return new Pipeline({
     next(event) {
-      wg.add()
-      Fs.from(event)
-        .tap((e) => this.publish(e))
-        .toPromise()
-        .catch((err) => this.abort(err))
-        .finally(() => wg.done())
+      queue.push(
+        Fs.from(event)
+          .tap((e) => this.publish(e))
+          .toPromise()
+          .catch((err) => this.abort(err))
+          .then()
+      )
     },
-    complete() {
-      return wg.wait()
+    async complete() {
+      while (queue.length) {
+        await queue.shift()
+      }
     }
   })
 }
@@ -26,19 +27,21 @@ export const mergeMap = <T, R>(
   callback: TMapCallback<T, StreamLike<R>>
 ): Pipeline<T, R> => {
   let index = 0
-  const wg = new WaitGroup()
-
+  const queue: Promise<void>[] = []
   return new Pipeline({
     next(event) {
-      wg.add()
-      Fs.from(callback(event, index++))
-        .tap((e) => this.publish(e))
-        .toPromise()
-        .catch((err) => this.abort(err))
-        .finally(() => wg.done())
+      queue.push(
+        Fs.from(callback(event, index++))
+          .tap((e) => this.publish(e))
+          .toPromise()
+          .catch((err) => this.abort(err))
+          .then()
+      )
     },
-    complete() {
-      return wg.wait()
+    async complete() {
+      while (queue.length) {
+        await queue.shift()
+      }
     }
   })
 }
