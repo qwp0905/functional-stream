@@ -142,11 +142,13 @@ export class Subject<T> {
           promise.push([resolve, reject])
         })
       },
-      throw(e) {
+      throw: (e) => {
+        this.clear()
         handleError(e)
         return Promise.reject(e)
       },
-      return() {
+      return: () => {
+        this.clear()
         handleComplete()
         return Promise.resolve({ value: undefined, done: true })
       }
