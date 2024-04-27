@@ -1,7 +1,7 @@
 import { Fs } from '..'
 import { TMapCallback } from '../@types/callback'
 import { IFs } from '../@types/stream'
-import { Subject } from '../observer'
+import { Subject } from '../observer/subject'
 import { Pipeline } from '../observer/pipeline'
 
 export const groupBy = <T, R>(callback: TMapCallback<T, R>): Pipeline<T, IFs<T>> => {

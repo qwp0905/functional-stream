@@ -4,7 +4,7 @@ import {
   fromIterable,
   fromPromise,
   fromReadable
-} from './observer/index'
+} from './observer/subject'
 import { isAsyncIterable, isIterable, isReadableStream } from './utils/functions'
 import {
   TAnyCallback,
@@ -24,7 +24,7 @@ import { take } from './operators/take'
 import { mergeAll, mergeMap } from './operators/merge'
 import { catchError } from './operators/error'
 import { defaultIfEmpty, throwIfEmpty } from './operators/empty'
-import { Subject } from './observer'
+import { Subject } from './observer/subject'
 import { groupBy } from './operators/group'
 import { delay } from './operators/delay'
 import { Pipeline } from './observer/pipeline'

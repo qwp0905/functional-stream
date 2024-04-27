@@ -1,15 +1,13 @@
-import { IObserver, Subject } from '.'
+import { IObserver, Subject } from './subject'
 
 export class Pipeline<T, R = T> extends Subject<R> implements IObserver<T> {
-  constructor(private readonly observe?: IObserver<T, Pipeline<T, R>>) {
+  constructor(private readonly observe: IObserver<T, Pipeline<T, R>>) {
     super()
   }
 
   next(event: T) {
     try {
-      this.observe?.next
-        ? this.observe.next.call(this, event)
-        : this.publish(event as any)
+      this.observe.next.call(this, event)
     } catch (err) {
       this.error(err)
     }

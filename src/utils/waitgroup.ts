@@ -1,4 +1,4 @@
-import { Subject } from '../observer'
+import { Subject } from '../observer/subject'
 
 export class WaitGroup {
   private start = 0
