@@ -5,7 +5,7 @@ import {
   fromPromise,
   fromReadable
 } from './observer/index'
-import { isAsyncIterable, isIterable } from './utils/functions'
+import { isAsyncIterable, isIterable, isReadableStream } from './utils/functions'
 import {
   TAnyCallback,
   TErrorCallback,
@@ -53,8 +53,8 @@ export class Fs<T> implements IFs<T> {
       return new Fs(fromAsyncIterable(like as AsyncIterable<T>))
     }
 
-    if (like instanceof ReadableStream) {
-      return new Fs(fromReadable(like))
+    if (isReadableStream(like)) {
+      return new Fs(fromReadable(like as any))
     }
 
     if (like instanceof Promise) {

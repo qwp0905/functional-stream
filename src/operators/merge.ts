@@ -16,7 +16,7 @@ export const mergeAll = <T>(): Pipeline<StreamLike<T>, T> => {
       )
     },
     async complete() {
-      while (queue.length) {
+      while (queue.length > 0) {
         await queue.shift()
       }
     }
@@ -39,7 +39,7 @@ export const mergeMap = <T, R>(
       )
     },
     async complete() {
-      while (queue.length) {
+      while (queue.length > 0) {
         await queue.shift()
       }
     }
