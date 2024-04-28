@@ -98,7 +98,7 @@ export class Fs<T> implements IFs<T> {
   }
 
   private pipe<R>(pipeline: Pipeline<T, R>): IFs<R> {
-    this.source.add(pipeline)
+    this.source.watch(pipeline)
     const next = this as unknown as Fs<R>
     next.source = pipeline
     return next
@@ -109,7 +109,7 @@ export class Fs<T> implements IFs<T> {
   }
 
   watch(options: IStreamReadOptions<T>) {
-    return this.source.add(options)
+    return this.source.watch(options)
   }
 
   unwatch(): void {

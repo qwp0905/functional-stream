@@ -28,7 +28,7 @@ export class Subject<T> {
   private queue: Event<T>[] = []
   private end = false
 
-  add(observer: IObserver<T>) {
+  watch(observer: IObserver<T>) {
     this.observer = observer
     while (this.queue.length !== 0) {
       const event = this.queue.shift()!
@@ -68,7 +68,7 @@ export class Subject<T> {
     }
 
     this.observer.error?.(err)
-    this.clear()
+    this.unwatch()
   }
 
   commit() {
@@ -82,10 +82,10 @@ export class Subject<T> {
     }
 
     this.observer.complete?.()
-    this.clear()
+    this.unwatch()
   }
 
-  private clear() {
+  unwatch() {
     this.end = true
     this.observer = null
     this.queue = []
@@ -113,7 +113,7 @@ export class Subject<T> {
       }
     }
 
-    this.add({
+    this.watch({
       next(event) {
         if (promise.length) {
           const [resolve] = promise.shift()!
@@ -145,12 +145,12 @@ export class Subject<T> {
         })
       },
       throw: (e) => {
-        this.clear()
+        this.unwatch()
         handleError(e)
         return Promise.reject(e)
       },
       return: () => {
-        this.clear()
+        this.unwatch()
         handleComplete()
         return Promise.resolve({ value: undefined, done: true })
       }

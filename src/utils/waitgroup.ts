@@ -8,7 +8,7 @@ export class WaitGroup {
 
   constructor() {
     this.done_flag = new Promise((resolve) => {
-      this.trigger.add({
+      this.trigger.watch({
         next: () => {
           if (this.start - this.end++ > 1) {
             return
