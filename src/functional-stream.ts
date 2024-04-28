@@ -85,13 +85,11 @@ export class Fs<T> implements IFs<T> {
   }
 
   static range(count: number, start = 0): IFs<number> {
-    return Fs.from({
-      *[Symbol.iterator]() {
-        for (let i = start; i < count; i++) {
-          yield i
-        }
-      }
-    })
+    return Fs.loop(
+      start,
+      (x) => x < x + count,
+      (x) => x++
+    )
   }
 
   static loop<T>(
