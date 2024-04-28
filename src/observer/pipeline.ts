@@ -16,7 +16,7 @@ export class Pipeline<T, R = T> extends Subject<R> implements IObserver<T> {
 
   async error(err: Error) {
     try {
-      await this.observe?.error?.call(this, err)
+      await this.observe.error?.call(this, err)
       this.abort(err)
     } catch (e) {
       this.abort(e)
@@ -25,15 +25,10 @@ export class Pipeline<T, R = T> extends Subject<R> implements IObserver<T> {
 
   async complete() {
     try {
-      await this.observe?.complete?.call(this)
+      await this.observe.complete?.call(this)
       this.commit()
     } catch (err) {
       this.error(err)
     }
-  }
-
-  pipe<K>(pipe: Pipeline<R, K>) {
-    this.add(pipe)
-    return pipe
   }
 }
