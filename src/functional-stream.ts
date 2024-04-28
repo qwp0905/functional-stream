@@ -77,11 +77,11 @@ export class Fs<T> implements IFs<T> {
   }
 
   static merge<T>(...streams: StreamLike<T>[]): IFs<T> {
-    return Fs.from(streams).mergeAll()
+    return fromIterable(streams).mergeAll()
   }
 
   static concat<T>(...streams: StreamLike<T>[]): IFs<T> {
-    return Fs.from(streams).concatAll()
+    return fromIterable(streams).concatAll()
   }
 
   static range(count: number, start = 0): IFs<number> {
