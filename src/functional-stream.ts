@@ -33,9 +33,9 @@ import { Pipeline } from './observer/pipeline'
 export class Fs<T> implements IFs<T> {
   constructor(private source: Subject<T>) {}
 
-  static generate<T>(fn: (sub: Subject<T>) => void) {
+  static generate<T>(generator: (sub: Subject<T>) => void) {
     const sub = new Subject<T>()
-    fn(sub)
+    generator(sub)
     return new Fs(sub)
   }
 
