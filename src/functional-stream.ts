@@ -112,6 +112,10 @@ export class Fs<T> implements IFs<T> {
     return this.source.add(options)
   }
 
+  unwatch(): void {
+    return this.source.commit()
+  }
+
   toPromise(): Promise<T> {
     return new Promise((resolve, reject) => {
       let result: T

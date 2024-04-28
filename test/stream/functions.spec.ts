@@ -1,5 +1,5 @@
 import { Readable } from 'stream'
-import { isAsyncIterable, isIterable } from '../../src/utils/functions'
+import { isAsyncIterable, isEventSource, isIterable } from '../../src/utils/functions'
 
 describe('functions', () => {
   it('array', () => {
@@ -48,5 +48,11 @@ describe('functions', () => {
     const sym = Symbol('123123123123')
     expect(isAsyncIterable(sym)).toBeFalsy()
     expect(isIterable(sym)).toBeFalsy()
+  })
+
+  it('event', async () => {
+    const { EventEmitter } = await import('events')
+    const event = new EventEmitter()
+    expect(isEventSource(event)).toBeTruthy()
   })
 })
