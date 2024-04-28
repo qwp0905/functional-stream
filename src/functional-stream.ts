@@ -100,9 +100,22 @@ export class Fs<T> implements IFs<T> {
 
   private pipe<R>(pipeline: Pipeline<T, R>): IFs<R> {
     this.source.watch(pipeline)
+    pipeline.beforeDestroy(() => this.source.flush())
     const next = this as unknown as Fs<R>
     next.source = pipeline
     return next
+  }
+
+  private pipeTo<R>(generator: (sub: Subject<R>) => void): IFs<R> {
+    const sub = new Subject<R>()
+    sub.beforeDestroy(() => this.source.flush())
+    generator(sub)
+    return new Fs(sub)
+  }
+
+  private copyTo(sub: Subject<T>): IFs<T> {
+    sub.beforeDestroy(() => this.source.flush())
+    return new Fs<T>(sub)
   }
 
   private iter(): AsyncIterator<T> {
@@ -136,6 +149,10 @@ export class Fs<T> implements IFs<T> {
 
   toArray(): Promise<T[]> {
     return this.reduce((acc, cur) => acc.concat([cur]), [] as T[]).toPromise()
+  }
+
+  count(): IFs<number> {
+    return this.reduce((acc) => acc++, 0)
   }
 
   some(callback: TFilterCallback<T>): IFs<boolean> {
@@ -179,9 +196,8 @@ export class Fs<T> implements IFs<T> {
       return this.pipe(mergeAll() as any)
     }
 
-    return Fs.generate((sub) => {
+    return this.pipeTo((sub) => {
       const iter = this.iter()
-
       Promise.all(
         new Array(concurrency).fill(null).map(async () => {
           for (let data = await iter.next(); !data.done; data = await iter.next()) {
@@ -208,7 +224,7 @@ export class Fs<T> implements IFs<T> {
       return this.pipe(mergeMap(callback))
     }
 
-    return Fs.generate((sub) => {
+    return this.pipeTo((sub) => {
       const iter = this.iter()
       let index = 0
       Promise.all(
@@ -230,7 +246,7 @@ export class Fs<T> implements IFs<T> {
   }
 
   finalize(callback: TAnyCallback): IFs<T> {
-    return Fs.generate((sub) => {
+    return this.pipeTo((sub) => {
       this.watch({
         next(data) {
           sub.publish(data)
@@ -271,7 +287,7 @@ export class Fs<T> implements IFs<T> {
       }
     })
 
-    return sub.map((s) => new Fs(s))
+    return sub.map((s) => this.copyTo(s))
   }
 
   defaultIfEmpty(v: T): IFs<T> {
@@ -337,28 +353,27 @@ function fromReadable<T>(readable: ReadableStream<T>): IFs<T> {
 }
 
 function fromEvent<T>(source: any, event: string | symbol): IFs<T> {
-  let removeHandler: () => void
   return Fs.generate<T>((sub) => {
     const handler = (...args: any[]) => sub.publish(args.length > 1 ? args : args[0])
 
     if (isHtmlElement(source)) {
       source.addEventListener(event, handler)
-      removeHandler = () => source.removeEventListener(event, handler)
+      sub.beforeDestroy(() => source.removeEventListener(event, handler))
       return
     }
 
     if (isEventSource(source)) {
       source.addListener(event, handler)
-      removeHandler = () => source.removeListener(event, handler)
+      sub.beforeDestroy(() => source.removeListener(event, handler))
       return
     }
 
     if (isOnOffEventSource(source)) {
       source.on(event, handler)
-      removeHandler = () => source.off(event, handler)
+      sub.beforeDestroy(() => source.off(event, handler))
       return
     }
 
     throw new Error('invalid event source')
-  }).finalize(removeHandler!)
+  })
 }

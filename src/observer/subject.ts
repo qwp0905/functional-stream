@@ -28,6 +28,7 @@ export class Subject<T> {
   private observer: IObserver<T> | null = null
   private queue: Event<T>[] = []
   private end = false
+  private readonly finalizers: (() => void)[] = []
 
   watch(observer: IObserver<T>) {
     if (this.observer) {
@@ -90,10 +91,22 @@ export class Subject<T> {
     this.unwatch()
   }
 
+  flush() {
+    while (this.finalizers.length > 0) {
+      const finalizer = this.finalizers.shift()!
+      finalizer()
+    }
+  }
+
+  beforeDestroy(fn: () => void) {
+    this.finalizers.push(fn)
+  }
+
   private unwatch() {
     this.end = true
     this.observer = null
     this.queue = []
+    this.flush()
   }
 
   [Symbol.asyncIterator](): AsyncIterator<T> {
