@@ -1,3 +1,5 @@
+import { IObserver } from '../@types/observer'
+
 enum EventKind {
   next,
   error,
@@ -154,59 +156,4 @@ export class Subject<T> {
       }
     }
   }
-}
-
-export interface IObserver<T, R = any> {
-  next(this: R, event: T): any
-  error?(this: R, err: Error): any
-  complete?(this: R): any
-}
-
-export function fromIterable<T>(iter: Iterable<T>): Subject<T> {
-  const subject = new Subject<T>()
-  Promise.resolve()
-    .then(() => {
-      for (const data of iter) {
-        subject.publish(data)
-      }
-    })
-    .catch((err) => subject.abort(err))
-    .finally(() => subject.commit())
-  return subject
-}
-
-export function fromAsyncIterable<T>(iter: AsyncIterable<T>): Subject<T> {
-  const subject = new Subject<T>()
-  Promise.resolve()
-    .then(async () => {
-      for await (const data of iter) {
-        subject.publish(data)
-      }
-    })
-    .catch((err) => subject.abort(err))
-    .finally(() => subject.commit())
-  return subject
-}
-
-export function fromPromise<T>(p: Promise<T>): Subject<T> {
-  const subject = new Subject<T>()
-  p.then((data) => subject.publish(data))
-    .catch((err) => subject.abort(err))
-    .finally(() => subject.commit())
-  return subject
-}
-
-export function fromReadable<T>(readable: ReadableStream<T>): Subject<T> {
-  return fromAsyncIterable({
-    async *[Symbol.asyncIterator]() {
-      const reader = readable.getReader()
-      try {
-        for (let data = await reader.read(); !data.done; data = await reader.read()) {
-          yield data.value
-        }
-      } finally {
-        reader.releaseLock()
-      }
-    }
-  })
 }

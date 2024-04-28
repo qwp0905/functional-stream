@@ -1,4 +1,5 @@
 export { Fs } from './functional-stream'
-export { Subject, IObserver } from './observer/subject'
+export { Subject } from './observer/subject'
 export { Pipeline } from './observer/pipeline'
 export { IFs } from './@types/stream'
+export { IObserver } from './@types/observer'

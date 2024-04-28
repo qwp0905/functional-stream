@@ -1,11 +1,12 @@
 import { IFs, IStreamReadOptions, StreamLike } from './@types/stream'
 import {
-  fromAsyncIterable,
-  fromIterable,
-  fromPromise,
-  fromReadable
-} from './observer/subject'
-import { isAsyncIterable, isIterable, isReadableStream } from './utils/functions'
+  isAsyncIterable,
+  isEventSource,
+  isHtmlElement,
+  isIterable,
+  isOnOffEventSource,
+  isReadableStream
+} from './utils/functions'
 import {
   TAnyCallback,
   TErrorCallback,
@@ -32,6 +33,12 @@ import { Pipeline } from './observer/pipeline'
 export class Fs<T> implements IFs<T> {
   constructor(private source: Subject<T>) {}
 
+  static generate<T>(fn: (sub: Subject<T>) => void) {
+    const sub = new Subject<T>()
+    fn(sub)
+    return new Fs(sub)
+  }
+
   static of<T>(...v: T[]): IFs<T> {
     return Fs.from(v)
   }
@@ -46,22 +53,26 @@ export class Fs<T> implements IFs<T> {
     }
 
     if (isIterable(like)) {
-      return new Fs(fromIterable(like as Iterable<T>))
+      return fromIterable(like as Iterable<T>)
     }
 
     if (isAsyncIterable(like)) {
-      return new Fs(fromAsyncIterable(like as AsyncIterable<T>))
+      return fromAsyncIterable(like as AsyncIterable<T>)
     }
 
     if (isReadableStream(like)) {
-      return new Fs(fromReadable(like as any))
+      return fromReadable(like as any)
     }
 
     if (like instanceof Promise) {
-      return new Fs(fromPromise(like))
+      return fromPromise(like)
     }
 
     throw new Error('stream type is not supported')
+  }
+
+  static fromEvent<T>(source: any, event: string | symbol): IFs<T> {
+    return fromEvent(source, event)
   }
 
   static merge<T>(...streams: StreamLike<T>[]): IFs<T> {
@@ -163,22 +174,21 @@ export class Fs<T> implements IFs<T> {
       return this.pipe(mergeAll() as any)
     }
 
-    const sub = new Subject<any>()
-    const iter = this.iter()
+    return Fs.generate((sub) => {
+      const iter = this.iter()
 
-    Promise.all(
-      new Array(concurrency).fill(null).map(async () => {
-        for (let data = await iter.next(); !data.done; data = await iter.next()) {
-          await Fs.from(data.value as any)
-            .tap((e) => sub.publish(e))
-            .toPromise()
-        }
-      })
-    )
-      .catch((err) => sub.abort(err))
-      .finally(() => sub.commit())
-
-    return Fs.from(sub)
+      Promise.all(
+        new Array(concurrency).fill(null).map(async () => {
+          for (let data = await iter.next(); !data.done; data = await iter.next()) {
+            await Fs.from(data.value as any)
+              .tap((e) => sub.publish(e as any))
+              .toPromise()
+          }
+        })
+      )
+        .catch((err) => sub.abort(err))
+        .finally(() => sub.commit())
+    })
   }
 
   concatAll(): IFs<T extends StreamLike<infer K> ? K : never> {
@@ -193,22 +203,21 @@ export class Fs<T> implements IFs<T> {
       return this.pipe(mergeMap(callback))
     }
 
-    const sub = new Subject<any>()
-    const iter = this.iter()
-    let index = 0
-    Promise.all(
-      new Array(concurrency).fill(null).map(async () => {
-        for (let data = await iter.next(); !data.done; data = await iter.next()) {
-          await Fs.from(callback(data.value, index++) as any)
-            .tap((e) => sub.publish(e))
-            .toPromise()
-        }
-      })
-    )
-      .catch((err) => sub.abort(err))
-      .finally(() => sub.commit())
-
-    return Fs.from(sub)
+    return Fs.generate((sub) => {
+      const iter = this.iter()
+      let index = 0
+      Promise.all(
+        new Array(concurrency).fill(null).map(async () => {
+          for (let data = await iter.next(); !data.done; data = await iter.next()) {
+            await Fs.from(callback(data.value, index++) as any)
+              .tap((e) => sub.publish(e as any))
+              .toPromise()
+          }
+        })
+      )
+        .catch((err) => sub.abort(err))
+        .finally(() => sub.commit())
+    })
   }
 
   concatMap<R>(callback: TMapCallback<T, StreamLike<R>>): IFs<R> {
@@ -216,20 +225,19 @@ export class Fs<T> implements IFs<T> {
   }
 
   finalize(callback: TAnyCallback): IFs<T> {
-    const sub = new Subject<T>()
-    this.watch({
-      next(data) {
-        sub.publish(data)
-      },
-      error(err) {
-        sub.abort(err)
-      },
-      complete() {
-        return Promise.resolve(callback())
-      }
+    return Fs.generate((sub) => {
+      this.watch({
+        next(data) {
+          sub.publish(data)
+        },
+        error(err) {
+          sub.abort(err)
+        },
+        complete() {
+          return Promise.resolve(callback())
+        }
+      })
     })
-
-    return Fs.from(sub)
   }
 
   delay(ms: number): IFs<T> {
@@ -258,7 +266,7 @@ export class Fs<T> implements IFs<T> {
       }
     })
 
-    return sub.map((s) => Fs.from(s))
+    return sub.map((s) => new Fs(s))
   }
 
   defaultIfEmpty(v: T): IFs<T> {
@@ -272,4 +280,80 @@ export class Fs<T> implements IFs<T> {
   groupBy<R>(callback: TMapCallback<T, R>): IFs<IFs<T>> {
     return this.pipe(groupBy(callback))
   }
+}
+
+function fromIterable<T>(iter: Iterable<T>): IFs<T> {
+  return Fs.generate((subject) => {
+    Promise.resolve()
+      .then(() => {
+        for (const data of iter) {
+          subject.publish(data)
+        }
+      })
+      .catch((err) => subject.abort(err))
+      .finally(() => subject.commit())
+  })
+}
+
+function fromAsyncIterable<T>(iter: AsyncIterable<T>): IFs<T> {
+  return Fs.generate((subject) => {
+    Promise.resolve()
+      .then(async () => {
+        for await (const data of iter) {
+          subject.publish(data)
+        }
+      })
+      .catch((err) => subject.abort(err))
+      .finally(() => subject.commit())
+  })
+}
+
+function fromPromise<T>(p: Promise<T>): IFs<T> {
+  return Fs.generate((subject) => {
+    p.then((data) => subject.publish(data))
+      .catch((err) => subject.abort(err))
+      .finally(() => subject.commit())
+  })
+}
+
+function fromReadable<T>(readable: ReadableStream<T>): IFs<T> {
+  return fromAsyncIterable({
+    async *[Symbol.asyncIterator]() {
+      const reader = readable.getReader()
+      try {
+        for (let data = await reader.read(); !data.done; data = await reader.read()) {
+          yield data.value
+        }
+      } finally {
+        reader.releaseLock()
+      }
+    }
+  })
+}
+
+function fromEvent<T>(source: any, event: string | symbol): IFs<T> {
+  let removeHandler: () => void
+  return Fs.generate<T>((sub) => {
+    const handler = (...args: any[]) => sub.publish(args.length > 1 ? args : args[0])
+
+    if (isHtmlElement(source)) {
+      source.addEventListener(event, handler)
+      removeHandler = () => source.removeEventListener(event, handler)
+      return
+    }
+
+    if (isEventSource(source)) {
+      source.addListener(event, handler)
+      removeHandler = () => source.removeListener(event, handler)
+      return
+    }
+
+    if (isOnOffEventSource(source)) {
+      source.on(event, handler)
+      removeHandler = () => source.off(event, handler)
+      return
+    }
+
+    throw new Error('invalid event source')
+  }).finalize(removeHandler!)
 }
