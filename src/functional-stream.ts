@@ -87,8 +87,8 @@ export class Fs<T> implements IFs<T> {
   static range(count: number, start = 0): IFs<number> {
     return Fs.loop(
       start,
-      (x) => x < x + count,
-      (x) => x++
+      (x) => x < start + count,
+      (x) => x + 1
     )
   }
 
