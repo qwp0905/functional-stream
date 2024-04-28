@@ -36,7 +36,7 @@ export class Subject<T> {
     }
 
     this.observer = observer
-    while (this.queue.length !== 0) {
+    while (this.queue.length > 0) {
       const event = this.queue.shift()!
       switch (event.kind) {
         case EventKind.next:
