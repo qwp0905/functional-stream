@@ -94,6 +94,20 @@ export class Fs<T> implements IFs<T> {
     })
   }
 
+  static loop<T>(
+    initialValue: T,
+    condFunc: (x: T) => boolean,
+    nextFunc: (x: T) => T
+  ): IFs<T> {
+    return fromIterable({
+      *[Symbol.iterator]() {
+        for (let x = initialValue; condFunc(x); x = nextFunc(x)) {
+          yield x
+        }
+      }
+    })
+  }
+
   [Symbol.asyncIterator]() {
     return this.source[Symbol.asyncIterator]()
   }
