@@ -20,7 +20,6 @@ describe('dom', () => {
   })
 
   it('fs', async () => {
-    el.textContent = '123123'
     const a: any[] = []
     const r = Fs.fromEvent<MouseEvent>(el, 'click')
     r.watch({
