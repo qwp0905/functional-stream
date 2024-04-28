@@ -90,7 +90,7 @@ export class Subject<T> {
     this.unwatch()
   }
 
-  unwatch() {
+  private unwatch() {
     this.end = true
     this.observer = null
     this.queue = []
