@@ -11,13 +11,16 @@ export const mergeAll = <T>(): Pipeline<StreamLike<T>, T> => {
         Fs.from(event)
           .tap((e) => this.publish(e))
           .toPromise()
-          .catch((err) => this.abort(err))
           .then()
       )
     },
     async complete() {
       while (queue.length > 0) {
-        await queue.shift()
+        try {
+          await queue.shift()
+        } catch (err) {
+          return this.abort(err)
+        }
       }
     }
   })
@@ -34,13 +37,16 @@ export const mergeMap = <T, R>(
         Fs.from(callback(event, index++))
           .tap((e) => this.publish(e))
           .toPromise()
-          .catch((err) => this.abort(err))
           .then()
       )
     },
     async complete() {
       while (queue.length > 0) {
-        await queue.shift()
+        try {
+          await queue.shift()
+        } catch (err) {
+          return this.abort(err)
+        }
       }
     }
   })
