@@ -29,6 +29,7 @@ import { Subject } from './observer/subject'
 import { groupBy } from './operators/group'
 import { delay } from './operators/delay'
 import { Pipeline } from './observer/pipeline'
+import { NotSupportTypeError } from './utils/errors'
 
 export class Fs<T> implements IFs<T> {
   constructor(private source: Subject<T>) {}
@@ -68,7 +69,7 @@ export class Fs<T> implements IFs<T> {
       return fromPromise(like)
     }
 
-    throw new Error('stream type is not supported')
+    throw new NotSupportTypeError()
   }
 
   static fromEvent<T>(source: any, event: string | symbol): IFs<T> {

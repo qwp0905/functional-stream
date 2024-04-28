@@ -1,4 +1,5 @@
 import { IObserver } from '../@types/observer'
+import { AlreadySubscribedError } from '../utils/errors'
 
 enum EventKind {
   next,
@@ -29,6 +30,10 @@ export class Subject<T> {
   private end = false
 
   watch(observer: IObserver<T>) {
+    if (this.observer) {
+      throw new AlreadySubscribedError()
+    }
+
     this.observer = observer
     while (this.queue.length !== 0) {
       const event = this.queue.shift()!
