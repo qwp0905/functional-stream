@@ -1,13 +1,11 @@
-.github
+.git*
 .vscode
-.yarn
+.yarn*
 scripts
+src
 test
-.gitignore
 .eslint*
 .pnp*
 .prettier*
-.yarnrc.yml
-README.md
 tsconfig.json
 yarn.lock
