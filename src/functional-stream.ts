@@ -95,11 +95,11 @@ export class Fs<T> implements IFs<T> {
   static loop<T>(
     initialValue: T,
     condFunc: (x: T) => boolean,
-    nextFunc: (x: T) => T
+    nextFunc: (x: T) => T | Promise<T>
   ): IFs<T> {
-    return fromIterable({
-      *[Symbol.iterator]() {
-        for (let x = initialValue; condFunc(x); x = nextFunc(x)) {
+    return fromAsyncIterable({
+      async *[Symbol.asyncIterator]() {
+        for (let x = initialValue; condFunc(x); x = await nextFunc(x)) {
           yield x
         }
       }
