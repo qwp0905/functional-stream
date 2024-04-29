@@ -8,7 +8,9 @@ export const reduce = <A, C = A>(
   let index = 0
   return new Pipeline({
     next(event) {
-      initialValue = callback(initialValue || (event as any), event, index++)
+      initialValue = initialValue
+        ? callback(initialValue, event, index++)
+        : (event as any)
     },
     complete() {
       this.publish(initialValue!)
