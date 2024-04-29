@@ -2,7 +2,6 @@
 
 set -eou pipefail
 
-yarn install --immutable --immutable-cache --check-cache
 yarn build
 
 yarn config set -H \
