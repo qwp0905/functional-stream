@@ -29,7 +29,7 @@ describe('dom', () => {
   })
 
   it('fs', async () => {
-    let flag = true
+    let flag = false
     EventTarget.prototype._removeEventListener = EventTarget.prototype.removeEventListener
 
     EventTarget.prototype.removeEventListener = function (a, b, c) {

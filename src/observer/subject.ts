@@ -59,8 +59,11 @@ export class Subject<T> {
       this.queue.push(new NextEvent(event))
       return
     }
-
-    this.observer.next(event)
+    try {
+      this.observer.next(event)
+    } catch (err) {
+      this.abort(err)
+    }
   }
 
   abort(err: Error) {
@@ -73,8 +76,13 @@ export class Subject<T> {
       return
     }
 
-    this.observer.error?.(err)
-    this.unwatch()
+    try {
+      this.observer.error?.(err)
+    } catch (error) {
+      this.observer.error?.(error)
+    } finally {
+      this.unwatch()
+    }
   }
 
   commit() {
@@ -87,8 +95,13 @@ export class Subject<T> {
       return
     }
 
-    this.observer.complete?.()
-    this.unwatch()
+    try {
+      this.observer.complete?.()
+    } catch (err) {
+      this.observer.error?.(err)
+    } finally {
+      this.unwatch()
+    }
   }
 
   flush() {
