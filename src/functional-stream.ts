@@ -164,7 +164,7 @@ export class Fs<T> implements IFs<T> {
   }
 
   count(): IFs<number> {
-    return this.reduce((acc) => acc++, 0)
+    return this.reduce((acc) => acc + 1, 0)
   }
 
   some(callback: TFilterCallback<T>): IFs<boolean> {
