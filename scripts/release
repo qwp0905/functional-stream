@@ -2,8 +2,6 @@
 
 set -eou pipefail
 
-corepack enable
-
 yarn install --immutable --immutable-cache --check-cache
 yarn build
 
