@@ -112,7 +112,7 @@ export class Fs<T> implements IFs<T> {
 
   private pipe<R>(pipeline: Pipeline<T, R>): IFs<R> {
     this.source.watch(pipeline)
-    pipeline.beforeDestroy(() => this.source.flush())
+    pipeline.beforeDestroy(this.source)
     const next = this as unknown as Fs<R>
     next.source = pipeline
     return next
@@ -120,13 +120,13 @@ export class Fs<T> implements IFs<T> {
 
   private pipeTo<R>(generator: (sub: Subject<R>) => void): IFs<R> {
     const sub = new Subject<R>()
-    sub.beforeDestroy(() => this.source.flush())
+    sub.beforeDestroy(this.source)
     generator(sub)
     return new Fs(sub)
   }
 
   private copyTo(sub: Subject<T>): IFs<T> {
-    sub.beforeDestroy(() => this.source.flush())
+    sub.beforeDestroy(this.source)
     return new Fs<T>(sub)
   }
 

@@ -104,15 +104,19 @@ export class Subject<T> {
     }
   }
 
-  flush() {
+  private flush() {
     while (this.finalizers.length > 0) {
       const finalizer = this.finalizers.shift()!
       finalizer()
     }
   }
 
-  beforeDestroy(fn: () => void) {
-    this.finalizers.push(fn)
+  beforeDestroy<R>(fn: (() => void) | Subject<R>) {
+    if (fn instanceof Subject) {
+      this.finalizers.push(() => fn.flush())
+    } else {
+      this.finalizers.push(fn)
+    }
   }
 
   private unwatch() {
