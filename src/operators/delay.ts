@@ -1,18 +1,22 @@
 import { Pipeline } from '../observer/pipeline'
-import { WaitGroup } from '../utils/waitgroup'
 
 export const delay = <T>(ms: number): Pipeline<T> => {
-  const wg = new WaitGroup()
+  const queue: Promise<void>[] = []
   return new Pipeline({
     next(event) {
-      wg.add()
-      setTimeout(() => {
-        this.publish(event)
-        wg.done()
-      }, ms)
+      queue.push(
+        new Promise((resolve) => {
+          setTimeout(() => {
+            this.publish(event)
+            resolve()
+          }, ms)
+        })
+      )
     },
-    complete() {
-      return wg.wait()
+    async complete() {
+      while (queue.length > 0) {
+        await queue.shift()
+      }
     }
   })
 }
