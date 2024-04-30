@@ -1,4 +1,4 @@
-import { Fs } from '../../src'
+import { Fs } from '../../src/functional-stream.js'
 
 describe('group by', () => {
   it('1', async () => {

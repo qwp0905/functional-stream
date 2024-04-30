@@ -1,4 +1,4 @@
-import { Fs } from '../../src'
+import { Fs } from '../../src/functional-stream.js'
 
 describe('chain', () => {
   it('1', async () => {

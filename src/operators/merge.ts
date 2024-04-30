@@ -1,8 +1,8 @@
-import { StreamLike } from '../@types/stream'
-import { TMapCallback } from '../@types/callback'
-import { Fs } from '..'
-import { Pipeline } from '../observer/pipeline'
-import { IPipeline } from '../@types/observer'
+import { StreamLike } from '../@types/stream.js'
+import { TMapCallback } from '../@types/callback.js'
+import { Fs } from '../functional-stream.js'
+import { IPipeline } from '../@types/observer.js'
+import { Pipeline } from '../observer/pipeline.js'
 
 export const mergeAll = <T>(): IPipeline<StreamLike<T>, T> => {
   const queue: Promise<void>[] = []

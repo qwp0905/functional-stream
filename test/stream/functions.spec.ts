@@ -1,6 +1,6 @@
 import { Readable } from 'stream'
 import { EventEmitter } from 'events'
-import { isAsyncIterable, isEventSource, isIterable } from '../../src/utils/functions'
+import { isAsyncIterable, isEventSource, isIterable } from '../../src/utils/functions.js'
 
 describe('functions', () => {
   it('array', () => {

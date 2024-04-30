@@ -1,5 +1,5 @@
-import { IPipeline } from '../@types/observer'
-import { Pipeline } from '../observer/pipeline'
+import { IPipeline } from '../@types/observer.js'
+import { Pipeline } from '../observer/pipeline.js'
 
 export const delay = <T>(ms: number): IPipeline<T> => {
   const queue: Promise<void>[] = []

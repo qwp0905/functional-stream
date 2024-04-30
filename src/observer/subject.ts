@@ -1,5 +1,5 @@
-import { IObserver, ISubject } from '../@types/observer'
-import { AlreadySubscribedError } from '../utils/errors'
+import { IObserver, ISubject } from '../@types/observer.js'
+import { AlreadySubscribedError } from '../utils/errors.js'
 
 enum EventKind {
   next,

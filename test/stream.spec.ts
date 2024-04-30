@@ -1,4 +1,4 @@
-import { Fs } from '../src'
+import { Fs } from '../src/functional-stream.js'
 
 describe('number', () => {
   const arr = new Array(10).fill(null).map((_, i) => i)

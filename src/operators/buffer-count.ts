@@ -1,5 +1,5 @@
-import { IPipeline } from '../@types/observer'
-import { Pipeline } from '../observer/pipeline'
+import { IPipeline } from '../@types/observer.js'
+import { Pipeline } from '../observer/pipeline.js'
 
 export const bufferCount = <T>(count: number): IPipeline<T, T[]> => {
   let queue: T[] = []

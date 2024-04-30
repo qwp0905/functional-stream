@@ -1,8 +1,10 @@
 {
   "name": "@qwp0905/functional-stream",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "",
   "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "type": "module",
   "scripts": {
     "build": "rimraf dist && tsc --build tsconfig.json",
     "format": "prettier --config .prettierrc --write \"{src,test}/**/*.{ts,js}\"",
@@ -52,7 +54,10 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
-    "verbose": true
+    "verbose": true,
+    "moduleNameMapper": {
+      "^(.*)\\.js$": "$1"
+    }
   },
   "packageManager": "yarn@4.1.1"
 }

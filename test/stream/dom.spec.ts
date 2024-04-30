@@ -2,8 +2,8 @@
  * @jest-environment jsdom
  */
 
-import { Fs } from '../../src'
-import { isHtmlElement } from '../../src/utils/functions'
+import { Fs } from '../../src/functional-stream.js'
+import { isHtmlElement } from '../../src/utils/functions.js'
 declare global {
   interface EventTarget {
     _removeEventListener: EventTarget['removeEventListener']

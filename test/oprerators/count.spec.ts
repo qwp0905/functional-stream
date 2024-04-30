@@ -1,4 +1,4 @@
-import { Fs } from '../../src'
+import { Fs } from '../../src/functional-stream.js'
 
 describe('count', () => {
   it('1', async () => {

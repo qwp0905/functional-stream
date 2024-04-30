@@ -1,4 +1,4 @@
-import { IFs, IStreamReadOptions, StreamLike } from './@types/stream'
+import { IFs, IStreamReadOptions, StreamLike } from './@types/stream.js'
 import {
   isAsyncIterable,
   isEventSource,
@@ -6,7 +6,7 @@ import {
   isIterable,
   isOnOffEventSource,
   isReadableStream
-} from './utils/functions'
+} from './utils/functions.js'
 import {
   TAnyCallback,
   TErrorCallback,
@@ -14,22 +14,22 @@ import {
   TMapCallback,
   TReduceCallback,
   TTapCallback
-} from './@types/callback'
-import { map } from './operators/map'
-import { filter } from './operators/filter'
-import { tap } from './operators/tap'
-import { reduce } from './operators/reduce'
-import { skip } from './operators/skip'
-import { bufferCount } from './operators/buffer-count'
-import { take } from './operators/take'
-import { mergeAll, mergeMap } from './operators/merge'
-import { catchError } from './operators/error'
-import { defaultIfEmpty, throwIfEmpty } from './operators/empty'
-import { Subject } from './observer/subject'
-import { groupBy } from './operators/group'
-import { delay } from './operators/delay'
-import { InvalidEventSourceError, NotSupportTypeError } from './utils/errors'
-import { IPipeline, ISubject } from './@types/observer'
+} from './@types/callback.js'
+import { map } from './operators/map.js'
+import { filter } from './operators/filter.js'
+import { tap } from './operators/tap.js'
+import { reduce } from './operators/reduce.js'
+import { skip } from './operators/skip.js'
+import { bufferCount } from './operators/buffer-count.js'
+import { take } from './operators/take.js'
+import { mergeAll, mergeMap } from './operators/merge.js'
+import { catchError } from './operators/error.js'
+import { defaultIfEmpty, throwIfEmpty } from './operators/empty.js'
+import { Subject } from './observer/subject.js'
+import { groupBy } from './operators/group.js'
+import { delay } from './operators/delay.js'
+import { InvalidEventSourceError, NotSupportTypeError } from './utils/errors.js'
+import { IPipeline, ISubject } from './@types/observer.js'
 
 export class Fs<T> implements IFs<T> {
   constructor(private source: ISubject<T>) {}

@@ -1,6 +1,6 @@
-import { TErrorCallback } from '../@types/callback'
-import { IPipeline } from '../@types/observer'
-import { Pipeline } from '../observer/pipeline'
+import { TErrorCallback } from '../@types/callback.js'
+import { IPipeline } from '../@types/observer.js'
+import { Pipeline } from '../observer/pipeline.js'
 
 export const catchError = <T>(callback: TErrorCallback): IPipeline<T> => {
   return new Pipeline({
