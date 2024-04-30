@@ -9,3 +9,9 @@ export class NotSupportTypeError extends Error {
     super('stream type is not supported')
   }
 }
+
+export class InvalidEventSourceError extends Error {
+  constructor() {
+    super('invalid event source')
+  }
+}
