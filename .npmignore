@@ -2,8 +2,9 @@
 .vscode
 .yarn*
 scripts
-src
-test
+src/
+test/
+dist/test/
 .eslint*
 .pnp*
 .prettier*

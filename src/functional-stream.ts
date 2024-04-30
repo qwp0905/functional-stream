@@ -73,7 +73,7 @@ export class Fs<T> implements IFs<T> {
   }
 
   static fromEvent<T extends keyof GlobalEventHandlersEventMap>(
-    source: EventTarget,
+    source: EventTarget | GlobalEventHandlers,
     event: T
   ): IFs<GlobalEventHandlersEventMap[T]>
   static fromEvent<T>(source: any, event: string | symbol): IFs<T>
