@@ -1,5 +1,6 @@
 import { IObserver, ISubject } from '../@types/observer.js'
 import { AlreadySubscribedError } from '../utils/errors.js'
+import { isFunction } from '../utils/functions.js'
 
 enum EventKind {
   next,
@@ -28,7 +29,7 @@ export class Subject<T> implements ISubject<T> {
   private observer: IObserver<T> | null = null
   private queue: Event<T>[] = []
   private end = false
-  private readonly finalizers: (() => void)[] = []
+  private readonly finalizers: Set<(() => void) | ISubject<any>> = new Set()
 
   watch(observer: IObserver<T>) {
     if (this.observer) {
@@ -104,26 +105,22 @@ export class Subject<T> implements ISubject<T> {
     }
   }
 
-  private flush() {
-    while (this.finalizers.length > 0) {
-      const finalizer = this.finalizers.shift()!
-      finalizer()
-    }
-  }
-
   add<R>(fn: (() => void) | ISubject<R>) {
-    if (fn instanceof Subject) {
-      this.finalizers.push(() => fn.flush())
-    } else {
-      this.finalizers.push(fn as () => void)
-    }
+    this.finalizers.add(fn)
   }
 
   private unwatch() {
     this.end = true
     this.observer = null
     this.queue = []
-    this.flush()
+    for (const finalizer of this.finalizers.values()) {
+      this.finalizers.delete(finalizer)
+      if (typeof finalizer === 'function') {
+        finalizer()
+      } else {
+        finalizer.commit()
+      }
+    }
   }
 
   [Symbol.asyncIterator](): AsyncIterator<T> {

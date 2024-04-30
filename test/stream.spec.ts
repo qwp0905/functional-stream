@@ -16,7 +16,7 @@ describe('number', () => {
     const r = Fs.range(10)
       .bufferCount(2)
       .map((e) => Promise.resolve(e))
-      .delay(10)
+      .delay(100)
       .concatAll()
       .skip(1)
       .map((e) => e.reduce((a, c) => a + c, 0))
