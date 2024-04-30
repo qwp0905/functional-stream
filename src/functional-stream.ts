@@ -41,7 +41,7 @@ export class Fs<T> implements IFs<T> {
   }
 
   static of<T>(...v: T[]): IFs<T> {
-    return Fs.from(v)
+    return fromIterable(v)
   }
 
   static from<T>(like: StreamLike<T>): IFs<T> {
@@ -72,7 +72,13 @@ export class Fs<T> implements IFs<T> {
     throw new NotSupportTypeError()
   }
 
-  static fromEvent<T>(source: any, event: string | symbol): IFs<T> {
+  static fromEvent<T extends keyof GlobalEventHandlersEventMap>(
+    source: EventTarget,
+    event: T
+  ): IFs<GlobalEventHandlersEventMap[T]>
+  static fromEvent<T>(source: any, event: string | symbol): IFs<T>
+
+  static fromEvent(source: any, event: string | symbol) {
     return fromEvent(source, event)
   }
 

@@ -6,11 +6,7 @@ import { Fs } from '../../src'
 import { isHtmlElement } from '../../src/utils/functions'
 declare global {
   interface EventTarget {
-    _removeEventListener(
-      type: string,
-      callback: EventListenerOrEventListenerObject | null,
-      options?: EventListenerOptions | boolean
-    ): void
+    _removeEventListener: EventTarget['removeEventListener']
   }
 }
 
@@ -38,10 +34,10 @@ describe('dom', () => {
     }
 
     const a: any[] = []
-    const r = Fs.fromEvent<MouseEvent>(el, 'click')
+    const r = Fs.fromEvent(el, 'click').map((e) => e.target)
     r.watch({
       next(e) {
-        a.push(e.target)
+        a.push(e)
       }
     })
 
@@ -49,6 +45,7 @@ describe('dom', () => {
     el.click()
     el.click()
     r.unwatch()
+
     expect(a).toEqual([el, el, el])
     expect(flag).toBeTruthy()
   })
