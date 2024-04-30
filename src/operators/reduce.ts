@@ -1,10 +1,11 @@
 import { TReduceCallback } from '../@types/callback'
+import { IPipeline } from '../@types/observer'
 import { Pipeline } from '../observer/pipeline'
 
 export const reduce = <A, C = A>(
   callback: TReduceCallback<A, C>,
   initialValue?: A
-): Pipeline<C, A> => {
+): IPipeline<C, A> => {
   let index = 0
   return new Pipeline({
     next(event) {

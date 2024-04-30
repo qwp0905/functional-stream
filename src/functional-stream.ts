@@ -28,13 +28,13 @@ import { defaultIfEmpty, throwIfEmpty } from './operators/empty'
 import { Subject } from './observer/subject'
 import { groupBy } from './operators/group'
 import { delay } from './operators/delay'
-import { Pipeline } from './observer/pipeline'
 import { InvalidEventSourceError, NotSupportTypeError } from './utils/errors'
+import { IPipeline, ISubject } from './@types/observer'
 
 export class Fs<T> implements IFs<T> {
-  constructor(private source: Subject<T>) {}
+  constructor(private source: ISubject<T>) {}
 
-  static generate<T>(generator: (sub: Subject<T>) => void) {
+  static generate<T>(generator: (sub: ISubject<T>) => void) {
     const sub = new Subject<T>()
     generator(sub)
     return new Fs(sub)
@@ -50,7 +50,7 @@ export class Fs<T> implements IFs<T> {
     }
 
     if (like instanceof Subject) {
-      return new Fs(like)
+      return new Fs<T>(like)
     }
 
     if (isIterable(like)) {
@@ -110,23 +110,23 @@ export class Fs<T> implements IFs<T> {
     return this.source[Symbol.asyncIterator]()
   }
 
-  private pipe<R>(pipeline: Pipeline<T, R>): IFs<R> {
+  private pipe<R>(pipeline: IPipeline<T, R>): IFs<R> {
     this.source.watch(pipeline)
-    pipeline.beforeDestroy(this.source)
+    pipeline.add(this.source)
     const next = this as unknown as Fs<R>
     next.source = pipeline
     return next
   }
 
-  private pipeTo<R>(generator: (sub: Subject<R>) => void): IFs<R> {
+  private pipeTo<R>(generator: (sub: ISubject<R>) => void): IFs<R> {
     const sub = new Subject<R>()
-    sub.beforeDestroy(this.source)
+    sub.add(this.source)
     generator(sub)
     return new Fs(sub)
   }
 
-  private copyTo(sub: Subject<T>): IFs<T> {
-    sub.beforeDestroy(this.source)
+  private copyTo(sub: ISubject<T>): IFs<T> {
+    sub.add(this.source)
     return new Fs<T>(sub)
   }
 
@@ -370,19 +370,19 @@ function fromEvent<T>(source: any, event: string | symbol): IFs<T> {
 
     if (isHtmlElement(source)) {
       source.addEventListener(event, handler)
-      sub.beforeDestroy(() => source.removeEventListener(event, handler))
+      sub.add(() => source.removeEventListener(event, handler))
       return
     }
 
     if (isEventSource(source)) {
       source.addListener(event, handler)
-      sub.beforeDestroy(() => source.removeListener(event, handler))
+      sub.add(() => source.removeListener(event, handler))
       return
     }
 
     if (isOnOffEventSource(source)) {
       source.on(event, handler)
-      sub.beforeDestroy(() => source.off(event, handler))
+      sub.add(() => source.off(event, handler))
       return
     }
 

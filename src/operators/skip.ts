@@ -1,6 +1,7 @@
+import { IPipeline } from '../@types/observer'
 import { Pipeline } from '../observer/pipeline'
 
-export const skip = <T>(count: number): Pipeline<T> => {
+export const skip = <T>(count: number): IPipeline<T> => {
   let index = 0
 
   return new Pipeline({

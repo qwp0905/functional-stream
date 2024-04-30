@@ -6,7 +6,7 @@ import {
   TReduceCallback,
   TTapCallback
 } from './callback'
-import { Pipeline } from '../observer/pipeline'
+import { ISubject } from './observer'
 
 export interface IStreamReadOptions<T> {
   next(data: T): any
@@ -49,5 +49,5 @@ export type StreamLike<T> =
   | AsyncIterable<T>
   | Iterable<T>
   | IFs<T>
-  | Pipeline<T>
+  | ISubject<T>
   | Promise<T>

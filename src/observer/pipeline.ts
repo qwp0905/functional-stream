@@ -1,8 +1,8 @@
-import { IObserver } from '../@types/observer'
+import { IObserver, IPipeline } from '../@types/observer'
 import { Subject } from './subject'
 
-export class Pipeline<T, R = T> extends Subject<R> implements IObserver<T> {
-  constructor(private readonly observe: IObserver<T, Pipeline<T, R>>) {
+export class Pipeline<T, R = T> extends Subject<R> implements IPipeline<T, R> {
+  constructor(private readonly observe: IObserver<T, IPipeline<T, R>>) {
     super()
   }
 

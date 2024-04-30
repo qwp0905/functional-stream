@@ -2,8 +2,9 @@ import { StreamLike } from '../@types/stream'
 import { TMapCallback } from '../@types/callback'
 import { Fs } from '..'
 import { Pipeline } from '../observer/pipeline'
+import { IPipeline } from '../@types/observer'
 
-export const mergeAll = <T>(): Pipeline<StreamLike<T>, T> => {
+export const mergeAll = <T>(): IPipeline<StreamLike<T>, T> => {
   const queue: Promise<void>[] = []
   return new Pipeline({
     next(event) {
@@ -28,7 +29,7 @@ export const mergeAll = <T>(): Pipeline<StreamLike<T>, T> => {
 
 export const mergeMap = <T, R>(
   callback: TMapCallback<T, StreamLike<R>>
-): Pipeline<T, R> => {
+): IPipeline<T, R> => {
   let index = 0
   const queue: Promise<void>[] = []
   return new Pipeline({

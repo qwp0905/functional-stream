@@ -1,4 +1,4 @@
-import { IObserver } from '../@types/observer'
+import { IObserver, ISubject } from '../@types/observer'
 import { AlreadySubscribedError } from '../utils/errors'
 
 enum EventKind {
@@ -24,7 +24,7 @@ class CompleteEvent {
 type ResolveFunction<T> = (v: IteratorResult<T> | PromiseLike<IteratorResult<T>>) => void
 type RejectFunction = (reason: any) => void
 
-export class Subject<T> {
+export class Subject<T> implements ISubject<T> {
   private observer: IObserver<T> | null = null
   private queue: Event<T>[] = []
   private end = false
@@ -111,11 +111,11 @@ export class Subject<T> {
     }
   }
 
-  beforeDestroy<R>(fn: (() => void) | Subject<R>) {
+  add<R>(fn: (() => void) | ISubject<R>) {
     if (fn instanceof Subject) {
       this.finalizers.push(() => fn.flush())
     } else {
-      this.finalizers.push(fn)
+      this.finalizers.push(fn as () => void)
     }
   }
 

@@ -1,7 +1,8 @@
 import { TTapCallback } from '../@types/callback'
+import { IPipeline } from '../@types/observer'
 import { Pipeline } from '../observer/pipeline'
 
-export const tap = <T>(callback: TTapCallback<T>): Pipeline<T> => {
+export const tap = <T>(callback: TTapCallback<T>): IPipeline<T> => {
   let index = 0
   return new Pipeline({
     next(event) {

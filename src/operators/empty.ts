@@ -1,6 +1,7 @@
+import { IPipeline } from '../@types/observer'
 import { Pipeline } from '../observer/pipeline'
 
-export const defaultIfEmpty = <T>(v: T): Pipeline<T> => {
+export const defaultIfEmpty = <T>(v: T): IPipeline<T> => {
   let is_empty = true
   return new Pipeline({
     next(event) {
@@ -15,7 +16,7 @@ export const defaultIfEmpty = <T>(v: T): Pipeline<T> => {
   })
 }
 
-export const throwIfEmpty = <T>(err: any): Pipeline<T> => {
+export const throwIfEmpty = <T>(err: any): IPipeline<T> => {
   let is_empty = true
   return new Pipeline({
     next(event) {
