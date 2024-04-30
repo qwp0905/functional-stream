@@ -1,4 +1,5 @@
 import { Readable } from 'stream'
+import { EventEmitter } from 'events'
 import { isAsyncIterable, isEventSource, isIterable } from '../../src/utils/functions'
 
 describe('functions', () => {
@@ -51,7 +52,6 @@ describe('functions', () => {
   })
 
   it('event', async () => {
-    const { EventEmitter } = await import('events')
     const event = new EventEmitter()
     expect(isEventSource(event)).toBeTruthy()
   })
