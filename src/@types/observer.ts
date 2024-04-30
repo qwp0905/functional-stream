@@ -4,8 +4,7 @@ export interface IObserver<T, R = any> {
   complete?(this: R): any
 }
 
-export interface ISubject<T> {
-  [Symbol.asyncIterator](): AsyncIterator<T>
+export interface ISubject<T> extends AsyncIterable<T> {
   watch(observer: IObserver<T>): void
   publish(event: T): void
   abort(err: Error): void
