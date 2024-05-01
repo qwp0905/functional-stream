@@ -57,7 +57,6 @@
       "src/**/*.(t|j)s"
     ],
     "coverageDirectory": "../coverage",
-    "coverageProvider": "v8",
     "testEnvironment": "node",
     "verbose": true,
     "moduleNameMapper": {
