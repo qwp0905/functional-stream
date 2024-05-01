@@ -21,7 +21,6 @@ import {
   skip,
   bufferCount,
   take,
-  mergeAll,
   mergeMap,
   catchError,
   defaultIfEmpty,
@@ -236,24 +235,7 @@ export class Fs<T> implements IFs<T> {
   }
 
   mergeAll(concurrency: number = -1): IFs<T extends StreamLike<infer K> ? K : never> {
-    if (concurrency < 0) {
-      return this.pipe(mergeAll() as any)
-    }
-
-    return this.pipeTo((sub) => {
-      const iter = this.iter()
-      Promise.all(
-        new Array(concurrency).fill(null).map(async () => {
-          for (let data = await iter.next(); !data.done; data = await iter.next()) {
-            await Fs.from(data.value as any)
-              .tap((e) => sub.publish(e as any))
-              .toPromise()
-          }
-        })
-      )
-        .catch((err) => sub.abort(err))
-        .finally(() => sub.commit())
-    })
+    return this.mergeMap((e) => e as any, concurrency)
   }
 
   concatAll(): IFs<T extends StreamLike<infer K> ? K : never> {
@@ -261,14 +243,14 @@ export class Fs<T> implements IFs<T> {
   }
 
   exhaustAll(): IFs<T extends StreamLike<infer K> ? K : never> {
-    let running = false
+    let blocked = false
     return this.mergeMap((e) => {
-      if (running) {
+      if (blocked) {
         return [] as any
       }
 
-      running = true
-      return Fs.from(e as any).finalize(() => (running = false))
+      blocked = true
+      return Fs.from(e as any).finalize(() => (blocked = false))
     })
   }
 
@@ -310,14 +292,14 @@ export class Fs<T> implements IFs<T> {
   }
 
   exhaustMap<R>(callback: TMapCallback<T, StreamLike<R>>): IFs<R> {
-    let running = false
+    let blocked = false
     return this.mergeMap((e, i) => {
-      if (running) {
+      if (blocked) {
         return [] as any
       }
 
-      running = true
-      return Fs.from(callback(e, i)).finalize(() => (running = false))
+      blocked = true
+      return Fs.from(callback(e, i)).finalize(() => (blocked = false))
     })
   }
 
