@@ -10,3 +10,4 @@ dist/test/
 .prettier*
 tsconfig.json
 yarn.lock
+coverage

@@ -38,6 +38,13 @@ describe('merge', () => {
       await expect(r).resolves.toEqual([9, 8, 7, 6, 5, 4, 3, 2, 1, 0])
     })
 
+    it('complex 3', async () => {
+      const r = Fs.range(10)
+        .mergeMap((e, i) => new Promise((rs) => setTimeout(() => rs(e), 100 * (10 - i))))
+        .toArray()
+      await expect(r).resolves.toEqual([9, 8, 7, 6, 5, 4, 3, 2, 1, 0])
+    })
+
     it('concat 1', async () => {
       const r = Fs.range(10)
         .map((e, i) => new Promise((rs) => setTimeout(() => rs(e), 10 * (10 - i))))

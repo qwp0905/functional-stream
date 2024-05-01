@@ -10,7 +10,7 @@
     "format": "prettier --config .prettierrc --write \"{src,test}/**/*.{ts,js}\"",
     "lint": "eslint \"{src,test}/**/*.{ts,js}\"",
     "test": "jest",
-    "test:cov": "rimraf coverage && jest --coverage",
+    "test:cov": "jest --coverage",
     "test:cov:result": "yarn test:cov && open ./coverage/lcov-report/index.html"
   },
   "repository": {
@@ -52,12 +52,20 @@
     ],
     "testRegex": "^.*\\.spec\\.ts$",
     "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
+      "^.+\\.ts$": "ts-jest"
     },
     "collectCoverageFrom": [
-      "src/**/*.(t|j)s"
+      "<rootDir>/src/**/*.(t|j)s"
     ],
     "coverageDirectory": "coverage",
+    "coverageThreshold": {
+      "global": {
+        "branches": 80,
+        "functions": 80,
+        "lines": 80,
+        "statements": 80
+      }
+    },
     "testEnvironment": "node",
     "verbose": true,
     "moduleNameMapper": {
