@@ -1,4 +1,4 @@
-export { Fs } from './functional-stream.js'
+export { Fs } from './stream/functional-stream.js'
 export { Subject } from './observer/subject.js'
 export { Pipeline } from './observer/pipeline.js'
 export { IFs } from './@types/stream.js'

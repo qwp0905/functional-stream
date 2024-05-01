@@ -1,12 +1,5 @@
-import { IFs, IStreamReadOptions, StreamLike } from './@types/stream.js'
-import {
-  isAsyncIterable,
-  isEventSource,
-  isHtmlElement,
-  isIterable,
-  isOnOffEventSource,
-  isReadableStream
-} from './utils/functions.js'
+import { IFs, IStreamReadOptions, StreamLike } from '../@types/stream.js'
+import { isAsyncIterable, isIterable, isReadableStream } from '../utils/functions.js'
 import {
   TAnyCallback,
   TErrorCallback,
@@ -14,29 +7,33 @@ import {
   TMapCallback,
   TReduceCallback,
   TTapCallback
-} from './@types/callback.js'
-import { map } from './operators/map.js'
-import { filter } from './operators/filter.js'
-import { tap } from './operators/tap.js'
-import { reduce } from './operators/reduce.js'
-import { skip } from './operators/skip.js'
-import { bufferCount } from './operators/buffer-count.js'
-import { take } from './operators/take.js'
-import { mergeAll, mergeMap } from './operators/merge.js'
-import { catchError } from './operators/error.js'
-import { defaultIfEmpty, throwIfEmpty } from './operators/empty.js'
-import { Subject } from './observer/subject.js'
-import { groupBy } from './operators/group.js'
-import { delay } from './operators/delay.js'
+} from '../@types/callback.js'
+import { map } from '../operators/map.js'
+import { filter } from '../operators/filter.js'
+import { tap } from '../operators/tap.js'
+import { reduce } from '../operators/reduce.js'
+import { skip } from '../operators/skip.js'
+import { bufferCount } from '../operators/buffer-count.js'
+import { take } from '../operators/take.js'
+import { mergeAll, mergeMap } from '../operators/merge.js'
+import { catchError } from '../operators/error.js'
+import { defaultIfEmpty, throwIfEmpty } from '../operators/empty.js'
+import { Subject } from '../observer/subject.js'
+import { groupBy } from '../operators/group.js'
+import { delay } from '../operators/delay.js'
+import { NotSupportTypeError, SubscriptionTimeoutError } from '../utils/errors.js'
+import { IPipeline, ISubject } from '../@types/observer.js'
+import { sleep } from '../utils/sleep.js'
+import { endWith, startWith } from '../operators/with.js'
+import { pairwise } from '../operators/pair.js'
 import {
-  InvalidEventSourceError,
-  NotSupportTypeError,
-  SubscriptionTimeoutError
-} from './utils/errors.js'
-import { IPipeline, ISubject } from './@types/observer.js'
-import { sleep } from './utils/sleep.js'
-import { endWith, startWith } from './operators/with.js'
-import { pairwise } from './operators/pair.js'
+  fromAsyncIterable,
+  fromAsyncIterator,
+  fromEvent,
+  fromIterable,
+  fromPromise,
+  fromReadable
+} from './generators.js'
 
 export class Fs<T> implements IFs<T> {
   constructor(private source: ISubject<T>) {}
@@ -401,10 +398,6 @@ export class Fs<T> implements IFs<T> {
     })
   }
 
-  timeoutWith(time: number): IFs<T> {
-    return this
-  }
-
   startWith(v: T): IFs<T> {
     return this.pipe(startWith(v))
   }
@@ -416,92 +409,4 @@ export class Fs<T> implements IFs<T> {
   pairwise(): IFs<[T, T]> {
     return this.pipe(pairwise())
   }
-}
-
-function fromIterable<T>(iter: Iterable<T>): IFs<T> {
-  return Fs.generate((subject) => {
-    Promise.resolve()
-      .then(() => {
-        for (const data of iter) {
-          subject.publish(data)
-        }
-      })
-      .catch((err) => subject.abort(err))
-      .finally(() => subject.commit())
-  })
-}
-
-function fromAsyncIterable<T>(iter: AsyncIterable<T>): IFs<T> {
-  return Fs.generate((subject) => {
-    Promise.resolve()
-      .then(async () => {
-        for await (const data of iter) {
-          subject.publish(data)
-        }
-      })
-      .catch((err) => subject.abort(err))
-      .finally(() => subject.commit())
-  })
-}
-
-function fromPromise<T>(p: Promise<T>): IFs<T> {
-  return Fs.generate((subject) => {
-    p.then((data) => subject.publish(data))
-      .catch((err) => subject.abort(err))
-      .finally(() => subject.commit())
-  })
-}
-
-function fromReadable<T>(readable: ReadableStream<T>): IFs<T> {
-  return fromAsyncIterable({
-    async *[Symbol.asyncIterator]() {
-      const reader = readable.getReader()
-      try {
-        for (let data = await reader.read(); !data.done; data = await reader.read()) {
-          yield data.value
-        }
-      } finally {
-        reader.releaseLock()
-      }
-    }
-  })
-}
-
-function fromAsyncIterator<T>(iterator: AsyncIterator<T>): IFs<T> {
-  return Fs.generate((subject) => {
-    Promise.resolve()
-      .then(async () => {
-        for (let data = await iterator.next(); !data.done; data = await iterator.next()) {
-          subject.publish(data.value)
-        }
-      })
-      .catch((err) => subject.abort(err))
-      .finally(() => subject.commit())
-  })
-}
-
-function fromEvent<T>(source: any, event: string | symbol): IFs<T> {
-  return Fs.generate<T>((sub) => {
-    const handler = (...args: any[]) => sub.publish(args.length > 1 ? args : args[0])
-
-    if (isHtmlElement(source)) {
-      source.addEventListener(event, handler)
-      sub.add(() => source.removeEventListener(event, handler))
-      return
-    }
-
-    if (isEventSource(source)) {
-      source.addListener(event, handler)
-      sub.add(() => source.removeListener(event, handler))
-      return
-    }
-
-    if (isOnOffEventSource(source)) {
-      source.on(event, handler)
-      sub.add(() => source.off(event, handler))
-      return
-    }
-
-    throw new InvalidEventSourceError()
-  })
 }

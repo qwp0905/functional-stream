@@ -1,4 +1,4 @@
-import { Fs } from '../../src/functional-stream.js'
+import { Fs } from '../../src/stream/functional-stream.js'
 
 describe('filter', () => {
   it('1', async () => {

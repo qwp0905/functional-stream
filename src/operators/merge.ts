@@ -1,6 +1,6 @@
 import { StreamLike } from '../@types/stream.js'
 import { TMapCallback } from '../@types/callback.js'
-import { Fs } from '../functional-stream.js'
+import { Fs } from '../stream/functional-stream.js'
 import { IPipeline } from '../@types/observer.js'
 import { Pipeline } from '../observer/pipeline.js'
 

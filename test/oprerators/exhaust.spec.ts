@@ -1,4 +1,4 @@
-import { Fs } from '../../src/functional-stream.js'
+import { Fs } from '../../src/stream/functional-stream.js'
 import { IFs } from '../../src/index.js'
 
 describe('exhaust', () => {

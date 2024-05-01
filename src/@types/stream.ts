@@ -47,7 +47,6 @@ export interface IFs<T> extends AsyncIterable<T> {
   defaultIfEmpty(v: T): IFs<T>
   throwIfEmpty(err: unknown): IFs<T>
   timeout(each: number): IFs<T>
-  timeoutWith(time: number): IFs<T>
   startWith(v: T): IFs<T>
   endWith(v: T): IFs<T>
   pairwise(): IFs<[T, T]>

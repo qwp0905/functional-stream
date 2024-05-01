@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 
-import { Fs } from '../../src/functional-stream.js'
+import { Fs } from '../../src/stream/functional-stream.js'
 import { isHtmlElement } from '../../src/utils/functions.js'
 declare global {
   interface EventTarget {

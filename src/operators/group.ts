@@ -1,4 +1,4 @@
-import { Fs } from '../functional-stream.js'
+import { Fs } from '../stream/functional-stream.js'
 import { TMapCallback } from '../@types/callback.js'
 import { IFs } from '../@types/stream.js'
 import { Subject } from '../observer/subject.js'
