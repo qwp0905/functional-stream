@@ -272,8 +272,9 @@ export class Fs<T> implements IFs<T> {
         error(err) {
           sub.abort(err)
         },
-        complete() {
-          return Promise.resolve(callback())
+        async complete() {
+          await Promise.resolve(callback())
+          sub.commit()
         }
       })
     })

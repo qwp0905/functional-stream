@@ -21,6 +21,7 @@ describe('number', () => {
       .skip(1)
       .map((e) => e.reduce((a, c) => a + c, 0))
       .map((e) => Promise.resolve(e))
+      .delay(100)
       .mergeAll(1)
       .toArray()
     await expect(r).resolves.toEqual([5, 9, 13, 17])

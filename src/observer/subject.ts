@@ -1,6 +1,5 @@
 import { IObserver, ISubject } from '../@types/observer.js'
 import { AlreadySubscribedError } from '../utils/errors.js'
-import { isFunction } from '../utils/functions.js'
 
 enum EventKind {
   next,
