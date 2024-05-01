@@ -8,24 +8,30 @@ import {
   TReduceCallback,
   TTapCallback
 } from '../@types/callback.js'
-import { map } from '../operators/map.js'
-import { filter } from '../operators/filter.js'
-import { tap } from '../operators/tap.js'
-import { reduce, scan } from '../operators/reduce.js'
-import { skip } from '../operators/skip.js'
-import { bufferCount } from '../operators/buffer-count.js'
-import { take } from '../operators/take.js'
-import { mergeAll, mergeMap } from '../operators/merge.js'
-import { catchError } from '../operators/error.js'
-import { defaultIfEmpty, throwIfEmpty } from '../operators/empty.js'
 import { Subject } from '../observer/subject.js'
-import { groupBy } from '../operators/group.js'
-import { delay } from '../operators/delay.js'
 import { NotSupportTypeError, SubscriptionTimeoutError } from '../utils/errors.js'
 import { IPipeline, ISubject } from '../@types/observer.js'
 import { sleep } from '../utils/sleep.js'
-import { endWith, startWith } from '../operators/with.js'
-import { pairwise } from '../operators/pair.js'
+import {
+  map,
+  filter,
+  tap,
+  reduce,
+  scan,
+  skip,
+  bufferCount,
+  take,
+  mergeAll,
+  mergeMap,
+  catchError,
+  defaultIfEmpty,
+  throwIfEmpty,
+  groupBy,
+  delay,
+  endWith,
+  startWith,
+  pairwise
+} from '../operators/index.js'
 import {
   fromAsyncIterable,
   fromAsyncIterator,
