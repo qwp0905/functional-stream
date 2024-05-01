@@ -15,3 +15,9 @@ export class InvalidEventSourceError extends Error {
     super('invalid event source')
   }
 }
+
+export class SubscriptionTimeoutError extends Error {
+  constructor() {
+    super('subscription timeout')
+  }
+}

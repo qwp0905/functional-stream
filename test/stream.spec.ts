@@ -1,4 +1,5 @@
 import { Fs } from '../src/functional-stream.js'
+import { sleep } from '../src/utils/sleep.js'
 
 describe('number', () => {
   const arr = new Array(10).fill(null).map((_, i) => i)
@@ -25,5 +26,17 @@ describe('number', () => {
       .mergeAll(1)
       .toArray()
     await expect(r).resolves.toEqual([5, 9, 13, 17])
+  })
+
+  it('race', async () => {
+    const r = Fs.race(
+      sleep(10).then(() => Fs.range(1)),
+      sleep(30).then(() => Fs.range(3)),
+      sleep(50).then(() => Fs.range(5))
+    )
+      .mergeAll()
+      .toArray()
+
+    await expect(r).resolves.toEqual([0])
   })
 })

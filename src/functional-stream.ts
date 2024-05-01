@@ -28,13 +28,20 @@ import { defaultIfEmpty, throwIfEmpty } from './operators/empty.js'
 import { Subject } from './observer/subject.js'
 import { groupBy } from './operators/group.js'
 import { delay } from './operators/delay.js'
-import { InvalidEventSourceError, NotSupportTypeError } from './utils/errors.js'
+import {
+  InvalidEventSourceError,
+  NotSupportTypeError,
+  SubscriptionTimeoutError
+} from './utils/errors.js'
 import { IPipeline, ISubject } from './@types/observer.js'
+import { sleep } from './utils/sleep.js'
+import { endWith, startWith } from './operators/with.js'
+import { pairwise } from './operators/pair.js'
 
 export class Fs<T> implements IFs<T> {
   constructor(private source: ISubject<T>) {}
 
-  static generate<T>(generator: (sub: ISubject<T>) => void) {
+  static generate<T>(generator: (sub: ISubject<T>) => void): IFs<T> {
     const sub = new Subject<T>()
     generator(sub)
     return new Fs(sub)
@@ -110,6 +117,18 @@ export class Fs<T> implements IFs<T> {
         }
       }
     })
+  }
+
+  static race<T>(...v: StreamLike<T>[]): IFs<T> {
+    return Fs.from(
+      Promise.race(
+        v.map(async (e) => {
+          const iter = (Fs.from(e) as Fs<T>).iter()
+          const { value } = await iter.next()
+          return fromAsyncIterator(iter).startWith(value)
+        })
+      )
+    ).mergeAll()
   }
 
   [Symbol.asyncIterator]() {
@@ -234,6 +253,26 @@ export class Fs<T> implements IFs<T> {
     return this.mergeAll(1)
   }
 
+  exhaustAll(): IFs<T extends StreamLike<infer K> ? K : never> {
+    let running = false
+    return this.mergeMap((e) => {
+      if (running) {
+        return [] as any
+      }
+
+      running = true
+      return Fs.from(e as any).finalize(() => (running = false))
+    })
+  }
+
+  switchAll(): IFs<T extends StreamLike<infer K> ? K : never> {
+    let current = 0
+    return this.mergeMap((e, i) => {
+      current = i
+      return Fs.from<any>(e as any).filter(() => i === current)
+    })
+  }
+
   mergeMap<R>(
     callback: TMapCallback<T, StreamLike<R>>,
     concurrency: number = -1
@@ -261,6 +300,26 @@ export class Fs<T> implements IFs<T> {
 
   concatMap<R>(callback: TMapCallback<T, StreamLike<R>>): IFs<R> {
     return this.mergeMap(callback, 1)
+  }
+
+  exhaustMap<R>(callback: TMapCallback<T, StreamLike<R>>): IFs<R> {
+    let running = false
+    return this.mergeMap((e, i) => {
+      if (running) {
+        return [] as any
+      }
+
+      running = true
+      return Fs.from(callback(e, i)).finalize(() => (running = false))
+    })
+  }
+
+  switchMap<R>(callback: TMapCallback<T, StreamLike<R>>): IFs<R> {
+    let current = 0
+    return this.mergeMap((e, i) => {
+      current = i
+      return Fs.from(callback(e, i)).filter(() => current === i)
+    })
   }
 
   finalize(callback: TAnyCallback): IFs<T> {
@@ -313,12 +372,49 @@ export class Fs<T> implements IFs<T> {
     return this.pipe(defaultIfEmpty(v))
   }
 
-  throwIfEmpty(err: any): IFs<T> {
+  throwIfEmpty(err: unknown): IFs<T> {
     return this.pipe(throwIfEmpty(err))
   }
 
   groupBy<R>(callback: TMapCallback<T, R>): IFs<IFs<T>> {
     return this.pipe(groupBy(callback))
+  }
+
+  timeout(each: number): IFs<T> {
+    return this.pipeTo((sub) => {
+      const iter = this.iter()
+      const next = () => {
+        return Promise.race([
+          iter.next(),
+          sleep(each).then(() => Promise.reject(new SubscriptionTimeoutError()))
+        ])
+      }
+
+      Promise.resolve()
+        .then(async () => {
+          for (let data = await next(); !data.done; data = await next()) {
+            sub.publish(data.value)
+          }
+        })
+        .catch((err) => sub.abort(err))
+        .finally(() => sub.commit())
+    })
+  }
+
+  timeoutWith(time: number): IFs<T> {
+    return this
+  }
+
+  startWith(v: T): IFs<T> {
+    return this.pipe(startWith(v))
+  }
+
+  endWith(v: T): IFs<T> {
+    return this.pipe(endWith(v))
+  }
+
+  pairwise(): IFs<[T, T]> {
+    return this.pipe(pairwise())
   }
 }
 
@@ -368,6 +464,19 @@ function fromReadable<T>(readable: ReadableStream<T>): IFs<T> {
         reader.releaseLock()
       }
     }
+  })
+}
+
+function fromAsyncIterator<T>(iterator: AsyncIterator<T>): IFs<T> {
+  return Fs.generate((subject) => {
+    Promise.resolve()
+      .then(async () => {
+        for (let data = await iterator.next(); !data.done; data = await iterator.next()) {
+          subject.publish(data.value)
+        }
+      })
+      .catch((err) => subject.abort(err))
+      .finally(() => subject.commit())
   })
 }
 

@@ -32,8 +32,12 @@ export interface IFs<T> extends AsyncIterable<T> {
   bufferCount(count: number): IFs<T[]>
   mergeAll(concurrency?: number): IFs<T extends StreamLike<infer K> ? K : never>
   concatAll(): IFs<T extends StreamLike<infer K> ? K : never>
+  exhaustAll(): IFs<T extends StreamLike<infer K> ? K : never>
+  switchAll(): IFs<T extends StreamLike<infer K> ? K : never>
   mergeMap<R>(callback: TMapCallback<T, StreamLike<R>>, concurrency?: number): IFs<R>
   concatMap<R>(callback: TMapCallback<T, StreamLike<R>>): IFs<R>
+  exhaustMap<R>(callback: TMapCallback<T, StreamLike<R>>): IFs<R>
+  switchMap<R>(callback: TMapCallback<T, StreamLike<R>>): IFs<R>
   finalize(callback: TAnyCallback): IFs<T>
   delay(ms: number): IFs<T>
   chain(stream: StreamLike<T>): IFs<T>
@@ -41,7 +45,12 @@ export interface IFs<T> extends AsyncIterable<T> {
   copy(count: number): IFs<T>[]
   groupBy<R>(callback: TMapCallback<T, R>): IFs<IFs<T>>
   defaultIfEmpty(v: T): IFs<T>
-  throwIfEmpty(err: any): IFs<T>
+  throwIfEmpty(err: unknown): IFs<T>
+  timeout(each: number): IFs<T>
+  timeoutWith(time: number): IFs<T>
+  startWith(v: T): IFs<T>
+  endWith(v: T): IFs<T>
+  pairwise(): IFs<[T, T]>
 }
 
 export type StreamLike<T> =
