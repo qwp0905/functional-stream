@@ -11,7 +11,7 @@ import {
 import { map } from '../operators/map.js'
 import { filter } from '../operators/filter.js'
 import { tap } from '../operators/tap.js'
-import { reduce } from '../operators/reduce.js'
+import { reduce, scan } from '../operators/reduce.js'
 import { skip } from '../operators/skip.js'
 import { bufferCount } from '../operators/buffer-count.js'
 import { take } from '../operators/take.js'
@@ -213,6 +213,10 @@ export class Fs<T> implements IFs<T> {
     return this.pipe(reduce(callback, initialValue))
   }
 
+  scan<A = T>(callback: TReduceCallback<A, T>, initialValue?: A): IFs<A> {
+    return this.pipe(scan(callback, initialValue))
+  }
+
   take(count: number): IFs<T> {
     return this.pipe(take(count))
   }
@@ -408,5 +412,9 @@ export class Fs<T> implements IFs<T> {
 
   pairwise(): IFs<[T, T]> {
     return this.pipe(pairwise())
+  }
+
+  repeat(count: number): IFs<T> {
+    return Fs.concat(...this.copy(Math.max(0, count)))
   }
 }

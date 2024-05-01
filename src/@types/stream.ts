@@ -27,6 +27,7 @@ export interface IFs<T> extends AsyncIterable<T> {
   filter(callback: TFilterCallback<T>): IFs<T>
   tap(callback: TTapCallback<T>): IFs<T>
   reduce<A = T>(callback: TReduceCallback<A, T>, initialValue?: A): IFs<A>
+  scan<A = T>(callback: TReduceCallback<A, T>, initialValue?: A): IFs<A>
   take(count: number): IFs<T>
   skip(count: number): IFs<T>
   bufferCount(count: number): IFs<T[]>
@@ -50,6 +51,7 @@ export interface IFs<T> extends AsyncIterable<T> {
   startWith(v: T): IFs<T>
   endWith(v: T): IFs<T>
   pairwise(): IFs<[T, T]>
+  repeat(count: number): IFs<T>
 }
 
 export type StreamLike<T> =
