@@ -15,7 +15,7 @@ class NextEvent<T> {
 }
 class ErrorEvent {
   readonly kind = EventKind.error
-  constructor(readonly payload: Error) {}
+  constructor(readonly payload: unknown) {}
 }
 class CompleteEvent {
   readonly kind = EventKind.complete
@@ -66,7 +66,7 @@ export class Subject<T> implements ISubject<T> {
     }
   }
 
-  abort(err: Error) {
+  abort(err: unknown) {
     if (this.end) {
       return
     }
@@ -97,7 +97,7 @@ export class Subject<T> implements ISubject<T> {
 
     try {
       this.observer.complete?.()
-    } catch (err) {
+    } catch (err: unknown) {
       this.observer.error?.(err)
     } finally {
       this.unwatch()

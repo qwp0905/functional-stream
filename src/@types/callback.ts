@@ -10,4 +10,4 @@ export type TAnyCallback = () => any
 
 export type TVoidCallback = () => void | Promise<void>
 
-export type TErrorCallback = (err: Error) => Error | Promise<Error> | void
+export type TErrorCallback = (err: unknown) => void | Promise<void>

@@ -4,7 +4,7 @@ import { isAsyncIterable, isEventSource, isIterable } from '../../src/utils/func
 
 describe('functions', () => {
   it('array', () => {
-    const arr = []
+    const arr: any[] = []
     expect(isIterable(arr)).toBeTruthy()
     expect(isAsyncIterable(arr)).toBeFalsy()
   })

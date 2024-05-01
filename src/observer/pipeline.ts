@@ -14,7 +14,7 @@ export class Pipeline<T, R = T> extends Subject<R> implements IPipeline<T, R> {
     }
   }
 
-  async error(err: Error) {
+  async error(err: unknown) {
     try {
       await this.observe.error?.call(this, err)
       this.abort(err)
