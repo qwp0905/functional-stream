@@ -39,7 +39,7 @@ export class FsInternal<T> implements IFs<T> {
     return this.source[Symbol.asyncIterator]()
   }
 
-  private pipe<R>(pipeline: IPipeline<T, R>): IFs<R> {
+  protected pipe<R>(pipeline: IPipeline<T, R>): IFs<R> {
     this.source.watch(pipeline)
     pipeline.add(this.source)
     const next = this as unknown as Fs<R>
@@ -47,14 +47,14 @@ export class FsInternal<T> implements IFs<T> {
     return next
   }
 
-  private pipeTo<R>(generator: (sub: ISubject<R>) => void): IFs<R> {
+  protected pipeTo<R>(generator: (sub: ISubject<R>) => void): IFs<R> {
     const sub = new Subject<R>()
     sub.add(this.source)
     generator(sub)
     return new Fs(sub)
   }
 
-  private copyTo(sub: ISubject<T>): IFs<T> {
+  protected copyTo(sub: ISubject<T>): IFs<T> {
     sub.add(this.source)
     return new Fs<T>(sub)
   }
