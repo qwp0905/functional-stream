@@ -1,5 +1,5 @@
-import { Fs } from '../src/stream/functional-stream.js'
-import { sleep } from '../src/utils/sleep.js'
+import { Fs } from '../../src/stream/functional-stream.js'
+import { sleep } from '../../src/utils/sleep.js'
 
 describe('number', () => {
   const arr = new Array(10).fill(null).map((_, i) => i)
@@ -38,5 +38,20 @@ describe('number', () => {
       .toArray()
 
     await expect(r).resolves.toEqual([0])
+  })
+})
+
+describe('generate', () => {
+  it('readable', async () => {
+    const rs = new ReadableStream({
+      start(con) {
+        for (let i = 0; i < 10; i++) {
+          con.enqueue(i)
+        }
+        con.close()
+      }
+    })
+    const r = Fs.from(rs).toArray()
+    await expect(r).resolves.toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
   })
 })
