@@ -36,17 +36,47 @@ export class Subject<T> implements ISubject<T> {
     }
 
     this.observer = observer
-    while (this.queue.length > 0) {
-      const event = this.queue.shift()!
-      switch (event.kind) {
-        case EventKind.next:
-          this.publish(event.payload)
-          continue
-        case EventKind.error:
-          return this.abort(event.payload)
-        case EventKind.complete:
-          return this.commit()
+    Promise.resolve().then(() => {
+      while (this.queue.length > 0) {
+        const event = this.queue.shift()!
+        switch (event.kind) {
+          case EventKind.next:
+            this._next(event.payload)
+            continue
+          case EventKind.error:
+            return this._error(event.payload)
+          case EventKind.complete:
+            return this._complete()
+        }
       }
+    })
+  }
+
+  private _next(event: T) {
+    try {
+      this.observer!.next(event)
+    } catch (err) {
+      this.abort(err)
+    }
+  }
+
+  private _error(err: unknown) {
+    try {
+      this.observer!.error?.(err)
+    } catch (error) {
+      this.observer!.error?.(error)
+    } finally {
+      this.unwatch()
+    }
+  }
+
+  private _complete() {
+    try {
+      this.observer!.complete?.()
+    } catch (err: unknown) {
+      this.observer!.error?.(err)
+    } finally {
+      this.unwatch()
     }
   }
 
@@ -55,15 +85,12 @@ export class Subject<T> implements ISubject<T> {
       return
     }
 
-    if (!this.observer) {
+    if (!this.observer || this.queue.length > 0) {
       this.queue.push(new NextEvent(event))
       return
     }
-    try {
-      this.observer.next(event)
-    } catch (err) {
-      this.abort(err)
-    }
+
+    return this._next(event)
   }
 
   abort(err: unknown) {
@@ -71,18 +98,12 @@ export class Subject<T> implements ISubject<T> {
       return
     }
 
-    if (!this.observer) {
+    if (!this.observer || this.queue.length > 0) {
       this.queue.push(new ErrorEvent(err))
       return
     }
 
-    try {
-      this.observer.error?.(err)
-    } catch (error) {
-      this.observer.error?.(error)
-    } finally {
-      this.unwatch()
-    }
+    return this._error(err)
   }
 
   commit() {
@@ -90,18 +111,12 @@ export class Subject<T> implements ISubject<T> {
       return
     }
 
-    if (!this.observer) {
+    if (!this.observer || this.queue.length > 0) {
       this.queue.push(new CompleteEvent())
       return
     }
 
-    try {
-      this.observer.complete?.()
-    } catch (err: unknown) {
-      this.observer.error?.(err)
-    } finally {
-      this.unwatch()
-    }
+    return this._complete()
   }
 
   add<R>(fn: (() => void) | ISubject<R>) {
