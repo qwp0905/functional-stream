@@ -56,7 +56,7 @@ export class Subject<T> implements ISubject<T> {
     try {
       this.observer!.next(event)
     } catch (err) {
-      this.abort(err)
+      this._error(err)
     }
   }
 
