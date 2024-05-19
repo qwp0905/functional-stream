@@ -67,7 +67,7 @@ export class FsInternal<T> implements IFs<T> {
     return this.source.watch(options)
   }
 
-  unwatch(): void {
+  close(): void {
     return this.source.commit()
   }
 

@@ -44,7 +44,7 @@ describe('dom', () => {
     el.click()
     el.click()
     el.click()
-    r.unwatch()
+    r.close()
 
     expect(a).toEqual([el, el, el])
     expect(flag).toBeTruthy()
