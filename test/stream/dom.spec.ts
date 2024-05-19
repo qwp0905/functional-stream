@@ -4,11 +4,6 @@
 
 import { Fs } from '../../src/stream/functional-stream.js'
 import { isHtmlElement } from '../../src/utils/functions.js'
-declare global {
-  interface EventTarget {
-    _removeEventListener: EventTarget['removeEventListener']
-  }
-}
 
 describe('dom', () => {
   let el: HTMLDivElement
@@ -26,13 +21,7 @@ describe('dom', () => {
   })
 
   it('fs', async () => {
-    let flag = false
-    EventTarget.prototype._removeEventListener = EventTarget.prototype.removeEventListener
-
-    EventTarget.prototype.removeEventListener = function (a, b, c) {
-      this._removeEventListener(a, b, c)
-      flag = true
-    }
+    const spy = jest.spyOn(EventTarget.prototype, 'removeEventListener')
 
     const a: any[] = []
     const b: any[] = []
@@ -55,6 +44,6 @@ describe('dom', () => {
 
     expect(a).toEqual([el, el, el])
     expect(b).toEqual(['abc', 'abc', 'abc'])
-    expect(flag).toBeTruthy()
+    expect(spy).toHaveBeenCalledTimes(1)
   })
 })
