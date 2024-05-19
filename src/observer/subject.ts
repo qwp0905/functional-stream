@@ -41,26 +41,26 @@ export class Subject<T> implements ISubject<T> {
         const event = this.queue.shift()!
         switch (event.kind) {
           case EventKind.next:
-            this._next(event.payload)
+            this._publish(event.payload)
             continue
           case EventKind.error:
-            return this._error(event.payload)
+            return this._abort(event.payload)
           case EventKind.complete:
-            return this._complete()
+            return this._commit()
         }
       }
     })
   }
 
-  private _next(event: T) {
+  private _publish(event: T) {
     try {
       this.observer!.next(event)
     } catch (err) {
-      this._error(err)
+      this._abort(err)
     }
   }
 
-  private _error(err: unknown) {
+  private _abort(err: unknown) {
     try {
       this.observer!.error?.(err)
     } catch (error) {
@@ -70,7 +70,7 @@ export class Subject<T> implements ISubject<T> {
     }
   }
 
-  private _complete() {
+  private _commit() {
     try {
       this.observer!.complete?.()
     } catch (err: unknown) {
@@ -90,7 +90,7 @@ export class Subject<T> implements ISubject<T> {
       return
     }
 
-    return this._next(event)
+    return this._publish(event)
   }
 
   abort(err: unknown) {
@@ -103,7 +103,7 @@ export class Subject<T> implements ISubject<T> {
       return
     }
 
-    return this._error(err)
+    return this._abort(err)
   }
 
   commit() {
@@ -116,7 +116,7 @@ export class Subject<T> implements ISubject<T> {
       return
     }
 
-    return this._complete()
+    return this._commit()
   }
 
   add<R>(fn: (() => void) | ISubject<R>) {
