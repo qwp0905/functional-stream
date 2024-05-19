@@ -14,6 +14,7 @@ describe('dom', () => {
   let el: HTMLDivElement
   beforeEach(() => {
     el = document.createElement('div')
+    el.textContent = 'abc'
   })
 
   afterEach(() => {
@@ -34,10 +35,16 @@ describe('dom', () => {
     }
 
     const a: any[] = []
+    const b: any[] = []
     const r = Fs.fromEvent(el, 'click')
     r.watch({
       next(e) {
         a.push(e.target)
+      }
+    })
+    r.watch({
+      next(e) {
+        b.push(e.target?.textContent)
       }
     })
 
@@ -47,6 +54,7 @@ describe('dom', () => {
     r.close()
 
     expect(a).toEqual([el, el, el])
+    expect(b).toEqual(['abc', 'abc', 'abc'])
     expect(flag).toBeTruthy()
   })
 })
