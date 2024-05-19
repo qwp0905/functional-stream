@@ -7,9 +7,8 @@ import { isHtmlElement } from '../../src/utils/functions.js'
 
 describe('dom', () => {
   let el: HTMLDivElement
-  let spy: jest.SpyInstance
+  const spy = jest.spyOn(EventTarget.prototype, 'removeEventListener')
   beforeEach(() => {
-    spy = jest.spyOn(EventTarget.prototype, 'removeEventListener')
     el = document.createElement('div')
     el.textContent = 'abc'
   })
