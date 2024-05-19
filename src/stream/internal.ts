@@ -91,7 +91,7 @@ export class FsInternal<T> implements IFs<T> {
     return this.source.close()
   }
 
-  toPromise(): Promise<T> {
+  async toPromise(): Promise<T> {
     return new Promise((resolve, reject) => {
       let result: T
       this.watch({
@@ -110,6 +110,23 @@ export class FsInternal<T> implements IFs<T> {
 
   toArray(): Promise<T[]> {
     return this.reduce((acc, cur) => acc.concat([cur]), [] as T[]).toPromise()
+  }
+
+  forEach(callback: TMapCallback<T, any>): Promise<void> {
+    return new Promise((resolve, reject) => {
+      let i = 0
+      this.watch({
+        next(data) {
+          callback(data, i++)
+        },
+        error(err) {
+          reject(err)
+        },
+        complete() {
+          resolve()
+        }
+      })
+    })
   }
 
   count(): IFs<number> {

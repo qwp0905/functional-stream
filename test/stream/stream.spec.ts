@@ -13,6 +13,16 @@ describe('number', () => {
     await expect(r).resolves.toStrictEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
   })
 
+  it('forEach', async () => {
+    const mock = jest.fn()
+    await Fs.range(5).forEach(mock)
+    expect(mock).toHaveBeenNthCalledWith(1, 0, 0)
+    expect(mock).toHaveBeenNthCalledWith(2, 1, 1)
+    expect(mock).toHaveBeenNthCalledWith(3, 2, 2)
+    expect(mock).toHaveBeenNthCalledWith(4, 3, 3)
+    expect(mock).toHaveBeenNthCalledWith(5, 4, 4)
+  })
+
   it('complex', async () => {
     const r = Fs.range(10)
       .bufferCount(2)

@@ -19,6 +19,7 @@ export interface IFs<T> extends AsyncIterable<T> {
   close(): void
   toPromise(): Promise<T>
   toArray(): Promise<T[]>
+  forEach(callback: TMapCallback<T, any>): Promise<void>
 
   count(): IFs<number>
   some(callback: TFilterCallback<T>): IFs<boolean>
