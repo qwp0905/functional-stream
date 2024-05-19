@@ -65,9 +65,10 @@ export class FsInternal<T> implements IFs<T> {
 
   watch(options: IStreamReadOptions<T>) {
     const [sub, out] = [new Subject<T>(), new Subject<T>()]
-    out.watch(options)
     sub.add(out)
     sub.add(this.source)
+    out.watch(options)
+
     this.source.watch({
       next(event) {
         sub.publish(event)
