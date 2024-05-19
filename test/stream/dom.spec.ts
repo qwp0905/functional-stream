@@ -7,13 +7,16 @@ import { isHtmlElement } from '../../src/utils/functions.js'
 
 describe('dom', () => {
   let el: HTMLDivElement
+  let spy: jest.SpyInstance
   beforeEach(() => {
+    spy = jest.spyOn(EventTarget.prototype, 'removeEventListener')
     el = document.createElement('div')
     el.textContent = 'abc'
   })
 
   afterEach(() => {
     el.remove()
+    spy.mockReset()
   })
 
   it('generator', () => {
@@ -21,8 +24,6 @@ describe('dom', () => {
   })
 
   it('fs', async () => {
-    const spy = jest.spyOn(EventTarget.prototype, 'removeEventListener')
-
     const a: any[] = []
     const b: any[] = []
     const r = Fs.fromEvent(el, 'click')
