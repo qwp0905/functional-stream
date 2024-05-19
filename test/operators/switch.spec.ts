@@ -7,12 +7,7 @@ describe('switch', () => {
     const r = Fs.generate<IFs<number>>((sub) => {
       Promise.resolve()
         .then(async () => {
-          sub.publish(
-            Fs.range(10).concatMap(async (e) => {
-              await sleep(100)
-              return e
-            })
-          )
+          sub.publish(Fs.range(10).concatMap((e) => sleep(100).then(() => e)))
 
           await sleep(550)
           sub.publish(Fs.range(5).map((e) => e + 10))
