@@ -26,7 +26,7 @@ type RejectFunction = (reason: any) => void
 
 export class Subject<T> implements ISubject<T> {
   private observer: IObserver<T> | null = null
-  private queue: Event<T>[] = []
+  private readonly queue: Event<T>[] = []
   private end = false
   private readonly finalizers: Set<(() => void) | ISubject<any>> = new Set()
 
@@ -66,7 +66,7 @@ export class Subject<T> implements ISubject<T> {
     } catch (error) {
       this.observer!.error?.(error)
     } finally {
-      this.close()
+      this._close()
     }
   }
 
@@ -76,7 +76,21 @@ export class Subject<T> implements ISubject<T> {
     } catch (err: unknown) {
       this.observer!.error?.(err)
     } finally {
-      this.close()
+      this._close()
+    }
+  }
+
+  private _close() {
+    this.end = true
+    this.observer = null
+    this.queue.length = 0
+    for (const finalizer of this.finalizers.values()) {
+      this.finalizers.delete(finalizer)
+      if (typeof finalizer === 'function') {
+        finalizer()
+      } else {
+        finalizer.commit()
+      }
     }
   }
 
@@ -123,18 +137,13 @@ export class Subject<T> implements ISubject<T> {
     this.finalizers.add(fn)
   }
 
-  private close() {
-    this.end = true
-    this.observer = null
-    this.queue = []
-    for (const finalizer of this.finalizers.values()) {
-      this.finalizers.delete(finalizer)
-      if (typeof finalizer === 'function') {
-        finalizer()
-      } else {
-        finalizer.commit()
-      }
+  close() {
+    if (!this.observer) {
+      return this._close()
     }
+
+    this._commit()
+    return this._close()
   }
 
   [Symbol.asyncIterator](): AsyncIterator<T> {

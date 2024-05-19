@@ -34,10 +34,10 @@ describe('dom', () => {
     }
 
     const a: any[] = []
-    const r = Fs.fromEvent(el, 'click').map((e) => e.target)
+    const r = Fs.fromEvent(el, 'click')
     r.watch({
       next(e) {
-        a.push(e)
+        a.push(e.target)
       }
     })
 
@@ -46,6 +46,7 @@ describe('dom', () => {
     el.click()
     r.close()
 
+    // await sleep(10)
     expect(a).toEqual([el, el, el])
     expect(flag).toBeTruthy()
   })

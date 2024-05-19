@@ -64,11 +64,30 @@ export class FsInternal<T> implements IFs<T> {
   }
 
   watch(options: IStreamReadOptions<T>) {
-    return this.source.watch(options)
+    const [sub, out] = [new Subject<T>(), new Subject<T>()]
+    out.watch(options)
+    sub.add(out)
+    sub.add(this.source)
+    this.source.watch({
+      next(event) {
+        sub.publish(event)
+        out.publish(event)
+      },
+      error(err) {
+        sub.abort(err)
+        out.abort(err)
+      },
+      complete() {
+        sub.commit()
+        out.commit()
+      }
+    })
+
+    this.source = sub
   }
 
   close(): void {
-    return this.source.commit()
+    return this.source.close()
   }
 
   toPromise(): Promise<T> {
