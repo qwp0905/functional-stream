@@ -66,7 +66,7 @@ export class Subject<T> implements ISubject<T> {
     } catch (error) {
       this.observer!.error?.(error)
     } finally {
-      this.unwatch()
+      this.close()
     }
   }
 
@@ -76,7 +76,7 @@ export class Subject<T> implements ISubject<T> {
     } catch (err: unknown) {
       this.observer!.error?.(err)
     } finally {
-      this.unwatch()
+      this.close()
     }
   }
 
@@ -123,7 +123,7 @@ export class Subject<T> implements ISubject<T> {
     this.finalizers.add(fn)
   }
 
-  private unwatch() {
+  private close() {
     this.end = true
     this.observer = null
     this.queue = []
@@ -191,12 +191,12 @@ export class Subject<T> implements ISubject<T> {
         })
       },
       throw: (e) => {
-        this.unwatch()
+        this.close()
         handleError(e)
         return Promise.reject(e)
       },
       return: () => {
-        this.unwatch()
+        this.close()
         handleComplete()
         return Promise.resolve({ value: undefined, done: true })
       }
