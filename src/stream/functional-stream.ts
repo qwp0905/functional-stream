@@ -12,6 +12,7 @@ import {
   fromReadable
 } from './generators.js'
 import { FsInternal } from './internal.js'
+import { HtmlEventMap } from '../@types/dom.js'
 
 export class Fs<T> extends FsInternal<T> implements IFs<T> {
   constructor(source: ISubject<T>) {
@@ -56,10 +57,10 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
     throw new NotSupportTypeError()
   }
 
-  static fromEvent<T extends keyof GlobalEventHandlersEventMap>(
-    source: EventTarget | GlobalEventHandlers,
-    event: T
-  ): IFs<GlobalEventHandlersEventMap[T]>
+  static fromEvent<T extends EventTarget, K extends keyof HtmlEventMap<T>>(
+    source: T,
+    event: K
+  ): IFs<HtmlEventMap<T>[K]>
   static fromEvent<T>(source: any, event: string | symbol): IFs<T>
 
   static fromEvent(source: any, event: string | symbol) {
