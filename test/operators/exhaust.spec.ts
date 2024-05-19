@@ -1,15 +1,17 @@
 import { Fs } from '../../src/stream/functional-stream.js'
-import { IFs } from '../../src/index.js'
+import { sleep } from '../../src/utils/sleep.js'
 
 describe('exhaust', () => {
   it('1', async () => {
-    const r = Fs.of(
-      Fs.range(10).concatMap(
-        (e) => new Promise<number>((rs) => setTimeout(() => rs(e), 100))
-      ),
-      Fs.range(10)
-    )
-      .chain(new Promise<IFs<number>>((rs) => setTimeout(() => rs(Fs.range(3)), 1500)))
+    const r = Fs.generate((sub) => {
+      Promise.resolve().then(async () => {
+        sub.publish(Fs.range(10).concatMap((e) => sleep(100).then(() => e)))
+        sub.publish(Fs.range(10))
+        await sleep(1500)
+        sub.publish(Fs.range(3))
+        sub.commit()
+      })
+    })
       .exhaustAll()
       .toArray()
 

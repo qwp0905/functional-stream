@@ -145,23 +145,11 @@ export class FsInternal<T> implements IFs<T> {
   }
 
   exhaustAll(): IFs<T extends StreamLike<infer K> ? K : never> {
-    let blocked = false
-    return this.mergeMap((e) => {
-      if (blocked) {
-        return [] as any
-      }
-
-      blocked = true
-      return Fs.from(e as any).finalize(() => (blocked = false))
-    })
+    return this.exhaustMap((e) => e as any)
   }
 
   switchAll(): IFs<T extends StreamLike<infer K> ? K : never> {
-    let current = 0
-    return this.mergeMap((e, i) => {
-      current = i
-      return Fs.from<any>(e as any).filter(() => i === current)
-    })
+    return this.switchMap((e) => e as any)
   }
 
   mergeMap<R>(
