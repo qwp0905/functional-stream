@@ -1,7 +1,11 @@
 export class AjaxResponse<T> {
   constructor(private readonly xhr: XMLHttpRequest) {}
 
-  get data(): T {
+  getData(): T {
     return this.xhr.response
+  }
+
+  getStatus() {
+    return this.xhr.status
   }
 }

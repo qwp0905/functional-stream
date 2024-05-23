@@ -21,9 +21,3 @@ export class SubscriptionTimeoutError extends Error {
     super('subscription timeout')
   }
 }
-
-export class BodyTypeNotSupportError extends Error {
-  constructor() {
-    super('body type not support')
-  }
-}

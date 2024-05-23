@@ -1,4 +1,4 @@
-import { BodyTypeNotSupportError } from '../utils/errors.js'
+import { BodyTypeNotSupportError } from './error.js'
 
 export enum HttpMethod {
   get = 'get',
@@ -40,7 +40,8 @@ export class Request {
     headers,
     responseType = 'json',
     user,
-    password
+    password,
+    timeout
   }: AjaxConfig) {
     this.url = url
     this.method = method
@@ -50,6 +51,7 @@ export class Request {
     this.responseType = responseType
     this.user = user
     this.password = password
+    this.timeout = timeout ?? 120
   }
 
   getUrl(): string {
@@ -127,6 +129,10 @@ export class Request {
 
   getPassword() {
     return this.password
+  }
+
+  getTimeout() {
+    return this.timeout
   }
 }
 
