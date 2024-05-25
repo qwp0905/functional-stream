@@ -9,3 +9,10 @@ export {
   AjaxError,
   BodyTypeNotSupportError
 } from './ajax/index.js'
+export {
+  AlreadySubscribedError,
+  NotSupportTypeError,
+  InvalidEventSourceError,
+  SubscriptionTimeoutError,
+  Duration
+} from './utils/index.js'

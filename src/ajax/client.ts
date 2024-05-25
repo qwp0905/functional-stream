@@ -1,3 +1,4 @@
+import { Duration } from '../utils/time.js'
 import { fromAjax } from './ajax.js'
 import { AjaxConfig, HttpMethod } from './request.js'
 
@@ -69,5 +70,5 @@ export const defaultAjaxClient = new AjaxClient({
   validate(status) {
     return status < 400
   },
-  timeout: 120000
+  timeout: Duration.minute(2)
 })
