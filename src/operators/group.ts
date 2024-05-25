@@ -1,9 +1,6 @@
-import { Fs } from '../stream/functional-stream.js'
-import { TMapCallback } from '../@types/callback.js'
-import { IFs } from '../@types/stream.js'
-import { Subject } from '../observer/subject.js'
-import { Pipeline } from '../observer/pipeline.js'
-import { IPipeline } from '../@types/observer.js'
+import { Fs } from '../stream/index.js'
+import { TMapCallback, IFs, IPipeline } from '../@types/index.js'
+import { Subject, Pipeline } from '../observer/index.js'
 
 export const groupBy = <T, R>(callback: TMapCallback<T, R>): IPipeline<T, IFs<T>> => {
   const sub_map = new Map<R, Subject<T>>()

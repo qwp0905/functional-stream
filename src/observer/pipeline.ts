@@ -1,4 +1,4 @@
-import { IObserver, IPipeline } from '../@types/observer.js'
+import { IObserver, IPipeline } from '../@types/index.js'
 import { Subject } from './subject.js'
 
 export class Pipeline<T, R = T> extends Subject<R> implements IPipeline<T, R> {

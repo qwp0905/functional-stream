@@ -1,6 +1,10 @@
-import { IFs } from '../@types/stream.js'
-import { isEventSource, isHtmlElement, isOnOffEventSource } from '../utils/functions.js'
-import { InvalidEventSourceError } from '../utils/errors.js'
+import { IFs } from '../@types/index.js'
+import {
+  isEventSource,
+  isHtmlElement,
+  isOnOffEventSource,
+  InvalidEventSourceError
+} from '../utils/index.js'
 import { Fs } from './functional-stream.js'
 
 export function fromIterable<T>(iter: Iterable<T>): IFs<T> {

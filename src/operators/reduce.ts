@@ -1,6 +1,5 @@
-import { TReduceCallback } from '../@types/callback.js'
-import { IPipeline } from '../@types/observer.js'
-import { Pipeline } from '../observer/pipeline.js'
+import { IPipeline, TReduceCallback } from '../@types/index.js'
+import { Pipeline } from '../observer/index.js'
 
 export const reduce = <A, C = A>(
   callback: TReduceCallback<A, C>,

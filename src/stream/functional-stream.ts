@@ -1,8 +1,11 @@
-import { IFs, StreamLike } from '../@types/stream.js'
-import { isAsyncIterable, isIterable, isReadableStream } from '../utils/functions.js'
-import { Subject } from '../observer/subject.js'
-import { NotSupportTypeError } from '../utils/errors.js'
-import { ISubject } from '../@types/observer.js'
+import {
+  isAsyncIterable,
+  isIterable,
+  isReadableStream,
+  NotSupportTypeError
+} from '../utils/index.js'
+import { Subject } from '../observer/index.js'
+import { ISubject, HtmlEventMap, IFs, StreamLike } from '../@types/index.js'
 import {
   fromAsyncIterable,
   fromAsyncIterator,
@@ -12,8 +15,7 @@ import {
   fromReadable
 } from './generators.js'
 import { FsInternal } from './internal.js'
-import { HtmlEventMap } from '../@types/dom.js'
-import { defaultAjaxClient } from '../ajax/client.js'
+import { defaultAjaxClient } from '../ajax/index.js'
 
 export class Fs<T> extends FsInternal<T> implements IFs<T> {
   constructor(source: ISubject<T>) {

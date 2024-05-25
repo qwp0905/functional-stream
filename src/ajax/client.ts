@@ -20,17 +20,25 @@ export class AjaxClient {
     return this.request<T>(url, HttpMethod.get, config)
   }
 
-  post<T = any>(url: string, data: any, config: Omit<AjaxConfig, 'method' | 'url'> = {}) {
+  post<T = any>(
+    url: string,
+    data: any = {},
+    config: Omit<AjaxConfig, 'method' | 'url'> = {}
+  ) {
     return this.request<T>(url, HttpMethod.post, { ...config, body: data })
   }
 
-  put<T = any>(url: string, data: any, config: Omit<AjaxConfig, 'method' | 'url'> = {}) {
+  put<T = any>(
+    url: string,
+    data: any = {},
+    config: Omit<AjaxConfig, 'method' | 'url'> = {}
+  ) {
     return this.request<T>(url, HttpMethod.put, { ...config, body: data })
   }
 
   patch<T = any>(
     url: string,
-    data: any,
+    data: any = {},
     config: Omit<AjaxConfig, 'method' | 'url'> = {}
   ) {
     return this.request<T>(url, HttpMethod.patch, { ...config, body: data })

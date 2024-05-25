@@ -1,4 +1,4 @@
-import { IFs } from '../@types/stream.js'
+import { IFs } from '../@types/index.js'
 import { Fs } from '../stream/functional-stream.js'
 import { AjaxError } from './error.js'
 import { AjaxConfig, Request } from './request.js'

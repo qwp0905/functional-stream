@@ -1,5 +1,5 @@
-import { IPipeline } from '../@types/observer.js'
-import { Pipeline } from '../observer/pipeline.js'
+import { IPipeline } from '../@types/index.js'
+import { Pipeline } from '../observer/index.js'
 
 export const skip = <T>(count: number): IPipeline<T> => {
   let index = 0

@@ -1,16 +1,18 @@
-import { IFs, IStreamReadOptions, StreamLike } from '../@types/stream.js'
 import {
+  IFs,
+  IStreamReadOptions,
+  StreamLike,
+  IPipeline,
+  ISubject,
   TAnyCallback,
   TErrorCallback,
   TFilterCallback,
   TMapCallback,
   TReduceCallback,
   TTapCallback
-} from '../@types/callback.js'
-import { Subject } from '../observer/subject.js'
-import { SubscriptionTimeoutError } from '../utils/errors.js'
-import { IPipeline, ISubject } from '../@types/observer.js'
-import { sleep } from '../utils/sleep.js'
+} from '../@types/index.js'
+import { Subject } from '../observer/index.js'
+import { SubscriptionTimeoutError, sleep } from '../utils/index.js'
 import {
   map,
   filter,
@@ -28,10 +30,10 @@ import {
   delay,
   endWith,
   startWith,
-  pairwise
+  pairwise,
+  split
 } from '../operators/index.js'
 import { Fs } from './functional-stream.js'
-import { split } from '../operators/split.js'
 
 export class FsInternal<T> implements IFs<T> {
   constructor(protected source: ISubject<T>) {}

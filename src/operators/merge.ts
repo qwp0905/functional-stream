@@ -1,8 +1,6 @@
-import { StreamLike } from '../@types/stream.js'
-import { TMapCallback } from '../@types/callback.js'
-import { Fs } from '../stream/functional-stream.js'
-import { IPipeline } from '../@types/observer.js'
-import { Pipeline } from '../observer/pipeline.js'
+import { StreamLike, TMapCallback, IPipeline } from '../@types/index.js'
+import { Fs } from '../stream/index.js'
+import { Pipeline } from '../observer/index.js'
 
 export const mergeMap = <T, R>(
   callback: TMapCallback<T, StreamLike<R>>

@@ -1,4 +1,4 @@
-import { IObserver, ISubject } from '../@types/observer.js'
+import { IObserver, ISubject } from '../@types/index.js'
 import { AlreadySubscribedError } from '../utils/errors.js'
 
 enum EventKind {

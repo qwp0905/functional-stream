@@ -1,6 +1,5 @@
-import { TFilterCallback } from '../@types/callback.js'
-import { IPipeline } from '../@types/observer.js'
-import { Pipeline } from '../observer/pipeline.js'
+import { TFilterCallback, IPipeline } from '../@types/index.js'
+import { Pipeline } from '../observer/index.js'
 
 export const filter = <T>(callback: TFilterCallback<T>): IPipeline<T> => {
   let index = 0

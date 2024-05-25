@@ -1,6 +1,5 @@
-import { TMapCallback } from '../@types/callback.js'
-import { IPipeline } from '../@types/observer.js'
-import { Pipeline } from '../observer/pipeline.js'
+import { TMapCallback, IPipeline } from '../@types/index.js'
+import { Pipeline } from '../observer/index.js'
 
 export const map = <T, R>(callback: TMapCallback<T, R>): IPipeline<T, R> => {
   let index = 0
