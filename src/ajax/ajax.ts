@@ -1,12 +1,12 @@
 import { IFs } from '../@types/index.js'
 import { Fs } from '../stream/functional-stream.js'
 import { AjaxError } from './error.js'
-import { AjaxConfig, Request } from './request.js'
+import { AjaxConfig, AjaxRequest } from './request.js'
 import { AjaxResponse } from './response.js'
 
 export function fromAjax<T>(config: AjaxConfig): IFs<AjaxResponse<T>> {
   return Fs.generate((sub) => {
-    const req = new Request(config)
+    const req = new AjaxRequest(config)
 
     Promise.resolve()
       .then(async () => {
@@ -28,8 +28,8 @@ export function fromAjax<T>(config: AjaxConfig): IFs<AjaxResponse<T>> {
         }
 
         sub.publish(parsed)
-        sub.commit()
       })
       .catch((err) => sub.abort(err))
+      .finally(() => sub.commit())
   })
 }

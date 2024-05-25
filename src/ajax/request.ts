@@ -24,7 +24,7 @@ export interface AjaxConfig {
   validate?: (status: number) => boolean
 }
 
-export class Request {
+export class AjaxRequest {
   private readonly url: string
   private readonly method: HttpMethod
   private readonly body?: any

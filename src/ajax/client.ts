@@ -12,11 +12,11 @@ export interface AjaxClientConfig {
 export class AjaxClient {
   constructor(private readonly config: AjaxClientConfig = {}) {}
 
-  head(url: string, config: Omit<AjaxConfig, 'method' | 'url'> = {}) {
+  head(url: string, config: Omit<AjaxConfig, 'method' | 'url' | 'body'> = {}) {
     return this.request<void>(url, HttpMethod.head, config)
   }
 
-  get<T = any>(url: string, config: Omit<AjaxConfig, 'method' | 'url'> = {}) {
+  get<T = any>(url: string, config: Omit<AjaxConfig, 'method' | 'url' | 'body'> = {}) {
     return this.request<T>(url, HttpMethod.get, config)
   }
 
@@ -44,7 +44,7 @@ export class AjaxClient {
     return this.request<T>(url, HttpMethod.patch, { ...config, body: data })
   }
 
-  delete<T = any>(url: string, config: Omit<AjaxConfig, 'method' | 'url'> = {}) {
+  delete<T = any>(url: string, config: Omit<AjaxConfig, 'method' | 'url' | 'body'> = {}) {
     return this.request<T>(url, HttpMethod.get, config)
   }
 

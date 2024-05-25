@@ -1,6 +1,5 @@
-export { Fs } from './stream/functional-stream.js'
-export { Subject } from './observer/subject.js'
-export { Pipeline } from './observer/pipeline.js'
+export { Fs } from './stream/index.js'
+export { Subject, Pipeline } from './observer/index.js'
 export * from './@types/index.js'
 export {
   AjaxClient,
