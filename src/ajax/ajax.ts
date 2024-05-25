@@ -20,13 +20,14 @@ export function fromAjax<T>(config: AjaxConfig): IFs<AjaxResponse<T>> {
         })
         timeout.unref()
 
-        if (!req.validate(res.status)) {
+        const parsed = await AjaxResponse.parseFrom<T>(res, req.getResponseType())
+        if (!req.validate(parsed.getStatus())) {
           return sub.abort(
-            await AjaxError.parseFrom(`request failed with status ${res.status}`, res)
+            new AjaxError(`request failed with status ${res.status}`, parsed)
           )
         }
 
-        sub.publish(await AjaxResponse.parseFrom<T>(res, req.getResponseType()))
+        sub.publish(parsed)
         sub.commit()
       })
       .catch((err) => sub.abort(err))

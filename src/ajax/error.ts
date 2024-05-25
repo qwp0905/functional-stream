@@ -13,12 +13,4 @@ export class AjaxError extends Error {
   ) {
     super(message)
   }
-
-  getResponse() {
-    return this.response
-  }
-
-  static async parseFrom(message: string, response: Response) {
-    return new AjaxError(message, await AjaxResponse.parseFrom(response))
-  }
 }
