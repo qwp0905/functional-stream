@@ -50,8 +50,7 @@ async function getBody(res: Response, type?: ResponseType): Promise<any> {
     case 'blob':
       return res.blob()
     case 'stream':
-      const decoder = new TextDecoder(charset)
-      return Fs.from(res.body).map((e) => decoder.decode(e.buffer, { stream: true }))
+      return Fs.from(res.body.pipeThrough(new TextDecoderStream(charset)))
   }
 
   if (!content_type) {
@@ -63,8 +62,7 @@ async function getBody(res: Response, type?: ResponseType): Promise<any> {
   }
 
   if (/application\/octet-stream/i.test(content_type)) {
-    const decoder = new TextDecoder(charset)
-    return Fs.from(res.body).map((e) => decoder.decode(e.buffer, { stream: true }))
+    return Fs.from(res.body.pipeThrough(new TextDecoderStream(charset)))
   }
 
   if (/application\/x-www-form-urlencode/i.test(content_type)) {
