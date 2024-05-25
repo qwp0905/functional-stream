@@ -94,7 +94,7 @@ export class FsInternal<T> implements IFs<T> {
     return this.source.close()
   }
 
-  async toPromise(): Promise<T> {
+  toPromise(): Promise<T> {
     return new Promise((resolve, reject) => {
       let result: T
       this.watch({
