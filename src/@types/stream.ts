@@ -53,6 +53,7 @@ export interface IFs<T> extends AsyncIterable<T> {
   endWith(v: T): IFs<T>
   pairwise(): IFs<[T, T]>
   repeat(count: number): IFs<T>
+  split(delimiter: string): IFs<T extends string ? string : never>
 }
 
 export type StreamLike<T> =

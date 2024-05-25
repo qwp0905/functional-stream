@@ -31,6 +31,7 @@ import {
   pairwise
 } from '../operators/index.js'
 import { Fs } from './functional-stream.js'
+import { split } from '../operators/split.js'
 
 export class FsInternal<T> implements IFs<T> {
   constructor(protected source: ISubject<T>) {}
@@ -331,5 +332,9 @@ export class FsInternal<T> implements IFs<T> {
 
   repeat(count: number): IFs<T> {
     return Fs.concat(...this.copy(Math.max(0, count)))
+  }
+
+  split(delimiter: string) {
+    return this.pipe(split(delimiter) as any) as any
   }
 }

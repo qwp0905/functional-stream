@@ -61,6 +61,10 @@ async function getBody(res: Response, type?: ResponseType): Promise<any> {
     return res.json()
   }
 
+  if (/application\/x-ndjson/i.test(content_type)) {
+    return Fs.from(res.body.pipeThrough(new TextDecoderStream(charset))).split('\n')
+  }
+
   if (/application\/octet-stream/i.test(content_type)) {
     return Fs.from(res.body.pipeThrough(new TextDecoderStream(charset)))
   }
