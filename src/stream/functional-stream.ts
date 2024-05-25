@@ -13,9 +13,7 @@ import {
 } from './generators.js'
 import { FsInternal } from './internal.js'
 import { HtmlEventMap } from '../@types/dom.js'
-import { AjaxConfig } from '../ajax/request.js'
-import { AjaxResponse } from '../ajax/response.js'
-import { fromAjax } from '../ajax/ajax.js'
+import { Ajax } from '../ajax/ajax.js'
 
 export class Fs<T> extends FsInternal<T> implements IFs<T> {
   constructor(source: ISubject<T>) {
@@ -112,7 +110,5 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
     ).mergeAll()
   }
 
-  static fromAjax<T>(config: AjaxConfig): IFs<AjaxResponse<T>> {
-    return fromAjax(config)
-  }
+  static ajax = Ajax
 }

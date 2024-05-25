@@ -1,5 +1,7 @@
 import { BodyTypeNotSupportError } from './error.js'
 
+export type ResponseType = 'arraybuffer' | 'blob' | 'json' | 'text' | 'stream'
+
 export enum HttpMethod {
   get = 'get',
   post = 'post',
@@ -15,10 +17,9 @@ export interface AjaxConfig {
   body?: any
   params?: Record<string, any>
   headers?: Record<string, string>
-  responseType?: XMLHttpRequestResponseType
-  user?: string
-  password?: string
+  responseType?: ResponseType
   timeout?: number
+  validate?: (status: number) => boolean
 }
 
 export class Request {
@@ -27,10 +28,9 @@ export class Request {
   private readonly body?: any
   private readonly params: Record<string, any>
   private readonly headers: Record<string, string>
-  private readonly responseType: XMLHttpRequestResponseType
-  private readonly user?: string
-  private readonly password?: string
+  private readonly responseType?: ResponseType
   private readonly timeout: number
+  readonly validate: (status: number) => boolean
 
   constructor({
     url,
@@ -38,10 +38,9 @@ export class Request {
     body,
     params,
     headers,
-    responseType = 'json',
-    user,
-    password,
-    timeout
+    responseType,
+    timeout,
+    validate
   }: AjaxConfig) {
     this.url = url
     this.method = method
@@ -49,20 +48,19 @@ export class Request {
     this.params = params || {}
     this.headers = headers || {}
     this.responseType = responseType
-    this.user = user
-    this.password = password
-    this.timeout = timeout ?? 120
+    this.timeout = timeout ?? 120 * 1000
+    this.validate = validate ?? ((status) => status < 400)
   }
 
   getUrl(): string {
     const [base, params] = this.url.split('?')
     if (!params) {
-      return base + new URLSearchParams(this.params)
+      return base + '?' + new URLSearchParams(this.params)
     }
 
     const p = new URLSearchParams(params)
     new URLSearchParams(this.params).forEach((v, k) => p.set(k, v))
-    return base + p
+    return base + '?' + p
   }
 
   getMethod(): HttpMethod {
@@ -119,16 +117,8 @@ export class Request {
     throw new BodyTypeNotSupportError()
   }
 
-  getResponseType(): XMLHttpRequestResponseType {
+  getResponseType() {
     return this.responseType
-  }
-
-  getUser() {
-    return this.user
-  }
-
-  getPassword() {
-    return this.password
   }
 
   getTimeout() {
