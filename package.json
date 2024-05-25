@@ -72,5 +72,8 @@
       "^(.*)\\.js$": "$1"
     }
   },
-  "packageManager": "yarn@4.1.1"
+  "packageManager": "yarn@4.1.1",
+  "engines": {
+    "node": ">=18.0.0"
+  }
 }

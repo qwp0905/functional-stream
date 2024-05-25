@@ -19,6 +19,8 @@ export interface AjaxConfig {
   headers?: Record<string, string>
   responseType?: ResponseType
   timeout?: number
+  user?: string
+  password?: string
   validate?: (status: number) => boolean
 }
 
@@ -40,7 +42,9 @@ export class Request {
     headers,
     responseType,
     timeout,
-    validate
+    validate,
+    user,
+    password
   }: AjaxConfig) {
     this.url = url
     this.method = method
@@ -50,6 +54,11 @@ export class Request {
     this.responseType = responseType
     this.timeout = timeout ?? 120 * 1000
     this.validate = validate ?? ((status) => status < 400)
+
+    if (user || password) {
+      this.headers['Authorization'] =
+        `Basic ${btoa((user ?? '') + ':' + (password ?? ''))}`
+    }
   }
 
   getUrl(): string {
