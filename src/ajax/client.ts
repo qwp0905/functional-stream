@@ -2,11 +2,11 @@ import { fromAjax } from './ajax.js'
 import { AjaxConfig, HttpMethod } from './request.js'
 
 export interface AjaxClientConfig {
-  base_url?: string
-  timeout?: number
-  user?: string
-  password?: string
-  validate?: (status: number) => boolean
+  readonly base_url?: string
+  readonly timeout?: number
+  readonly user?: string
+  readonly password?: string
+  readonly validate?: (status: number) => boolean
 }
 
 export class AjaxClient {

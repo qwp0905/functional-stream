@@ -12,13 +12,14 @@ export function fromAjax<T>(config: AjaxConfig): IFs<AjaxResponse<T>> {
       .then(async () => {
         const controller = new AbortController()
         const timeout = setTimeout(() => controller.abort(), req.getTimeout())
+        sub.add(() => timeout.unref())
+
         const res = await fetch(req.getUrl(), {
           method: req.getMethod(),
           body: req.getBody(),
           headers: req.getHeaders(),
           signal: controller.signal
         })
-        timeout.unref()
 
         const parsed = await AjaxResponse.parseFrom<T>(res, req.getResponseType())
         if (!req.validate(parsed.getStatus())) {
