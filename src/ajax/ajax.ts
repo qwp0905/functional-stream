@@ -1,10 +1,10 @@
 import { IFs } from '../@types/index.js'
 import { Fs } from '../stream/functional-stream.js'
 import { AjaxError } from './error.js'
-import { AjaxConfig, AjaxRequest } from './request.js'
+import { AjaxRequestConfig, AjaxRequest } from './request.js'
 import { AjaxResponse } from './response.js'
 
-export function fromAjax<T>(config: AjaxConfig): IFs<AjaxResponse<T>> {
+export function fromAjax<T>(config: AjaxRequestConfig): IFs<AjaxResponse<T>> {
   return Fs.generate((sub) => {
     const req = new AjaxRequest(config)
 

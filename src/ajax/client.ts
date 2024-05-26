@@ -1,6 +1,6 @@
 import { Duration } from '../utils/time.js'
 import { fromAjax } from './ajax.js'
-import { AjaxConfig, HttpMethod } from './request.js'
+import { AjaxRequestConfig, HttpMethod } from './request.js'
 
 export interface AjaxClientConfig {
   readonly base_url?: string
@@ -10,50 +10,36 @@ export interface AjaxClientConfig {
   readonly validate?: (status: number) => boolean
 }
 
+export interface AjaxConfig extends Omit<AjaxRequestConfig, 'method' | 'url'> {}
+
 export class AjaxClient {
   constructor(private readonly config: AjaxClientConfig = {}) {}
 
-  head(url: string, config: Omit<AjaxConfig, 'method' | 'url' | 'body'> = {}) {
+  head(url: string, config: AjaxConfig) {
     return this.request<void>(url, HttpMethod.head, config)
   }
 
-  get<T = any>(url: string, config: Omit<AjaxConfig, 'method' | 'url' | 'body'> = {}) {
+  get<T = any>(url: string, config: AjaxConfig = {}) {
     return this.request<T>(url, HttpMethod.get, config)
   }
 
-  post<T = any>(
-    url: string,
-    data: any = {},
-    config: Omit<AjaxConfig, 'method' | 'url'> = {}
-  ) {
+  post<T = any>(url: string, data: any = {}, config: AjaxConfig = {}) {
     return this.request<T>(url, HttpMethod.post, { ...config, body: data })
   }
 
-  put<T = any>(
-    url: string,
-    data: any = {},
-    config: Omit<AjaxConfig, 'method' | 'url'> = {}
-  ) {
+  put<T = any>(url: string, data: any = {}, config: AjaxConfig = {}) {
     return this.request<T>(url, HttpMethod.put, { ...config, body: data })
   }
 
-  patch<T = any>(
-    url: string,
-    data: any = {},
-    config: Omit<AjaxConfig, 'method' | 'url'> = {}
-  ) {
+  patch<T = any>(url: string, data: any = {}, config: AjaxConfig = {}) {
     return this.request<T>(url, HttpMethod.patch, { ...config, body: data })
   }
 
-  delete<T = any>(url: string, config: Omit<AjaxConfig, 'method' | 'url' | 'body'> = {}) {
+  delete<T = any>(url: string, config: AjaxConfig = {}) {
     return this.request<T>(url, HttpMethod.get, config)
   }
 
-  private request<T>(
-    url: string,
-    method: HttpMethod,
-    config: Omit<AjaxConfig, 'method' | 'url'>
-  ) {
+  private request<T>(url: string, method: HttpMethod, config: AjaxConfig) {
     return fromAjax<T>({
       ...config,
       method,

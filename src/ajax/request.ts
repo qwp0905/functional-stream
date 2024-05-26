@@ -11,7 +11,7 @@ export enum HttpMethod {
   head = 'head'
 }
 
-export interface AjaxConfig {
+export interface AjaxRequestConfig {
   url: string
   method: HttpMethod
   body?: any
@@ -45,7 +45,7 @@ export class AjaxRequest {
     validate,
     user,
     password
-  }: AjaxConfig) {
+  }: AjaxRequestConfig) {
     this.url = url
     this.method = method
     this.body = body
