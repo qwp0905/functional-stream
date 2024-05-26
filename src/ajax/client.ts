@@ -10,7 +10,7 @@ export interface AjaxClientConfig {
   readonly validate?: (status: number) => boolean
 }
 
-export interface AjaxConfig extends Omit<AjaxRequestConfig, 'method' | 'url'> {}
+export interface AjaxConfig extends Omit<AjaxRequestConfig, 'method' | 'url' | 'body'> {}
 
 export class AjaxClient {
   constructor(private readonly config: AjaxClientConfig = {}) {}
@@ -39,7 +39,11 @@ export class AjaxClient {
     return this.request<T>(url, HttpMethod.get, config)
   }
 
-  private request<T>(url: string, method: HttpMethod, config: AjaxConfig) {
+  private request<T>(
+    url: string,
+    method: HttpMethod,
+    config: AjaxConfig & Pick<AjaxRequestConfig, 'body'>
+  ) {
     return fromAjax<T>({
       ...config,
       method,
