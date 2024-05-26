@@ -200,20 +200,24 @@ export class FsInternal<T> implements IFs<T> {
       return this.pipe(mergeMap(callback))
     }
 
-    return this.pipeTo((sub) => {
-      const iter = this.iter()
-      let index = 0
-      Promise.all(
-        new Array(concurrency).fill(null).map(async () => {
-          for (let data = await iter.next(); !data.done; data = await iter.next()) {
-            await Fs.from(callback(data.value, index++) as any)
-              .tap((e) => sub.publish(e as any))
-              .toPromise()
-          }
-        })
-      )
-        .catch((err) => sub.abort(err))
-        .finally(() => sub.commit())
+    return this.pipeTo(async (sub) => {
+      try {
+        const iter = this.iter()
+        let index = 0
+        await Promise.all(
+          new Array(concurrency).fill(null).map(async () => {
+            for (let data = await iter.next(); !data.done; data = await iter.next()) {
+              await Fs.from(callback(data.value, index++) as any)
+                .tap((e) => sub.publish(e as any))
+                .toPromise()
+            }
+          })
+        )
+      } catch (err) {
+        sub.abort(err)
+      } finally {
+        sub.commit()
+      }
     })
   }
 
@@ -300,22 +304,23 @@ export class FsInternal<T> implements IFs<T> {
   }
 
   timeout(each: number): IFs<T> {
-    return this.pipeTo((sub) => {
-      const iter = this.iter()
-      const next = () =>
-        Promise.race([
-          iter.next(),
-          sleep(each).then(() => Promise.reject(new SubscriptionTimeoutError()))
-        ])
+    return this.pipeTo(async (sub) => {
+      try {
+        const iter = this.iter()
+        const next = () =>
+          Promise.race([
+            iter.next(),
+            sleep(each).then(() => Promise.reject(new SubscriptionTimeoutError()))
+          ])
 
-      Promise.resolve()
-        .then(async () => {
-          for (let data = await next(); !data.done; data = await next()) {
-            sub.publish(data.value)
-          }
-        })
-        .catch((err) => sub.abort(err))
-        .finally(() => sub.commit())
+        for (let data = await next(); !data.done; data = await next()) {
+          sub.publish(data.value)
+        }
+      } catch (err) {
+        sub.abort(err)
+      } finally {
+        sub.commit()
+      }
     })
   }
 
