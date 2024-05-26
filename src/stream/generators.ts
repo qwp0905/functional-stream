@@ -8,36 +8,42 @@ import {
 import { Fs } from './functional-stream.js'
 
 export function fromIterable<T>(iter: Iterable<T>): IFs<T> {
-  return Fs.generate((subject) => {
-    Promise.resolve()
-      .then(() => {
-        for (const data of iter) {
-          subject.publish(data)
-        }
-      })
-      .catch((err) => subject.abort(err))
-      .finally(() => subject.commit())
+  return Fs.generate(async (subject) => {
+    try {
+      for (const data of iter) {
+        subject.publish(data)
+      }
+    } catch (err) {
+      subject.abort(err)
+    } finally {
+      subject.commit()
+    }
   })
 }
 
 export function fromAsyncIterable<T>(iter: AsyncIterable<T>): IFs<T> {
-  return Fs.generate((subject) => {
-    Promise.resolve()
-      .then(async () => {
-        for await (const data of iter) {
-          subject.publish(data)
-        }
-      })
-      .catch((err) => subject.abort(err))
-      .finally(() => subject.commit())
+  return Fs.generate(async (subject) => {
+    try {
+      for await (const data of iter) {
+        subject.publish(data)
+      }
+    } catch (err) {
+      subject.abort(err)
+    } finally {
+      subject.commit()
+    }
   })
 }
 
 export function fromPromise<T>(p: Promise<T>): IFs<T> {
-  return Fs.generate((subject) => {
-    p.then((data) => subject.publish(data))
-      .catch((err) => subject.abort(err))
-      .finally(() => subject.commit())
+  return Fs.generate(async (subject) => {
+    try {
+      subject.publish(await p)
+    } catch (err) {
+      subject.abort(err)
+    } finally {
+      subject.commit()
+    }
   })
 }
 
@@ -57,15 +63,16 @@ export function fromReadable<T>(readable: ReadableStream<T>): IFs<T> {
 }
 
 export function fromAsyncIterator<T>(iterator: AsyncIterator<T>): IFs<T> {
-  return Fs.generate((subject) => {
-    Promise.resolve()
-      .then(async () => {
-        for (let data = await iterator.next(); !data.done; data = await iterator.next()) {
-          subject.publish(data.value)
-        }
-      })
-      .catch((err) => subject.abort(err))
-      .finally(() => subject.commit())
+  return Fs.generate(async (subject) => {
+    try {
+      for (let data = await iterator.next(); !data.done; data = await iterator.next()) {
+        subject.publish(data.value)
+      }
+    } catch (err) {
+      subject.abort(err)
+    } finally {
+      subject.commit()
+    }
   })
 }
 
