@@ -1,6 +1,6 @@
 {
   "name": "@qwp0905/functional-stream",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
@@ -10,7 +10,7 @@
     "format": "prettier --config .prettierrc --write \"{src,test}/**/*.{ts,js}\"",
     "lint": "eslint \"{src,test}/**/*.{ts,js}\"",
     "test": "jest",
-    "test:cov": "jest --coverage",
+    "test:cov": "rimraf coverage && jest --coverage",
     "test:cov:result": "yarn test:cov && open ./coverage/lcov-report/index.html"
   },
   "repository": {
@@ -55,7 +55,9 @@
       "^.+\\.ts$": "ts-jest"
     },
     "collectCoverageFrom": [
-      "<rootDir>/src/**/*.(t|j)s"
+      "<rootDir>/src/**/*.(t|j)s",
+      "!<rootDir>/src/@types/**/*",
+      "!<rootDir>/**/*/index.ts"
     ],
     "coverageDirectory": "coverage",
     "coverageThreshold": {

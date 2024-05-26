@@ -53,8 +53,6 @@ export class AjaxClient {
 }
 
 export const defaultAjaxClient = new AjaxClient({
-  validate(status) {
-    return status < 400
-  },
+  validate: (status) => status < 400,
   timeout: Duration.minute(2)
 })
