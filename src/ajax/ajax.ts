@@ -1,5 +1,5 @@
 import { IFs } from '../@types/index.js'
-import { Fs } from '../stream/functional-stream.js'
+import { Fs } from '../stream/index.js'
 import { AjaxError } from './error.js'
 import { AjaxRequestConfig, AjaxRequest } from './request.js'
 import { AjaxResponse } from './response.js'

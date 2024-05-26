@@ -8,6 +8,7 @@ export interface AjaxClientConfig {
   readonly user?: string
   readonly password?: string
   readonly validate?: (status: number) => boolean
+  readonly headers?: Record<string, string>
 }
 
 export interface AjaxConfig extends Omit<AjaxRequestConfig, 'method' | 'url' | 'body'> {}
@@ -47,6 +48,7 @@ export class AjaxClient {
     return fromAjax<T>({
       ...config,
       method,
+      headers: Object.assign(this.config.headers ?? {}, config.headers),
       url: (this.config.base_url ?? '') + url,
       validate: config.validate ?? this.config.validate,
       timeout: config.timeout ?? this.config.timeout,
