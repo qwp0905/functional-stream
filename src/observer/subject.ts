@@ -1,4 +1,5 @@
 import { IObserver, ISubject } from '../@types/index.js'
+import { RejectFunction, ResolveFunction } from '../@types/promise.js'
 import { AlreadySubscribedError } from '../utils/errors.js'
 
 enum EventKind {
@@ -20,9 +21,6 @@ class ErrorEvent {
 class CompleteEvent {
   readonly kind = EventKind.complete
 }
-
-type ResolveFunction<T> = (v: IteratorResult<T> | PromiseLike<IteratorResult<T>>) => void
-type RejectFunction = (reason: any) => void
 
 export class Subject<T> implements ISubject<T> {
   private observer: IObserver<T> | null = null

@@ -9,6 +9,7 @@ export interface AjaxClientConfig {
   readonly password?: string
   readonly validate?: (status: number) => boolean
   readonly headers?: Record<string, string>
+  readonly concurrency?: number
 }
 
 export interface AjaxConfig extends Omit<AjaxRequestConfig, 'method' | 'url' | 'body'> {}

@@ -112,5 +112,7 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
     ).mergeAll()
   }
 
-  static readonly ajax = defaultAjaxClient
+  static get ajax() {
+    return defaultAjaxClient
+  }
 }
