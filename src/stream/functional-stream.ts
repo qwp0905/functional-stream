@@ -115,4 +115,11 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
   static get ajax() {
     return defaultAjaxClient
   }
+
+  static interval(ms: number): IFs<void> {
+    return Fs.generate((sub) => {
+      const i = setInterval(() => sub.publish(), ms)
+      sub.add(() => i.unref())
+    })
+  }
 }
