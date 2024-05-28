@@ -22,12 +22,10 @@ export class AjaxClient {
   private readonly sub: ISubject<[string, AjaxRequestConfig]> = new Subject()
   private readonly map: Map<string, ISubject<AjaxResponse<any>>> = new Map()
   constructor(private readonly config: AjaxClientConfig) {
-    Fs.from(this.sub)
-      .mergeMap(
-        ([key, config]) => ajaxCall(config, this.map.get(key)!),
-        this.config.concurrency
-      )
-      .toPromise()
+    Fs.from(this.sub).mergeMap(
+      ([key, config]) => ajaxCall(config, this.map.get(key)!),
+      this.config.concurrency
+    )
   }
 
   head(url: string, config: AjaxConfig) {
