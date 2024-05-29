@@ -31,16 +31,14 @@ export class AjaxClient {
       return
     }
 
-    Promise.resolve().then(async () => {
-      const iter = this.sub[Symbol.asyncIterator]()
-      Promise.all(
-        new Array(config.concurrency).fill(null).map(async () => {
-          for (let data = await iter.next(); !data.done; data = await iter.next()) {
-            await ajaxCall(data.value[1], data.value[0])
-          }
-        })
-      )
-    })
+    const iter = this.sub[Symbol.asyncIterator]()
+    Promise.all(
+      new Array(config.concurrency).fill(null).map(async () => {
+        for (let data = await iter.next(); !data.done; data = await iter.next()) {
+          await ajaxCall(data.value[1], data.value[0])
+        }
+      })
+    )
   }
 
   head(url: string, config: AjaxConfig) {
