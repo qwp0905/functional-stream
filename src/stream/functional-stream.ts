@@ -42,15 +42,15 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
     }
 
     if (isIterable(like)) {
-      return fromIterable(like as Iterable<T>)
+      return fromIterable(like)
     }
 
     if (isAsyncIterable(like)) {
-      return fromAsyncIterable(like as AsyncIterable<T>)
+      return fromAsyncIterable(like)
     }
 
     if (isReadableStream(like)) {
-      return fromReadable(like as any)
+      return fromReadable(like)
     }
 
     if (like instanceof Promise) {
@@ -117,6 +117,10 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
       const i = setInterval(() => sub.publish(), ms)
       sub.add(() => i.unref())
     })
+  }
+
+  static empty<T>(): IFs<T> {
+    return Fs.generate((sub) => sub.commit())
   }
 
   static get ajax() {

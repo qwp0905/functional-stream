@@ -1,16 +1,16 @@
-export function isFunction(v: any): boolean {
+export function isFunction(v: any): v is (...args: any[]) => any {
   return typeof v === 'function'
 }
 
-export function isAsyncIterable(v: any): boolean {
+export function isAsyncIterable<T = any>(v: any): v is AsyncIterable<T> {
   return isFunction(v?.[Symbol.asyncIterator])
 }
 
-export function isIterable(v: any): boolean {
+export function isIterable<T = any>(v: any): v is Iterable<T> {
   return isFunction(v?.[Symbol.iterator])
 }
 
-export function isReadableStream(v: any): boolean {
+export function isReadableStream<T = any>(v: any): v is ReadableStream<T> {
   return isFunction(v?.getReader)
 }
 

@@ -229,7 +229,7 @@ export class FsInternal<T> implements IFs<T> {
     let blocked = false
     return this.mergeMap((e, i) => {
       if (blocked) {
-        return [] as any
+        return Fs.empty()
       }
 
       blocked = true
@@ -287,7 +287,6 @@ export class FsInternal<T> implements IFs<T> {
         sub.forEach((s) => s.commit())
       }
     })
-
     return sub.map((s) => this.copyTo(s))
   }
 
