@@ -14,3 +14,9 @@ export class AjaxError extends Error {
     super(message)
   }
 }
+
+export class AjaxTimeoutError extends Error {
+  constructor() {
+    super('request timeout.')
+  }
+}

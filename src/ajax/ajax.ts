@@ -1,5 +1,5 @@
 import { ISubject } from '../@types/index.js'
-import { AjaxError } from './error.js'
+import { AjaxError, AjaxTimeoutError } from './error.js'
 import { AjaxRequestConfig, AjaxRequest } from './request.js'
 import { AjaxResponse } from './response.js'
 
@@ -10,7 +10,9 @@ export async function ajaxCall(
   try {
     const req = new AjaxRequest(config)
     const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), req.getTimeout())
+    const timeout = setTimeout(() => {
+      controller.abort(new AjaxTimeoutError())
+    }, req.getTimeout())
     subject.add(() => timeout.unref())
 
     const res = await fetch(req.getUrl(), {
