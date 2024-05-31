@@ -31,7 +31,8 @@ import {
   endWith,
   startWith,
   pairwise,
-  split
+  split,
+  distinct
 } from '../operators/index.js'
 import { Fs } from './functional-stream.js'
 
@@ -341,5 +342,9 @@ export class FsInternal<T> implements IFs<T> {
 
   split(delimiter: string) {
     return this.pipe(split(delimiter) as any) as any
+  }
+
+  distinct<K>(callback: TMapCallback<T, K>): IFs<T> {
+    return this.pipe(distinct(callback))
   }
 }

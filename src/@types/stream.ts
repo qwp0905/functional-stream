@@ -54,6 +54,7 @@ export interface IFs<T> extends AsyncIterable<T> {
   pairwise(): IFs<[T, T]>
   repeat(count: number): IFs<T>
   split(delimiter: string): IFs<T extends string ? string : never>
+  distinct<K>(callback: TMapCallback<T, K>): IFs<T>
 }
 
 export type StreamLike<T> =
