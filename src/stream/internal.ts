@@ -96,15 +96,13 @@ export class FsInternal<T> implements IFs<T> {
   }
 
   toPromise(): Promise<T> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve, error) => {
       let result: T
       this.watch({
         next(event) {
           result = event
         },
-        error(err) {
-          reject(err)
-        },
+        error,
         complete() {
           resolve(result)
         }
@@ -117,18 +115,14 @@ export class FsInternal<T> implements IFs<T> {
   }
 
   forEach(callback: TMapCallback<T, any>): Promise<void> {
-    return new Promise((resolve, reject) => {
+    return new Promise((complete, error) => {
       let i = 0
       this.watch({
         next(data) {
           callback(data, i++)
         },
-        error(err) {
-          reject(err)
-        },
-        complete() {
-          resolve()
-        }
+        error,
+        complete
       })
     })
   }
