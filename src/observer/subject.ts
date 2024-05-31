@@ -1,6 +1,5 @@
-import { IObserver, ISubject } from '../@types/index.js'
-import { RejectFunction, ResolveFunction } from '../@types/promise.js'
-import { AlreadySubscribedError } from '../utils/errors.js'
+import { IObserver, ISubject, RejectFunction, ResolveFunction } from '../@types/index.js'
+import { AlreadySubscribedError } from '../utils/index.js'
 
 enum EventKind {
   next,
