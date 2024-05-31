@@ -101,3 +101,24 @@ export function fromEvent<T>(source: any, event: string | symbol): IFs<T> {
     throw new InvalidEventSourceError()
   })
 }
+
+export function fromInterval(interval: number): IFs<void> {
+  return Fs.generate((subject) => {
+    const timer = setInterval(() => subject.publish(), interval)
+    subject.add(() => timer.unref())
+  })
+}
+
+export function fromLoop<T>(
+  initialValue: T,
+  condFunc: (x: T) => boolean,
+  nextFunc: (x: T) => T | Promise<T>
+): IFs<T> {
+  return fromAsyncIterable({
+    async *[Symbol.asyncIterator]() {
+      for (let x = initialValue; condFunc(x); x = await nextFunc(x)) {
+        yield x
+      }
+    }
+  })
+}

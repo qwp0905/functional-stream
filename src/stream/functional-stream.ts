@@ -10,7 +10,9 @@ import {
   fromAsyncIterable,
   fromAsyncIterator,
   fromEvent,
+  fromInterval,
   fromIterable,
+  fromLoop,
   fromPromise,
   fromReadable
 } from './generators.js'
@@ -91,13 +93,7 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
     condFunc: (x: T) => boolean,
     nextFunc: (x: T) => T | Promise<T>
   ): IFs<T> {
-    return fromAsyncIterable({
-      async *[Symbol.asyncIterator]() {
-        for (let x = initialValue; condFunc(x); x = await nextFunc(x)) {
-          yield x
-        }
-      }
-    })
+    return fromLoop(initialValue, condFunc, nextFunc)
   }
 
   static race<T>(...v: StreamLike<T>[]): IFs<T> {
@@ -113,10 +109,7 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
   }
 
   static interval(ms: number): IFs<void> {
-    return Fs.generate((sub) => {
-      const i = setInterval(() => sub.publish(), ms)
-      sub.add(() => i.unref())
-    })
+    return fromInterval(ms)
   }
 
   static empty<T>(): IFs<T> {
