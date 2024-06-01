@@ -4,11 +4,11 @@ import { Pipeline } from '../observer/index.js'
 const unique = Symbol()
 
 export const pairwise = <T>(): IPipeline<T, [T, T]> => {
-  let prev: T | symbol = unique
+  let prev: T | typeof unique = unique
   return new Pipeline({
     next(event) {
       if (prev !== unique) {
-        this.publish([prev as T, event])
+        this.publish([prev, event])
       }
       prev = event
     },
