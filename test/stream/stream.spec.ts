@@ -55,7 +55,9 @@ describe('number', () => {
       [2, 3]
     ])
   })
+})
 
+describe('generate', () => {
   it('race', async () => {
     const r = Fs.race(
       sleep(10).then(() => Fs.range(1)),
@@ -67,9 +69,7 @@ describe('number', () => {
 
     await expect(r).resolves.toEqual([0])
   })
-})
 
-describe('generate', () => {
   it('readable', async () => {
     const rs = new ReadableStream({
       start(con) {
@@ -86,5 +86,16 @@ describe('generate', () => {
   it('promise', async () => {
     const r = Fs.from(Promise.resolve(10)).toPromise()
     await expect(r).resolves.toEqual(10)
+  })
+
+  it('zip', async () => {
+    const r = Fs.zip(Fs.range(3), Fs.range(5, 3)).toArray()
+    await expect(r).resolves.toStrictEqual([
+      [0, 3],
+      [1, 4],
+      [2, 5],
+      [undefined, 6],
+      [undefined, 7]
+    ])
   })
 })
