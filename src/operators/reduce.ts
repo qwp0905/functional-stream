@@ -40,7 +40,6 @@ export const scan = <A, C = A>(
       this.abort(err)
     },
     complete() {
-      this.publish(initialValue!)
       this.commit()
     }
   })
