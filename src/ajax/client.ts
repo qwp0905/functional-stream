@@ -73,7 +73,7 @@ export class AjaxClient {
     const merged = {
       ...config,
       method,
-      headers: Object.assign(this.config.headers ?? {}, config.headers),
+      headers: { ...(this.config.headers ?? {}), ...(config.headers ?? {}) },
       url: (this.config.base_url ?? '') + url,
       validate: config.validate ?? this.config.validate,
       timeout: config.timeout ?? this.config.timeout,
