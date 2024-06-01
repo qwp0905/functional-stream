@@ -32,7 +32,8 @@ import {
   startWith,
   pairwise,
   split,
-  distinct
+  distinct,
+  finalize
 } from '../operators/index.js'
 import { Fs } from './functional-stream.js'
 
@@ -241,20 +242,7 @@ export class FsInternal<T> implements IFs<T> {
   }
 
   finalize(callback: TAnyCallback): IFs<T> {
-    return this.pipeTo((sub) => {
-      this.watch({
-        next(data) {
-          sub.publish(data)
-        },
-        error(err) {
-          sub.abort(err)
-        },
-        async complete() {
-          await Promise.resolve(callback())
-          sub.commit()
-        }
-      })
-    })
+    return this.pipe(finalize(callback))
   }
 
   delay(ms: number): IFs<T> {
