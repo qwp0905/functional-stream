@@ -21,11 +21,7 @@ export const mergeMap = <T, R>(
     },
     async complete() {
       while (queue.length > 0) {
-        try {
-          await queue.shift()
-        } catch (err) {
-          return this.abort(err)
-        }
+        await queue.shift()
       }
       this.commit()
     }

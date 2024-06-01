@@ -19,11 +19,7 @@ export const delay = <T>(ms: number): IPipeline<T> => {
     },
     async complete() {
       while (queue.length > 0) {
-        try {
-          await queue.shift()
-        } catch (err) {
-          return this.abort(err)
-        }
+        await queue.shift()
       }
       this.commit()
     }
