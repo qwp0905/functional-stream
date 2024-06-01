@@ -65,7 +65,7 @@ export class AjaxClient {
     return this.request<T>(url, HttpMethod.get, config)
   }
 
-  private request<T>(
+  protected request<T>(
     url: string,
     method: HttpMethod,
     config: AjaxConfig & Pick<AjaxRequestConfig, 'body'>
