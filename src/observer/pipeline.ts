@@ -14,19 +14,17 @@ export class Pipeline<T, R = T> extends Subject<R> implements IPipeline<T, R> {
     }
   }
 
-  async error(err: unknown) {
+  error(err: unknown) {
     try {
-      await this.observe.error?.call(this, err)
-      this.abort(err)
+      this.observe.error?.call(this, err)
     } catch (e) {
       this.abort(e)
     }
   }
 
-  async complete() {
+  complete() {
     try {
-      await this.observe.complete?.call(this)
-      this.commit()
+      this.observe.complete?.call(this)
     } catch (err) {
       this.error(err)
     }

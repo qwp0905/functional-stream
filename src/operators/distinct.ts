@@ -12,6 +12,12 @@ export const distinct = <T, K>(callback: TMapCallback<T, K>): IPipeline<T> => {
 
       set.add(key)
       this.publish(event)
+    },
+    error(err) {
+      this.abort(err)
+    },
+    complete() {
+      this.commit()
     }
   })
 }

@@ -12,8 +12,12 @@ export const startWith = <T>(v: T): IPipeline<T> => {
 
       this.publish(event)
     },
+    error(err) {
+      this.abort(err)
+    },
     complete() {
       empty && this.publish(v)
+      this.commit()
     }
   })
 }
@@ -23,8 +27,12 @@ export const endWith = <T>(v: T): IPipeline<T> => {
     next(event) {
       this.publish(event)
     },
+    error(err) {
+      this.abort(err)
+    },
     complete() {
       this.publish(v)
+      this.commit()
     }
   })
 }

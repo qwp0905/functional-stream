@@ -13,8 +13,12 @@ export const reduce = <A, C = A>(
           ? callback(initialValue, event, index++)
           : (event as any)
     },
+    error(err) {
+      this.abort(err)
+    },
     complete() {
       this.publish(initialValue!)
+      this.commit()
     }
   })
 }
@@ -32,8 +36,12 @@ export const scan = <A, C = A>(
           : (event as any)
       this.publish(initialValue!)
     },
+    error(err) {
+      this.abort(err)
+    },
     complete() {
       this.publish(initialValue!)
+      this.commit()
     }
   })
 }

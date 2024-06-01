@@ -14,10 +14,14 @@ export const delay = <T>(ms: number): IPipeline<T> => {
         })
       )
     },
+    error(err) {
+      this.abort(err)
+    },
     async complete() {
       while (queue.length > 0) {
         await queue.shift()
       }
+      this.commit()
     }
   })
 }

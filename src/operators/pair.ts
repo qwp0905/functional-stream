@@ -11,6 +11,12 @@ export const pairwise = <T>(): IPipeline<T, [T, T]> => {
         this.publish([prev as T, event])
       }
       prev = event
+    },
+    error(err) {
+      this.abort(err)
+    },
+    complete() {
+      this.commit()
     }
   })
 }

@@ -10,8 +10,12 @@ export const defaultIfEmpty = <T>(v: T): IPipeline<T> => {
       }
       this.publish(event)
     },
+    error(err) {
+      this.abort(err)
+    },
     complete() {
       is_empty && this.publish(v)
+      this.commit()
     }
   })
 }
@@ -25,8 +29,15 @@ export const throwIfEmpty = <T>(err: any): IPipeline<T> => {
       }
       this.publish(event)
     },
+    error(err) {
+      this.abort(err)
+    },
     complete() {
-      is_empty && this.abort(err)
+      if (is_empty) {
+        this.abort(err)
+      } else {
+        this.commit()
+      }
     }
   })
 }

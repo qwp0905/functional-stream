@@ -6,8 +6,16 @@ export const catchError = <T>(callback: TErrorCallback): IPipeline<T> => {
     next(event) {
       this.publish(event)
     },
-    error(err) {
-      return Promise.resolve(callback(err))
+    async error(err) {
+      try {
+        await callback(err)
+        this.commit()
+      } catch (e) {
+        this.abort(e)
+      }
+    },
+    complete() {
+      this.commit()
     }
   })
 }

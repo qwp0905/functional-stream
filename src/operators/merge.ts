@@ -16,6 +16,9 @@ export const mergeMap = <T, R>(
           .then()
       )
     },
+    error(err) {
+      this.abort(err)
+    },
     async complete() {
       while (queue.length > 0) {
         try {
@@ -24,6 +27,7 @@ export const mergeMap = <T, R>(
           return this.abort(err)
         }
       }
+      this.commit()
     }
   })
 }

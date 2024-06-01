@@ -21,12 +21,14 @@ export const groupBy = <T, R>(callback: TMapCallback<T, R>): IPipeline<T, IFs<T>
         sub.abort(err)
       }
       sub_map.clear()
+      this.abort(err)
     },
     complete() {
       for (const sub of sub_map.values()) {
         sub.commit()
       }
       sub_map.clear()
+      this.commit()
     }
   })
 }

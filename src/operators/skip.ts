@@ -10,6 +10,12 @@ export const skip = <T>(count: number): IPipeline<T> => {
         return
       }
       this.publish(event)
+    },
+    error(err) {
+      this.abort(err)
+    },
+    complete() {
+      this.commit()
     }
   })
 }

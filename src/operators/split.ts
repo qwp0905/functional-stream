@@ -11,8 +11,12 @@ export const split = (delimiter: string): IPipeline<string> => {
         this.publish(line)
       }
     },
+    error(err) {
+      this.abort(err)
+    },
     complete() {
       tmp && this.publish(tmp)
+      this.commit()
     }
   })
 }

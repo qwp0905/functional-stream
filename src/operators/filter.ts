@@ -6,6 +6,12 @@ export const filter = <T>(callback: TFilterCallback<T>): IPipeline<T> => {
   return new Pipeline({
     next(event) {
       callback(event, index++) && this.publish(event)
+    },
+    error(err) {
+      this.abort(err)
+    },
+    complete() {
+      this.commit()
     }
   })
 }

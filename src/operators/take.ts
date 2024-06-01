@@ -9,6 +9,12 @@ export const take = <T>(count: number): IPipeline<T> => {
         return this.publish(event)
       }
       this.commit()
+    },
+    error(err) {
+      this.abort(err)
+    },
+    complete() {
+      this.commit()
     }
   })
 }

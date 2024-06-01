@@ -7,6 +7,12 @@ export const tap = <T>(callback: TTapCallback<T>): IPipeline<T> => {
     next(event) {
       callback(event, index++)
       this.publish(event)
+    },
+    error(err) {
+      this.abort(err)
+    },
+    complete() {
+      this.commit()
     }
   })
 }

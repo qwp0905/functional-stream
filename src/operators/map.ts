@@ -6,6 +6,12 @@ export const map = <T, R>(callback: TMapCallback<T, R>): IPipeline<T, R> => {
   return new Pipeline({
     next(event) {
       this.publish(callback(event, index++))
+    },
+    error(err) {
+      this.abort(err)
+    },
+    complete() {
+      this.commit()
     }
   })
 }
