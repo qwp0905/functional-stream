@@ -14,7 +14,8 @@ import {
   fromIterable,
   fromLoop,
   fromPromise,
-  fromReadable
+  fromReadable,
+  fromZip
 } from './generators.js'
 import { FsInternal } from './internal.js'
 import { defaultAjaxClient } from '../ajax/index.js'
@@ -114,6 +115,10 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
 
   static empty<T>(): IFs<T> {
     return Fs.generate((sub) => sub.commit())
+  }
+
+  static zip(...v: StreamLike<any>[]) {
+    return fromZip(...v)
   }
 
   static get ajax() {

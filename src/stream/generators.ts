@@ -1,4 +1,4 @@
-import { IFs } from '../@types/index.js'
+import { IFs, StreamLike } from '../@types/index.js'
 import {
   isEventSource,
   isHtmlElement,
@@ -119,6 +119,25 @@ export function fromLoop<T>(
       for (let x = initialValue; condFunc(x); x = await nextFunc(x)) {
         yield x
       }
+    }
+  })
+}
+
+export function fromZip(...v: StreamLike<any>[]): IFs<any[]> {
+  const iters = v.map((e) => Fs.from(e)[Symbol.asyncIterator]())
+  const next = async () => {
+    return Promise.all(iters.map((e) => e.next()))
+  }
+
+  return Fs.generate(async (subject) => {
+    try {
+      for (let data = await next(); data.some((e) => !e.done); data = await next()) {
+        subject.publish(data.map((e) => e.value))
+      }
+    } catch (err) {
+      subject.abort(err)
+    } finally {
+      subject.commit()
     }
   })
 }
