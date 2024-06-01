@@ -129,15 +129,11 @@ export function fromZip(...v: StreamLike<any>[]): IFs<any[]> {
     return Promise.all(iters.map((e) => e.next()))
   }
 
-  return Fs.generate(async (subject) => {
-    try {
+  return fromAsyncIterable({
+    async *[Symbol.asyncIterator]() {
       for (let data = await next(); data.some((e) => !e.done); data = await next()) {
-        subject.publish(data.map((e) => e.value))
+        yield data.map((e) => e.value)
       }
-    } catch (err) {
-      subject.abort(err)
-    } finally {
-      subject.commit()
     }
   })
 }
