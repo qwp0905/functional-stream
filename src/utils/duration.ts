@@ -1,21 +1,21 @@
 export class Duration {
-  static millisecond(n?: number) {
-    return n ?? 1
+  static millisecond(n = 1) {
+    return n
   }
 
-  static second(n?: number) {
-    return this.millisecond(1000) * (n ?? 1)
+  static second(n = 1) {
+    return this.millisecond(1000) * n
   }
 
-  static minute(n?: number) {
-    return this.second(60) * (n ?? 1)
+  static minute(n = 1) {
+    return this.second(60) * n
   }
 
-  static hour(n?: number) {
-    return this.minute(60) * (n ?? 1)
+  static hour(n = 1) {
+    return this.minute(60) * n
   }
 
-  static day(n?: number) {
-    return this.hour(24) * (n ?? 1)
+  static day(n = 1) {
+    return this.hour(24) * n
   }
 }
