@@ -32,3 +32,12 @@ describe('take', () => {
     expect(count).toBe(5)
   })
 })
+
+describe('takeWhile', () => {
+  it('1', async () => {
+    const r = Fs.range(10)
+      .takeWhile((e) => e < 4)
+      .toArray()
+    await expect(r).resolves.toStrictEqual([0, 1, 2, 3])
+  })
+})

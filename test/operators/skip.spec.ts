@@ -6,3 +6,12 @@ describe('skip', () => {
     await expect(stream.skip(8).toArray()).resolves.toStrictEqual([8, 9])
   })
 })
+
+describe('skipWhile', () => {
+  it('1', async () => {
+    const r = Fs.range(10)
+      .skipWhile((e) => e < 4)
+      .toArray()
+    await expect(r).resolves.toStrictEqual([4, 5, 6, 7, 8, 9])
+  })
+})

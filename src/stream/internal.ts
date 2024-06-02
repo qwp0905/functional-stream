@@ -33,7 +33,9 @@ import {
   pairwise,
   split,
   distinct,
-  finalize
+  finalize,
+  skipWhile,
+  takeWhile
 } from '../operators/index.js'
 import { Fs } from './functional-stream.js'
 
@@ -328,5 +330,13 @@ export class FsInternal<T> implements IFs<T> {
 
   distinct<K>(callback: TMapCallback<T, K>): IFs<T> {
     return this.pipe(distinct(callback))
+  }
+
+  skipWhile(callback: TMapCallback<T, boolean>): IFs<T> {
+    return this.pipe(skipWhile(callback))
+  }
+
+  takeWhile(callback: TMapCallback<T, boolean>): IFs<T> {
+    return this.pipe(takeWhile(callback))
   }
 }
