@@ -6,7 +6,7 @@ export const split = (delimiter: string): IPipeline<string> => {
   return new Pipeline({
     next(event) {
       const lines = (tmp + event).split(delimiter)
-      tmp = lines.pop()!
+      tmp = lines.pop() ?? ''
       for (const line of lines) {
         this.publish(line)
       }
