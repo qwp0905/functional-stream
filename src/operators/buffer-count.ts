@@ -13,10 +13,13 @@ export const bufferCount = <T>(count: number): IPipeline<T, T[]> => {
       queue = []
     },
     error(err) {
+      queue.length && this.publish(queue)
+      queue = []
       this.abort(err)
     },
     complete() {
       queue.length && this.publish(queue)
+      queue = []
       this.commit()
     }
   })
