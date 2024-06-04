@@ -7,20 +7,6 @@ import {
 } from '../utils/index.js'
 import { Fs } from './functional-stream.js'
 
-export function fromIterable<T>(iter: Iterable<T>): IFs<T> {
-  return Fs.generate(async (subject) => {
-    try {
-      for (const data of iter) {
-        subject.publish(data)
-      }
-    } catch (err) {
-      subject.abort(err)
-    } finally {
-      subject.commit()
-    }
-  })
-}
-
 export function fromAsyncIterable<T>(iter: AsyncIterable<T>): IFs<T> {
   return Fs.generate(async (subject) => {
     try {
@@ -31,6 +17,16 @@ export function fromAsyncIterable<T>(iter: AsyncIterable<T>): IFs<T> {
       subject.abort(err)
     } finally {
       subject.commit()
+    }
+  })
+}
+
+export function fromIterable<T>(iter: Iterable<T>): IFs<T> {
+  return fromAsyncIterable({
+    async *[Symbol.asyncIterator]() {
+      for (const data of iter) {
+        yield data
+      }
     }
   })
 }
