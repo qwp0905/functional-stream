@@ -1,4 +1,5 @@
 import { Fs } from '../../src/stream/functional-stream.js'
+import { EmptyPipelineError } from '../../src/utils/errors.js'
 
 describe('empty', () => {
   it('throw', async () => {
@@ -14,6 +15,11 @@ describe('empty', () => {
     const err = new Error('123123')
     const r = Fs.range(10).throwIfEmpty(err).toPromise()
     await expect(r).resolves.toEqual(9)
+  })
+
+  it('throw 3', async () => {
+    const r = Fs.empty().throwIfEmpty().toPromise()
+    await expect(r).rejects.toThrow(EmptyPipelineError)
   })
 
   it('default 1', async () => {
