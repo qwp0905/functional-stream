@@ -6,7 +6,7 @@ describe('distinct', () => {
     await expect(r).resolves.toEqual([1, 2, 3, 4, 5, 6, 7])
   })
 
-  it('1', async () => {
+  it('2', async () => {
     const r = Fs.range(10)
       .map((e) => ({ num: e % 3 }))
       .distinct((e) => e.num)
