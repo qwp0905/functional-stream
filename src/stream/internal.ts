@@ -328,7 +328,7 @@ export class FsInternal<T> implements IFs<T> {
     return this.pipe(split(delimiter) as any) as any
   }
 
-  distinct<K>(callback: TMapCallback<T, K>): IFs<T> {
+  distinct<K>(callback: TMapCallback<T, K> = (e) => e as any): IFs<T> {
     return this.pipe(distinct(callback))
   }
 
