@@ -106,10 +106,12 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
             data,
             (x) => !x.done,
             () => iter.next()
-          ).map((e) => e.value)
+          )
         })
       )
-    ).mergeAll()
+    )
+      .mergeAll()
+      .map((e) => e.value)
   }
 
   static interval(ms: number): IFs<void> {
