@@ -31,6 +31,20 @@ export function fromIterable<T>(iter: Iterable<T>): IFs<T> {
   })
 }
 
+export function fromLoop<T>(
+  initialValue: T,
+  condFunc: (x: T) => boolean,
+  nextFunc: (x: T) => T | Promise<T>
+): IFs<T> {
+  return fromAsyncIterable({
+    async *[Symbol.asyncIterator]() {
+      for (let x = initialValue; condFunc(x); x = await nextFunc(x)) {
+        yield x
+      }
+    }
+  })
+}
+
 export function fromPromise<T>(p: Promise<T>): IFs<T> {
   return Fs.generate(async (subject) => {
     try {
@@ -88,20 +102,6 @@ export function fromInterval(interval: number): IFs<void> {
   return Fs.generate((subject) => {
     const timer = setInterval(() => subject.publish(), interval)
     subject.add(() => timer.unref())
-  })
-}
-
-export function fromLoop<T>(
-  initialValue: T,
-  condFunc: (x: T) => boolean,
-  nextFunc: (x: T) => T | Promise<T>
-): IFs<T> {
-  return fromAsyncIterable({
-    async *[Symbol.asyncIterator]() {
-      for (let x = initialValue; condFunc(x); x = await nextFunc(x)) {
-        yield x
-      }
-    }
   })
 }
 
