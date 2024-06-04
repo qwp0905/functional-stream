@@ -21,3 +21,9 @@ export class SubscriptionTimeoutError extends Error {
     super('subscription timeout')
   }
 }
+
+export class EmptyPipelineError extends Error {
+  constructor() {
+    super('pipeline is empty.')
+  }
+}

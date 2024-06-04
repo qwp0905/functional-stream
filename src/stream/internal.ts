@@ -12,7 +12,7 @@ import {
   TTapCallback
 } from '../@types/index.js'
 import { Subject } from '../observer/index.js'
-import { SubscriptionTimeoutError, sleep } from '../utils/index.js'
+import { SubscriptionTimeoutError, sleep, EmptyPipelineError } from '../utils/index.js'
 import {
   map,
   filter,
@@ -279,7 +279,7 @@ export class FsInternal<T> implements IFs<T> {
     return this.pipe(defaultIfEmpty(v))
   }
 
-  throwIfEmpty(err: unknown): IFs<T> {
+  throwIfEmpty(err: unknown = new EmptyPipelineError()): IFs<T> {
     return this.pipe(throwIfEmpty(err))
   }
 

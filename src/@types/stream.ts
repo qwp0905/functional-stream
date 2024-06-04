@@ -47,7 +47,7 @@ export interface IFs<T> extends AsyncIterable<T> {
   copy(count: number): IFs<T>[]
   groupBy<R>(callback: TMapCallback<T, R>): IFs<IFs<T>>
   defaultIfEmpty(v: T): IFs<T>
-  throwIfEmpty(err: unknown): IFs<T>
+  throwIfEmpty(err?: unknown): IFs<T>
   timeout(each: number): IFs<T>
   startWith(v: T): IFs<T>
   endWith(v: T): IFs<T>
