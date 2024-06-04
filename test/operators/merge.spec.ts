@@ -1,4 +1,5 @@
 import { Fs } from '../../src/stream/functional-stream.js'
+import { sleep } from '../../src/utils/sleep.js'
 
 describe('merge', () => {
   describe('mergeAll', () => {
@@ -36,6 +37,20 @@ describe('merge', () => {
         .mergeAll()
         .toArray()
       await expect(r).resolves.toEqual([9, 8, 7, 6, 5, 4, 3, 2, 1, 0])
+    })
+
+    it('1', async () => {
+      const r = await Fs.range(5)
+        .map((e) => sleep(Math.random() * 100).then(() => e))
+        .mergeAll()
+        .toArray()
+
+      expect(r).toContain(0)
+      expect(r).toContain(1)
+      expect(r).toContain(2)
+      expect(r).toContain(3)
+      expect(r).toContain(4)
+      expect(r.length).toEqual(5)
     })
   })
 
