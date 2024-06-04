@@ -8,7 +8,6 @@ import { Subject } from '../observer/index.js'
 import { ISubject, HtmlEventMap, IFs, StreamLike } from '../@types/index.js'
 import {
   fromAsyncIterable,
-  fromAsyncIterator,
   fromEvent,
   fromInterval,
   fromIterable,
@@ -102,8 +101,12 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
       Promise.race(
         v.map(async (e) => {
           const iter = (Fs.from(e) as Fs<T>).iter()
-          const { value } = await iter.next()
-          return fromAsyncIterator(iter).startWith(value)
+          const data = await iter.next()
+          return Fs.loop(
+            data,
+            (x) => !x.done,
+            () => iter.next()
+          ).map((e) => e.value)
         })
       )
     ).mergeAll()

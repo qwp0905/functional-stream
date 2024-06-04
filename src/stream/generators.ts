@@ -62,20 +62,6 @@ export function fromReadable<T>(readable: ReadableStream<T>): IFs<T> {
   })
 }
 
-export function fromAsyncIterator<T>(iterator: AsyncIterator<T>): IFs<T> {
-  return Fs.generate(async (subject) => {
-    try {
-      for (let data = await iterator.next(); !data.done; data = await iterator.next()) {
-        subject.publish(data.value)
-      }
-    } catch (err) {
-      subject.abort(err)
-    } finally {
-      subject.commit()
-    }
-  })
-}
-
 export function fromEvent<T>(source: any, event: string | symbol): IFs<T> {
   return Fs.generate<T>((sub) => {
     const handler = (...args: any[]) => sub.publish(args.length > 1 ? args : args[0])
