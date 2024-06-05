@@ -40,7 +40,7 @@ import {
 import { Fs } from './functional-stream.js'
 
 export class FsInternal<T> implements IFs<T> {
-  constructor(protected source: ISubject<T>) {}
+  protected constructor(protected source: ISubject<T>) {}
 
   [Symbol.asyncIterator]() {
     return this.source[Symbol.asyncIterator]()
@@ -58,12 +58,12 @@ export class FsInternal<T> implements IFs<T> {
     const sub = new Subject<R>()
     sub.add(this.source)
     generator(sub)
-    return new Fs(sub)
+    return new FsInternal(sub)
   }
 
   protected copyTo(sub: ISubject<T>): IFs<T> {
     sub.add(this.source)
-    return new Fs<T>(sub)
+    return new FsInternal<T>(sub)
   }
 
   protected iter(): AsyncIterator<T> {
