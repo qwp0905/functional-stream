@@ -3,6 +3,10 @@ import { AjaxError, AjaxTimeoutError } from './error.js'
 import { AjaxRequestConfig, AjaxRequest } from './request.js'
 import { AjaxResponse } from './response.js'
 
+export interface AjaxAdapter {
+  dispatch(request: AjaxRequest, subject: ISubject<AjaxResponse<any>>): void
+}
+
 export async function ajaxCall(
   config: AjaxRequestConfig,
   subject: ISubject<AjaxResponse<any>>
