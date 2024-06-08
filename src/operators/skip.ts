@@ -20,6 +20,25 @@ export const skip = <T>(count: number): IPipeline<T> => {
   })
 }
 
+export const skipLast = <T>(count: number): IPipeline<T> => {
+  const queue: T[] = []
+  let index = 0
+  return new Pipeline({
+    next(event) {
+      queue.push(event)
+      if (index++ < count) {
+        this.publish(queue.shift()!)
+      }
+    },
+    error(err) {
+      this.abort(err)
+    },
+    complete() {
+      this.commit()
+    }
+  })
+}
+
 export const skipWhile = <T>(callback: TMapCallback<T, boolean>): IPipeline<T> => {
   let index = 0
   let started = false

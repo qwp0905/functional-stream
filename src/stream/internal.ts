@@ -35,7 +35,10 @@ import {
   distinct,
   finalize,
   skipWhile,
-  takeWhile
+  takeWhile,
+  skipLast,
+  takeLast,
+  timeInterval
 } from '../operators/index.js'
 import { Fs } from './functional-stream.js'
 
@@ -364,5 +367,17 @@ export class FsInternal<T> implements IFs<T> {
         }
       })
     })
+  }
+
+  skipLast(count: number): IFs<T> {
+    return this.pipe(skipLast(count))
+  }
+
+  takeLast(count: number): IFs<T> {
+    return this.pipe(takeLast(count))
+  }
+
+  timeInterval(): IFs<number> {
+    return this.pipe(timeInterval())
   }
 }

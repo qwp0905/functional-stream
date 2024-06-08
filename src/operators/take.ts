@@ -19,6 +19,27 @@ export const take = <T>(count: number): IPipeline<T> => {
   })
 }
 
+export const takeLast = <T>(count: number): IPipeline<T> => {
+  const queue: T[] = []
+  return new Pipeline({
+    next(event) {
+      queue.push(event)
+      if (queue.length > count) {
+        queue.shift()
+      }
+    },
+    error(err) {
+      this.abort(err)
+    },
+    complete() {
+      while (queue.length > 0) {
+        this.publish(queue.shift()!)
+      }
+      this.commit()
+    }
+  })
+}
+
 export const takeWhile = <T>(callback: TMapCallback<T, boolean>): IPipeline<T> => {
   let index = 0
 

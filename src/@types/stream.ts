@@ -58,6 +58,9 @@ export interface IFs<T> extends AsyncIterable<T> {
   distinct<K>(callback?: TMapCallback<T, K>): IFs<T>
   takeWhile(callback: TMapCallback<T, boolean>): IFs<T>
   skipWhile(callback: TMapCallback<T, boolean>): IFs<T>
+  takeLast(count: number): IFs<T>
+  skipLast(count: number): IFs<T>
+  timeInterval(): IFs<number>
 }
 
 export type StreamLike<T> =
