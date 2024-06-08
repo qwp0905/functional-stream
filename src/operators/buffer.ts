@@ -6,7 +6,7 @@ export const bufferCount = <T>(count: number): IPipeline<T, T[]> => {
   return new Pipeline({
     next(event) {
       queue.push(event)
-      if (queue.length < count) {
+      if (queue.length.lessThan(count)) {
         return
       }
       this.publish(queue)

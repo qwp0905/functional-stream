@@ -4,18 +4,18 @@ export class Duration {
   }
 
   static second(n = 1) {
-    return this.millisecond(1000) * n
+    return this.millisecond(1000).multiple(n)
   }
 
   static minute(n = 1) {
-    return this.second(60) * n
+    return this.second(60).multiple(n)
   }
 
   static hour(n = 1) {
-    return this.minute(60) * n
+    return this.minute(60).multiple(n)
   }
 
   static day(n = 1) {
-    return this.hour(24) * n
+    return this.hour(24).multiple(n)
   }
 }

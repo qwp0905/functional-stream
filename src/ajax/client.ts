@@ -22,7 +22,7 @@ export class AjaxClient {
   private readonly sub: ISubject<[ISubject<AjaxResponse<any>>, AjaxRequestConfig]> =
     new Subject()
   constructor(private readonly config: AjaxClientConfig) {
-    if (config.concurrency || 0 <= 0) {
+    if ((config.concurrency ?? 0).lessThanOrEqual(0)) {
       this.sub.watch({
         next([sub, conf]) {
           ajaxCall(conf, sub)
@@ -74,7 +74,7 @@ export class AjaxClient {
       ...config,
       method,
       headers: { ...(this.config.headers ?? {}), ...(config.headers ?? {}) },
-      url: (this.config.base_url ?? '') + url,
+      url: (this.config.base_url ?? '').concat(url),
       validate: config.validate ?? this.config.validate,
       timeout: config.timeout ?? this.config.timeout,
       user: config.user ?? this.config.user,
@@ -86,7 +86,7 @@ export class AjaxClient {
 }
 
 export const defaultAjaxClient = new AjaxClient({
-  validate: (status) => status < 400,
+  validate: (status) => status.lessThan(400),
   timeout: Duration.minute(2),
   concurrency: 512
 })

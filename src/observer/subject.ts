@@ -34,7 +34,7 @@ export class Subject<T> implements ISubject<T> {
 
     this.observer = observer
     Promise.resolve().then(() => {
-      while (this.queue.length > 0) {
+      while (this.queue.length.greaterThan(0)) {
         const event = this.queue.shift()!
         switch (event.kind) {
           case EventKind.next:
@@ -96,7 +96,7 @@ export class Subject<T> implements ISubject<T> {
       return
     }
 
-    if (!this.observer || this.queue.length > 0) {
+    if (!this.observer || this.queue.length.greaterThan(0)) {
       this.queue.push(new NextEvent(event))
       return
     }
@@ -109,7 +109,7 @@ export class Subject<T> implements ISubject<T> {
       return
     }
 
-    if (!this.observer || this.queue.length > 0) {
+    if (!this.observer || this.queue.length.greaterThan(0)) {
       this.queue.push(new ErrorEvent(err))
       return
     }
@@ -122,7 +122,7 @@ export class Subject<T> implements ISubject<T> {
       return
     }
 
-    if (!this.observer || this.queue.length > 0) {
+    if (!this.observer || this.queue.length.greaterThan(0)) {
       this.queue.push(new CompleteEvent())
       return
     }
@@ -151,7 +151,7 @@ export class Subject<T> implements ISubject<T> {
 
     const handleError = (err: Error) => {
       error = err
-      while (promise.length > 0) {
+      while (promise.length.greaterThan(0)) {
         const [, reject] = promise.shift()!
         reject(err)
       }
@@ -159,7 +159,7 @@ export class Subject<T> implements ISubject<T> {
 
     const handleComplete = () => {
       is_done = true
-      while (promise.length > 0) {
+      while (promise.length.greaterThan(0)) {
         const [resolve] = promise.shift()!
         resolve({ value: undefined, done: true })
       }
@@ -167,7 +167,7 @@ export class Subject<T> implements ISubject<T> {
 
     this.watch({
       next(event) {
-        if (promise.length) {
+        if (promise.length.greaterThan(0)) {
           const [resolve] = promise.shift()!
           resolve({ value: event, done: false })
         } else {
@@ -180,7 +180,7 @@ export class Subject<T> implements ISubject<T> {
 
     return {
       next() {
-        if (queue.length) {
+        if (queue.length.greaterThan(0)) {
           return Promise.resolve({ value: queue.shift()!, done: false })
         }
 

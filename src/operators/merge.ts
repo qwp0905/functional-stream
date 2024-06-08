@@ -20,7 +20,7 @@ export const mergeMap = <T, R>(
       this.abort(err)
     },
     async complete() {
-      while (queue.length > 0) {
+      while (queue.length.greaterThan(0)) {
         await queue.shift()
       }
       this.commit()

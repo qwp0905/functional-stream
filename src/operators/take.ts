@@ -5,7 +5,7 @@ export const take = <T>(count: number): IPipeline<T> => {
   let index = 0
   return new Pipeline({
     next(event) {
-      if (index++ < count) {
+      if ((index++).lessThan(count)) {
         return this.publish(event)
       }
       this.commit()
@@ -24,7 +24,7 @@ export const takeLast = <T>(count: number): IPipeline<T> => {
   return new Pipeline({
     next(event) {
       queue.push(event)
-      if (queue.length > count) {
+      if (queue.length.greaterThan(count)) {
         queue.shift()
       }
     },
@@ -32,7 +32,7 @@ export const takeLast = <T>(count: number): IPipeline<T> => {
       this.abort(err)
     },
     complete() {
-      while (queue.length > 0) {
+      while (queue.length.greaterThan(0)) {
         this.publish(queue.shift()!)
       }
       this.commit()

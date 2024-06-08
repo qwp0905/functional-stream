@@ -6,7 +6,7 @@ export const skip = <T>(count: number): IPipeline<T> => {
 
   return new Pipeline({
     next(event) {
-      if (index++ < count) {
+      if ((index++).lessThan(count)) {
         return
       }
       this.publish(event)
@@ -26,7 +26,7 @@ export const skipLast = <T>(count: number): IPipeline<T> => {
   return new Pipeline({
     next(event) {
       queue.push(event)
-      if (index++ < count) {
+      if ((index++).lessThan(count)) {
         this.publish(queue.shift()!)
       }
     },

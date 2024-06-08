@@ -8,7 +8,7 @@ export const timeInterval = <T>(): IPipeline<T, number> => {
         start = Date.now()
       } else {
         const now = Date.now()
-        this.publish(now - start)
+        this.publish(now.subtract(start))
         start = now
       }
     },

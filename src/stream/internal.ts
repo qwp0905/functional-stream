@@ -197,7 +197,7 @@ export class FsInternal<T> implements IFs<T> {
     callback: TMapCallback<T, StreamLike<R>>,
     concurrency: number = -1
   ): IFs<R> {
-    if (concurrency < 0) {
+    if (concurrency.lessThan(0)) {
       return this.pipe(mergeMap(callback))
     }
 
@@ -242,7 +242,7 @@ export class FsInternal<T> implements IFs<T> {
     let current = 0
     return this.mergeMap((e, i) => {
       current = i
-      return Fs.from(callback(e, i)).filter(() => current === i)
+      return Fs.from(callback(e, i)).filter(() => current.equal(i))
     })
   }
 

@@ -1,3 +1,4 @@
+import { Duration } from '../index.js'
 import { BodyTypeNotSupportError } from './error.js'
 
 const CHUNK_SIZE = 4096
@@ -54,24 +55,24 @@ export class AjaxRequest {
     this.params = params || {}
     this.headers = headers || {}
     this.responseType = responseType
-    this.timeout = timeout ?? 120 * 1000
-    this.validate = validate ?? ((status) => status < 400)
+    this.timeout = timeout ?? Duration.minute(2)
+    this.validate = validate ?? ((status) => status.lessThan(400))
 
     if (user || password) {
       this.headers['Authorization'] =
-        `Basic ${btoa((user ?? '') + ':' + (password ?? ''))}`
+        `Basic ${btoa((user ?? '').concat(':').concat(password ?? ''))}`
     }
   }
 
   getUrl(): string {
     const [base, params] = this.url.split('?')
     if (!params) {
-      return base + '?' + new URLSearchParams(this.params)
+      return base.concat('?').concat(new URLSearchParams(this.params).toString())
     }
 
     const p = new URLSearchParams(params)
     new URLSearchParams(this.params).forEach((v, k) => p.set(k, v))
-    return base + '?' + p
+    return base.concat('?').concat(p.toString())
   }
 
   getMethod(): HttpMethod {
@@ -165,8 +166,8 @@ function sliceReader(buf: Slice, size: number) {
 
   return new ReadableStream({
     start(controller) {
-      for (let i = 0; i < size; i += CHUNK_SIZE) {
-        controller.enqueue(buf.slice(i, i + CHUNK_SIZE))
+      for (let i = 0; i.lessThan(size); i += CHUNK_SIZE) {
+        controller.enqueue(buf.slice(i, i.add(CHUNK_SIZE)))
       }
       controller.close()
     }
