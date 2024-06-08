@@ -27,3 +27,13 @@ describe('buffer count', () => {
     await expect(result).resolves.toStrictEqual([[0, 1, 2], [3, 4, 5], [6, 7, 8], [9]])
   })
 })
+
+describe('buffer time', () => {
+  it('1', async () => {
+    const r = Fs.range(10)
+      .concatMap((e) => Fs.of(e).delay(100))
+      .bufferTime(320)
+      .toArray()
+    await expect(r).resolves.toEqual([[0, 1, 2], [3, 4, 5], [6, 7, 8], [9]])
+  })
+})
