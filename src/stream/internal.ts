@@ -339,4 +339,30 @@ export class FsInternal<T> implements IFs<T> {
   takeWhile(callback: TMapCallback<T, boolean>): IFs<T> {
     return this.pipe(takeWhile(callback))
   }
+
+  bufferTime(interval: number): IFs<T[]> {
+    let end = false
+    return this.pipeTo((sub) => {
+      let queue: T[] = []
+      const task = setInterval(() => {
+        sub.publish(queue)
+        queue = []
+        if (end) {
+          sub.commit()
+        }
+      }, interval)
+      sub.add(() => task.unref())
+      this.watch({
+        next(data) {
+          queue.push(data)
+        },
+        error(err) {
+          sub.abort(err)
+        },
+        complete() {
+          end = true
+        }
+      })
+    })
+  }
 }

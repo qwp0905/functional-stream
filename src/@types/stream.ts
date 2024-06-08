@@ -32,6 +32,7 @@ export interface IFs<T> extends AsyncIterable<T> {
   take(count: number): IFs<T>
   skip(count: number): IFs<T>
   bufferCount(count: number): IFs<T[]>
+  bufferTime(interval: number): IFs<T[]>
   mergeAll(concurrency?: number): IFs<T extends StreamLike<infer K> ? K : never>
   concatAll(): IFs<T extends StreamLike<infer K> ? K : never>
   exhaustAll(): IFs<T extends StreamLike<infer K> ? K : never>
