@@ -158,7 +158,11 @@ interface Slice {
   slice(start: number, end: number): Slice
 }
 
-function sliceReader(buf: Slice, size: number): ReadableStream {
+function sliceReader(buf: Slice, size: number) {
+  if (typeof ReadableStream === 'undefined') {
+    return buf
+  }
+
   return new ReadableStream({
     start(controller) {
       for (let i = 0; i < size; i += CHUNK_SIZE) {
@@ -170,6 +174,10 @@ function sliceReader(buf: Slice, size: number): ReadableStream {
 }
 
 function iterableReader(iter: Iterable<any>) {
+  if (typeof ReadableStream === 'undefined') {
+    return iter
+  }
+
   return new ReadableStream({
     start(controller) {
       for (const chunk of iter) {
