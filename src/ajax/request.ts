@@ -1,5 +1,7 @@
 import { BodyTypeNotSupportError } from './error.js'
 
+const CHUNK_SIZE = 4096
+
 export type ResponseType = 'arraybuffer' | 'blob' | 'json' | 'text' | 'stream'
 
 export enum HttpMethod {
@@ -86,27 +88,27 @@ export class AjaxRequest {
     }
 
     if (typeof this.body === 'string') {
-      return this.body
+      return sliceReader(this.body, this.body.length)
     }
 
     if (typeof FormData !== 'undefined' && this.body instanceof FormData) {
-      return this.body
+      return iterableReader(this.body)
     }
 
     if (typeof URLSearchParams !== undefined && this.body instanceof URLSearchParams) {
-      return this.body
+      return iterableReader(this.body)
     }
 
-    if (toStringEq(this.body, 'ArrayBuffer')) {
-      return this.body
+    if (isArrayBuffer(this.body)) {
+      return sliceReader(this.body, this.body.byteLength)
     }
 
-    if (toStringEq(this.body, 'File')) {
-      return this.body
+    if (isFile(this.body)) {
+      return sliceReader(this.body, this.body.size)
     }
 
-    if (toStringEq(this.body, 'Blob')) {
-      return this.body
+    if (isBlob(this.body)) {
+      return sliceReader(this.body, this.body.size)
     }
 
     if (typeof ReadableStream !== undefined && this.body instanceof ReadableStream) {
@@ -114,13 +116,14 @@ export class AjaxRequest {
     }
 
     if (typeof ArrayBuffer !== undefined && ArrayBuffer.isView(this.body)) {
-      return this.body.buffer
+      return sliceReader(this.body.buffer, this.body.buffer.byteLength)
     }
 
     if (typeof this.body === 'object') {
       this.headers['content-type'] =
         this.headers['content-type'] ?? 'application/json;utf-8'
-      return JSON.stringify(this.body)
+      const marshaled = JSON.stringify(this.body)
+      return sliceReader(marshaled, marshaled.length)
     }
 
     throw new BodyTypeNotSupportError()
@@ -137,4 +140,42 @@ export class AjaxRequest {
 
 function toStringEq(data: any, type: string) {
   return Object.prototype.toString.call(data) === `[object ${type}]`
+}
+
+function isFile(data: any): data is File {
+  return typeof File !== 'undefined' && toStringEq(data, 'File')
+}
+
+function isArrayBuffer(data: any): data is ArrayBuffer {
+  return typeof ArrayBuffer !== 'undefined' && toStringEq(data, 'ArrayBuffer')
+}
+
+function isBlob(data: any): data is Blob {
+  return typeof Blob !== 'undefined' && toStringEq(data, 'Blob')
+}
+
+interface Slice {
+  slice(start: number, end: number): Slice
+}
+
+function sliceReader(buf: Slice, size: number): ReadableStream {
+  return new ReadableStream({
+    start(controller) {
+      for (let i = 0; i < size; i += CHUNK_SIZE) {
+        controller.enqueue(buf.slice(i, i + CHUNK_SIZE))
+      }
+      controller.close()
+    }
+  })
+}
+
+function iterableReader(iter: Iterable<any>) {
+  return new ReadableStream({
+    start(controller) {
+      for (const chunk of iter) {
+        controller.enqueue(chunk)
+      }
+      controller.close()
+    }
+  })
 }

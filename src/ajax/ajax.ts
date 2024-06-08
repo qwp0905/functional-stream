@@ -23,8 +23,9 @@ export async function ajaxCall(
       method: req.getMethod(),
       body: req.getBody(),
       headers: req.getHeaders(),
-      signal: controller.signal
-    })
+      signal: controller.signal,
+      ...(typeof process !== undefined ? { duplex: 'half' } : {})
+    } as any)
 
     const parsed = await AjaxResponse.parseFrom(res, req.getResponseType())
     if (!req.validate(parsed.getStatus())) {
