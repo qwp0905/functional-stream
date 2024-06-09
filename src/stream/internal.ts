@@ -22,7 +22,6 @@ import {
   skip,
   bufferCount,
   take,
-  mergeMap,
   catchError,
   defaultIfEmpty,
   throwIfEmpty,
@@ -38,7 +37,8 @@ import {
   takeWhile,
   skipLast,
   takeLast,
-  timeInterval
+  timeInterval,
+  mergeScan
 } from '../operators/index.js'
 import { Fs } from './functional-stream.js'
 
@@ -197,29 +197,11 @@ export class FsInternal<T> implements IFs<T> {
     callback: TMapCallback<T, StreamLike<R>>,
     concurrency: number = -1
   ): IFs<R> {
-    if (concurrency.lessThan(0)) {
-      return this.pipe(mergeMap(callback))
-    }
-
-    return this.pipeTo(async (sub) => {
-      try {
-        const iter = this.iter()
-        let index = 0
-        await Promise.all(
-          new Array(concurrency).fill(null).map(async () => {
-            for (let data = await iter.next(); !data.done; data = await iter.next()) {
-              await Fs.from(callback(data.value, index++) as any)
-                .tap((e) => sub.publish(e as any))
-                .toPromise()
-            }
-          })
-        )
-      } catch (err) {
-        sub.abort(err)
-      } finally {
-        sub.commit()
-      }
-    })
+    return this.mergeScan<R>(
+      (_, cur, index) => callback(cur, index),
+      null as R,
+      concurrency
+    )
   }
 
   concatMap<R>(callback: TMapCallback<T, StreamLike<R>>): IFs<R> {
@@ -239,10 +221,44 @@ export class FsInternal<T> implements IFs<T> {
   }
 
   switchMap<R>(callback: TMapCallback<T, StreamLike<R>>): IFs<R> {
+    return this.switchScan((_, cur, i) => callback(cur, i), null as R)
+  }
+
+  switchScan<R>(callback: TReduceCallback<R, T, StreamLike<R>>, initialValue: R): IFs<R> {
     let current = 0
-    return this.mergeMap((e, i) => {
+    return this.mergeScan((acc, cur, i) => {
       current = i
-      return Fs.from(callback(e, i)).filter(() => current.equal(i))
+      return Fs.from(callback(acc, cur, i)).filter(() => current.equal(i))
+    }, initialValue)
+  }
+
+  mergeScan<R>(
+    callback: (acc: R, cur: T, index: number) => StreamLike<R>,
+    initialValue: R,
+    concurrency = -1
+  ): IFs<R> {
+    if (concurrency.lessThanOrEqual(0)) {
+      return this.pipe(mergeScan(callback, initialValue))
+    }
+
+    return this.pipeTo(async (sub) => {
+      try {
+        const iter = this.iter()
+        let index = 0
+        await Promise.all(
+          new Array(concurrency).fill(null).map(async () => {
+            for (let data = await iter.next(); !data.done; data = await iter.next()) {
+              await Fs.from(callback(initialValue, data.value, index++))
+                .tap((e) => sub.publish(e))
+                .toPromise()
+            }
+          })
+        )
+      } catch (err) {
+        sub.abort(err)
+      } finally {
+        sub.commit()
+      }
     })
   }
 

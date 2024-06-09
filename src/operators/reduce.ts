@@ -9,8 +9,8 @@ export const reduce = <A, C = A>(
   return new Pipeline({
     next(event) {
       initialValue =
-        initialValue !== undefined
-          ? callback(initialValue, event, index++)
+        !index.equal(0) || initialValue !== undefined
+          ? callback(initialValue!, event, index++)
           : (event as any)
     },
     error(err) {
@@ -31,8 +31,8 @@ export const scan = <A, C = A>(
   return new Pipeline({
     next(event) {
       initialValue =
-        initialValue !== undefined
-          ? callback(initialValue, event, index++)
+        !index.equal(0) || initialValue !== undefined
+          ? callback(initialValue!, event, index++)
           : (event as any)
       this.publish(initialValue!)
     },

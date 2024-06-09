@@ -2,18 +2,21 @@ import { StreamLike, TMapCallback, IPipeline } from '../@types/index.js'
 import { Fs } from '../stream/index.js'
 import { Pipeline } from '../observer/index.js'
 
-export const mergeMap = <T, R>(
-  callback: TMapCallback<T, StreamLike<R>>
+export const mergeScan = <T, R>(
+  callback: (acc: R, cur: T, index: number) => StreamLike<R>,
+  initialValue: R
 ): IPipeline<T, R> => {
   let index = 0
   const queue: Promise<void>[] = []
   return new Pipeline({
     next(event) {
       queue.push(
-        Fs.from(callback(event, index++))
+        Fs.from(callback(initialValue, event, index++))
           .tap((e) => this.publish(e))
           .toPromise()
-          .then()
+          .then((v) => {
+            initialValue = v
+          })
       )
     },
     error(err) {

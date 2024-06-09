@@ -2,6 +2,16 @@ import { Fs } from '../../src/stream/functional-stream.js'
 import { sleep } from '../../src/utils/sleep.js'
 
 describe('merge', () => {
+  describe('mergeScan', () => {
+    it('1', async () => {
+      const r = Fs.range(3)
+        .mergeScan((acc, cur) => Promise.resolve(acc.concat([cur])), new Array<number>())
+        .toArray()
+
+      await expect(r).resolves.toStrictEqual([[0], [0, 1], [0, 1, 2]])
+    })
+  })
+
   describe('mergeAll', () => {
     it('simple1', async () => {
       const arr = [[0, 1, 2], [3, 4, 5], [6, 7, 8], [9]]

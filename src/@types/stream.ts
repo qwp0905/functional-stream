@@ -61,6 +61,12 @@ export interface IFs<T> extends AsyncIterable<T> {
   takeLast(count: number): IFs<T>
   skipLast(count: number): IFs<T>
   timeInterval(): IFs<number>
+  mergeScan<R>(
+    callback: TReduceCallback<R, T, StreamLike<R>>,
+    initialValue: R,
+    concurrency?: number
+  ): IFs<R>
+  switchScan<R>(callback: TReduceCallback<R, T, StreamLike<R>>, initialValue: R): IFs<R>
 }
 
 export type StreamLike<T> =
