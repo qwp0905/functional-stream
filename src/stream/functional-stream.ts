@@ -81,9 +81,10 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
   }
 
   static range(count: number, start = 0): IFs<number> {
+    const end = start.add(count)
     return Fs.loop(
       start,
-      (x) => x.lessThan(start.add(count)),
+      (x) => x.lessThan(end),
       (x) => x.add(1)
     )
   }
