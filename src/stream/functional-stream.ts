@@ -115,7 +115,7 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
       .map((e) => e.value)
   }
 
-  static interval(ms: number): IFs<void> {
+  static interval(ms: number): IFs<number> {
     return fromInterval(ms)
   }
 

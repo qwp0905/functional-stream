@@ -99,9 +99,10 @@ export function fromEvent<T>(source: any, event: string | symbol): IFs<T> {
   })
 }
 
-export function fromInterval(interval: number): IFs<void> {
+export function fromInterval(interval: number): IFs<number> {
+  let i = 0
   return Fs.generate((subject) => {
-    const timer = setInterval(() => subject.publish(), interval)
+    const timer = setInterval(() => subject.publish(i++), interval)
     subject.add(() => timer.unref())
   })
 }
