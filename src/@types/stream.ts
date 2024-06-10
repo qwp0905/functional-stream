@@ -53,7 +53,6 @@ export interface IFs<T> extends AsyncIterable<T> {
   startWith(v: T): IFs<T>
   endWith(v: T): IFs<T>
   pairwise(): IFs<[T, T]>
-  repeat(count: number): IFs<T>
   split(delimiter: string): IFs<T extends string ? string : never>
   distinct<K>(callback?: TMapCallback<T, K>): IFs<T>
   takeWhile(callback: TMapCallback<T, boolean>): IFs<T>

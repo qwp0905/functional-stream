@@ -339,10 +339,6 @@ export class FsInternal<T> implements IFs<T> {
     return this.pipe(pairwise())
   }
 
-  repeat(count: number): IFs<T> {
-    return Fs.concat(...this.copy(Math.max(0, count)))
-  }
-
   split(delimiter: string) {
     return this.pipe(split(delimiter) as any) as any
   }
