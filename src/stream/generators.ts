@@ -109,9 +109,7 @@ export function fromInterval(interval: number): IFs<number> {
 
 export function fromZip(...v: StreamLike<any>[]): IFs<any[]> {
   const iters = v.map((e) => Fs.from(e)[Symbol.asyncIterator]())
-  const next = async () => {
-    return Promise.all(iters.map((e) => e.next()))
-  }
+  const next = async () => Promise.all(iters.map((e) => e.next()))
 
   return fromAsyncIterable({
     async *[Symbol.asyncIterator]() {
