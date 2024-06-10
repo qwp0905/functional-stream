@@ -27,8 +27,6 @@ import {
   throwIfEmpty,
   groupBy,
   delay,
-  endWith,
-  startWith,
   pairwise,
   split,
   distinct,
@@ -41,6 +39,7 @@ import {
   mergeScan
 } from '../operators/index.js'
 import { Fs } from './functional-stream.js'
+import { throttle } from '../operators/throttle.js'
 
 export class FsInternal<T> implements IFs<T> {
   protected constructor(protected source: ISubject<T>) {}
@@ -271,7 +270,31 @@ export class FsInternal<T> implements IFs<T> {
   }
 
   chain(stream: StreamLike<T>): IFs<T> {
-    return Fs.concat(this, stream)
+    return this.pipeTo((sub) => {
+      sub.add(() => fs.close())
+      const fs = Fs.from(stream)
+      this.watch({
+        next(data) {
+          sub.publish(data)
+        },
+        error(err) {
+          sub.abort(err)
+        },
+        complete() {
+          fs.watch({
+            next(data) {
+              sub.publish(data)
+            },
+            error(err) {
+              sub.abort(err)
+            },
+            complete() {
+              sub.commit()
+            }
+          })
+        }
+      })
+    })
   }
 
   catchError(callback: TErrorCallback): IFs<T> {
@@ -328,11 +351,11 @@ export class FsInternal<T> implements IFs<T> {
   }
 
   startWith(v: T): IFs<T> {
-    return this.pipe(startWith(v))
+    return Fs.of(v).chain(this)
   }
 
   endWith(v: T): IFs<T> {
-    return this.pipe(endWith(v))
+    return this.chain(Fs.of(v))
   }
 
   pairwise(): IFs<[T, T]> {
@@ -391,5 +414,26 @@ export class FsInternal<T> implements IFs<T> {
 
   timeInterval(): IFs<number> {
     return this.pipe(timeInterval())
+  }
+
+  audit<R>(callback: TMapCallback<T, StreamLike<R>>): IFs<T> {
+    let last: T
+    let blocked = false
+    return this.mergeMap((e, i) => {
+      last = e
+
+      if (blocked) {
+        return Fs.empty()
+      }
+
+      blocked = true
+      return Fs.from(callback(e, i)).take(1)
+    })
+      .map(() => last)
+      .tap(() => (blocked = false))
+  }
+
+  throttle<R>(callback: (arg: T) => StreamLike<R>): IFs<T> {
+    return this.pipe(throttle(callback))
   }
 }

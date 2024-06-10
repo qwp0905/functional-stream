@@ -5,10 +5,11 @@ export const take = <T>(count: number): IPipeline<T> => {
   let index = 0
   return new Pipeline({
     next(event) {
-      if ((index++).lessThan(count)) {
-        return this.publish(event)
+      index++
+      this.publish(event)
+      if (index.equal(count)) {
+        this.commit()
       }
-      this.commit()
     },
     error(err) {
       this.abort(err)

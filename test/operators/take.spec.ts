@@ -31,6 +31,11 @@ describe('take', () => {
       .toPromise()
     expect(count).toBe(5)
   })
+
+  it('take 6', async () => {
+    const r = Fs.interval(10).take(1).toPromise()
+    await expect(r).resolves.toBe(0)
+  })
 })
 
 describe('takeWhile', () => {
