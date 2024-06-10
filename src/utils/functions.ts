@@ -11,7 +11,7 @@ export function isIterable<T = any>(v: any): v is Iterable<T> {
 }
 
 export function isReadableStream<T = any>(v: any): v is ReadableStream<T> {
-  return isFunction(v?.getReader)
+  return typeof ReadableStream !== 'undefined' && v instanceof ReadableStream
 }
 
 export function isEventSource(v: any): boolean {
