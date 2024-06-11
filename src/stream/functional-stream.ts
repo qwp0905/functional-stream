@@ -149,6 +149,15 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
     return fromZip(...v)
   }
 
+  static delay(ms: number): IFs<void> {
+    return Fs.generate((sub) =>
+      setTimeout(() => {
+        sub.publish()
+        sub.commit()
+      }, ms)
+    )
+  }
+
   static get ajax() {
     return defaultAjaxClient
   }

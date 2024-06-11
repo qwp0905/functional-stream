@@ -18,6 +18,7 @@ export const distinct = <T, K>(callback: TMapCallback<T, K>): IPipeline<T> => {
     },
     complete() {
       this.commit()
+      set.clear()
     }
   })
 }

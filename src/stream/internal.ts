@@ -26,7 +26,6 @@ import {
   defaultIfEmpty,
   throwIfEmpty,
   groupBy,
-  delay,
   pairwise,
   split,
   distinct,
@@ -266,7 +265,7 @@ export class FsInternal<T> implements IFs<T> {
   }
 
   delay(ms: number): IFs<T> {
-    return this.pipe(delay(ms))
+    return this.mergeMap((e) => Fs.delay(ms).map(() => e))
   }
 
   chain(stream: StreamLike<T>): IFs<T> {
@@ -398,7 +397,7 @@ export class FsInternal<T> implements IFs<T> {
       const trigger = Fs.from(callback())
       sub.add(() => trigger.close())
       trigger.watch({
-        next(data) {
+        next() {
           sub.publish(queue)
           queue = []
           if (done) {
