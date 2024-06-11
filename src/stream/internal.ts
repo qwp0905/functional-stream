@@ -355,29 +355,7 @@ export class FsInternal<T> implements IFs<T> {
   }
 
   bufferTime(interval: number): IFs<T[]> {
-    let end = false
-    return this.pipeTo((sub) => {
-      let queue: T[] = []
-      const task = setInterval(() => {
-        sub.publish(queue)
-        queue = []
-        if (end) {
-          sub.commit()
-        }
-      }, interval)
-      sub.add(() => task.unref())
-      this.watch({
-        next(data) {
-          queue.push(data)
-        },
-        error(err) {
-          sub.abort(err)
-        },
-        complete() {
-          end = true
-        }
-      })
-    })
+    return this.bufferWhen(() => Fs.interval(interval))
   }
 
   skipLast(count: number): IFs<T> {
@@ -411,5 +389,35 @@ export class FsInternal<T> implements IFs<T> {
 
   throttle<R>(callback: (arg: T) => StreamLike<R>): IFs<T> {
     return this.pipe(throttle(callback))
+  }
+
+  bufferWhen<R>(callback: () => StreamLike<R>): IFs<T[]> {
+    return this.pipeTo((sub) => {
+      let queue: T[] = []
+      let done = false
+      const trigger = Fs.from(callback())
+      sub.add(() => trigger.close())
+      trigger.watch({
+        next(data) {
+          sub.publish(queue)
+          queue = []
+          if (done) {
+            sub.commit()
+          }
+        }
+      })
+
+      this.watch({
+        next(data) {
+          queue.push(data)
+        },
+        error(err) {
+          sub.abort(err)
+        },
+        complete() {
+          done = true
+        }
+      })
+    })
   }
 }

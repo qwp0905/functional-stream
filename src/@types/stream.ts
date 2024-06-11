@@ -68,6 +68,7 @@ export interface IFs<T> extends AsyncIterable<T> {
   switchScan<R>(callback: TReduceCallback<R, T, StreamLike<R>>, initialValue: R): IFs<R>
   audit<R>(callback: TMapCallback<T, StreamLike<R>>): IFs<T>
   throttle<R>(callback: (arg: T) => StreamLike<R>): IFs<T>
+  bufferWhen<R>(callback: () => StreamLike<R>): IFs<T[]>
 }
 
 export type StreamLike<T> =
