@@ -247,9 +247,9 @@ export class FsInternal<T> implements IFs<T> {
         await Promise.all(
           new Array(concurrency).fill(null).map(async () => {
             for (let data = await iter.next(); !data.done; data = await iter.next()) {
-              const fs = Fs.from(callback(initialValue, data.value, index++))
-              sub.add(() => fs.close())
-              await fs.tap((e) => sub.publish(e)).toPromise()
+              await Fs.from(callback(initialValue, data.value, index++))
+                .tap((e) => sub.publish(e))
+                .toPromise()
             }
           })
         )

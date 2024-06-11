@@ -73,11 +73,29 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
   }
 
   static merge<T>(...streams: StreamLike<T>[]): IFs<T> {
-    return fromIterable(streams).mergeAll()
+    return Fs.generate((subject) => {
+      const s = streams.map((e) => Fs.from(e))
+      s.forEach((e) => subject.add(() => e.close()))
+      fromIterable(s)
+        .mergeAll()
+        .tap((e) => subject.publish(e))
+        .catchError((err) => subject.abort(err))
+        .finalize(() => subject.commit())
+        .toPromise()
+    })
   }
 
   static concat<T>(...streams: StreamLike<T>[]): IFs<T> {
-    return fromIterable(streams).concatAll()
+    return Fs.generate((subject) => {
+      const s = streams.map((e) => Fs.from(e))
+      s.forEach((e) => subject.add(() => e.close()))
+      fromIterable(s)
+        .concatAll()
+        .tap((e) => subject.publish(e))
+        .catchError((err) => subject.abort(err))
+        .finalize(() => subject.commit())
+        .toPromise()
+    })
   }
 
   static range(count: number, start = 0): IFs<number> {
@@ -131,3 +149,4 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
     return defaultAjaxClient
   }
 }
+// Fs.interval(1000).startWith(1).take(2).tap(console.log).toPromise()
