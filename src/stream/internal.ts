@@ -247,9 +247,9 @@ export class FsInternal<T> implements IFs<T> {
         await Promise.all(
           new Array(concurrency).fill(null).map(async () => {
             for (let data = await iter.next(); !data.done; data = await iter.next()) {
-              await Fs.from(callback(initialValue, data.value, index++))
-                .tap((e) => sub.publish(e))
-                .toPromise()
+              const fs = Fs.from(callback(initialValue, data.value, index++))
+              sub.add(() => fs.close())
+              await fs.tap((e) => sub.publish(e)).toPromise()
             }
           })
         )
@@ -270,31 +270,7 @@ export class FsInternal<T> implements IFs<T> {
   }
 
   chain(stream: StreamLike<T>): IFs<T> {
-    return this.pipeTo((sub) => {
-      sub.add(() => fs.close())
-      const fs = Fs.from(stream)
-      this.watch({
-        next(data) {
-          sub.publish(data)
-        },
-        error(err) {
-          sub.abort(err)
-        },
-        complete() {
-          fs.watch({
-            next(data) {
-              sub.publish(data)
-            },
-            error(err) {
-              sub.abort(err)
-            },
-            complete() {
-              sub.commit()
-            }
-          })
-        }
-      })
-    })
+    return Fs.concat(this, stream)
   }
 
   catchError(callback: TErrorCallback): IFs<T> {

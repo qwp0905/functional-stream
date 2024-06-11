@@ -135,6 +135,10 @@ export class Subject<T> implements ISubject<T> {
   }
 
   close() {
+    if (this.end) {
+      return
+    }
+
     if (!this.observer) {
       return this._close()
     }
