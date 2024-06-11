@@ -76,7 +76,7 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
     return Fs.generate((subject) => {
       const s = streams.map((e) => Fs.from(e))
       s.forEach((e) => subject.add(() => e.close()))
-      fromIterable(s)
+      return fromIterable(s)
         .mergeAll()
         .tap((e) => subject.publish(e))
         .catchError((err) => subject.abort(err))
@@ -89,7 +89,7 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
     return Fs.generate((subject) => {
       const s = streams.map((e) => Fs.from(e))
       s.forEach((e) => subject.add(() => e.close()))
-      fromIterable(s)
+      return fromIterable(s)
         .concatAll()
         .tap((e) => subject.publish(e))
         .catchError((err) => subject.abort(err))
@@ -116,21 +116,25 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
   }
 
   static race<T>(...v: StreamLike<T>[]): IFs<T> {
-    return Fs.from(
-      Promise.race(
-        v.map(async (e) => {
-          const iter = (Fs.from(e) as Fs<T>).iter()
-          const data = await iter.next()
-          return Fs.loop(
-            data,
-            (x) => !x.done,
-            () => iter.next()
-          )
+    return Fs.generate((subject) => {
+      const s = v.map((e) => Fs.from(e))
+      s.forEach((e) => subject.add(() => e.close()))
+      let first = false
+      return fromIterable(s)
+        .mergeMap((e) => {
+          if (first) {
+            e.close()
+            return Fs.empty<T>()
+          }
+
+          first = true
+          return e
         })
-      )
-    )
-      .mergeAll()
-      .map((e) => e.value)
+        .tap((e) => subject.publish(e))
+        .catchError((err) => subject.abort(err))
+        .finalize(() => subject.commit())
+        .toPromise()
+    })
   }
 
   static interval(ms: number): IFs<number> {
@@ -149,4 +153,3 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
     return defaultAjaxClient
   }
 }
-// Fs.interval(1000).startWith(1).take(2).tap(console.log).toPromise()
