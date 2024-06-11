@@ -34,8 +34,8 @@ import {
   takeWhile,
   skipLast,
   takeLast,
-  timeInterval,
-  mergeScan
+  mergeScan,
+  timestamp
 } from '../operators/index.js'
 import { Fs } from './functional-stream.js'
 import { throttle } from '../operators/throttle.js'
@@ -369,10 +369,6 @@ export class FsInternal<T> implements IFs<T> {
     return this.pipe(takeLast(count))
   }
 
-  timeInterval(): IFs<number> {
-    return this.pipe(timeInterval())
-  }
-
   audit<R>(callback: TMapCallback<T, StreamLike<R>>): IFs<T> {
     let last: T
     let blocked = false
@@ -422,5 +418,15 @@ export class FsInternal<T> implements IFs<T> {
         }
       })
     })
+  }
+
+  timestamp(): IFs<number> {
+    return this.pipe(timestamp())
+  }
+
+  timeInterval(): IFs<number> {
+    return this.timestamp()
+      .pairwise()
+      .map(([prev, cur]) => cur.subtract(prev))
   }
 }

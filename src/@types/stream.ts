@@ -70,6 +70,7 @@ export interface IFs<T> extends AsyncIterable<T> {
   audit<R>(callback: TMapCallback<T, StreamLike<R>>): IFs<T>
   throttle<R>(callback: (arg: T) => StreamLike<R>): IFs<T>
   bufferWhen<R>(callback: () => StreamLike<R>): IFs<T[]>
+  timestamp(): IFs<number>
 }
 
 export type StreamLike<T> =
