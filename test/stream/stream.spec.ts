@@ -58,16 +58,26 @@ describe('number', () => {
 })
 
 describe('generate', () => {
-  it('race', async () => {
-    const r = Fs.race(
-      sleep(10).then(() => Fs.range(1)),
-      sleep(30).then(() => Fs.range(3)),
-      sleep(50).then(() => Fs.range(5))
-    )
-      .mergeAll()
-      .toArray()
+  describe('race', () => {
+    it('1', async () => {
+      const r = Fs.race(
+        sleep(10).then(() => Fs.range(1)),
+        sleep(30).then(() => Fs.range(3)),
+        sleep(50).then(() => Fs.range(5))
+      )
+        .mergeAll()
+        .toArray()
 
-    await expect(r).resolves.toEqual([0])
+      await expect(r).resolves.toEqual([0])
+    })
+
+    it('2', async () => {
+      let cb = jest.fn()
+      const r = Fs.race(Fs.interval(10), Fs.interval(20).tap(cb)).take(3).toArray()
+
+      await expect(r).resolves.toStrictEqual([0, 1, 2])
+      expect(cb).not.toHaveBeenCalled()
+    })
   })
 
   it('readable', async () => {
