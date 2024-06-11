@@ -99,7 +99,7 @@ export class FsInternal<T> implements IFs<T> {
     return this.source.close()
   }
 
-  toPromise(): Promise<T> {
+  lastOne(): Promise<T> {
     return new Promise((resolve, error) => {
       let result: T
       this.watch({
@@ -114,8 +114,12 @@ export class FsInternal<T> implements IFs<T> {
     })
   }
 
+  firstOne(): Promise<T> {
+    return this.take(1).lastOne()
+  }
+
   toArray(): Promise<T[]> {
-    return this.reduce((acc, cur) => acc.concat([cur]), [] as T[]).toPromise()
+    return this.reduce((acc, cur) => acc.concat([cur]), [] as T[]).lastOne()
   }
 
   forEach(callback: TMapCallback<T, any>): Promise<void> {
@@ -248,7 +252,7 @@ export class FsInternal<T> implements IFs<T> {
             for (let data = await iter.next(); !data.done; data = await iter.next()) {
               await Fs.from(callback(initialValue, data.value, index++))
                 .tap((e) => sub.publish(e))
-                .toPromise()
+                .lastOne()
             }
           })
         )

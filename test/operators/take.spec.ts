@@ -28,12 +28,12 @@ describe('take', () => {
     await Fs.range(10)
       .take(5)
       .tap(() => count++)
-      .toPromise()
+      .lastOne()
     expect(count).toBe(5)
   })
 
   it('take 6', async () => {
-    const r = Fs.interval(10).take(1).toPromise()
+    const r = Fs.interval(10).take(1).lastOne()
     await expect(r).resolves.toBe(0)
   })
 })

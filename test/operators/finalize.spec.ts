@@ -10,7 +10,7 @@ describe('finalize', () => {
     await Fs.range(10)
       .tap(() => (i = true))
       .finalize(cb)
-      .toPromise()
+      .lastOne()
     expect(cb).toHaveBeenCalledTimes(1)
     expect(i).toBe(false)
   })

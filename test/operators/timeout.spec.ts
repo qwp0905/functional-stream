@@ -7,7 +7,7 @@ describe('timeout', () => {
     const r = Fs.range(3)
       .concatMap((e) => sleep(100).then(() => e))
       .timeout(50)
-      .toPromise()
+      .lastOne()
 
     await expect(r).rejects.toThrow(SubscriptionTimeoutError)
   })

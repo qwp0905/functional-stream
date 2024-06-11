@@ -17,7 +17,8 @@ export interface IStreamReadOptions<T> {
 export interface IFs<T> extends AsyncIterable<T> {
   watch(options: IStreamReadOptions<T>): void
   close(): void
-  toPromise(): Promise<T>
+  lastOne(): Promise<T>
+  firstOne(): Promise<T>
   toArray(): Promise<T[]>
   forEach(callback: TMapCallback<T, any>): Promise<void>
 

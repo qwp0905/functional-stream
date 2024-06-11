@@ -5,7 +5,7 @@ describe('number', () => {
   const arr = new Array(10).fill(null).map((_, i) => i)
 
   it('to promise', async () => {
-    await expect(Fs.from(arr).toPromise()).resolves.toEqual(9)
+    await expect(Fs.from(arr).lastOne()).resolves.toEqual(9)
   })
 
   it('to array', async () => {
@@ -92,7 +92,7 @@ describe('generate', () => {
   })
 
   it('promise', async () => {
-    const r = Fs.from(Promise.resolve(10)).toPromise()
+    const r = Fs.from(Promise.resolve(10)).lastOne()
     await expect(r).resolves.toEqual(10)
   })
 

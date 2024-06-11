@@ -13,7 +13,7 @@ export const throttle = <T, R>(callback: (arg: T) => StreamLike<R>): IPipeline<T
       Fs.from(callback(event))
         .take(1)
         .tap(() => (blocked = false))
-        .toPromise()
+        .lastOne()
     },
     error(err) {
       this.abort(err)

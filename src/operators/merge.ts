@@ -13,7 +13,7 @@ export const mergeScan = <T, R>(
       queue.push(
         Fs.from(callback(initialValue, event, index++))
           .tap((e) => this.publish(e))
-          .toPromise()
+          .lastOne()
           .then((v) => {
             initialValue = v
           })

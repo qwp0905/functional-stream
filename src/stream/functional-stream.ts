@@ -81,7 +81,7 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
         .tap((e) => subject.publish(e))
         .catchError((err) => subject.abort(err))
         .finalize(() => subject.commit())
-        .toPromise()
+        .lastOne()
     })
   }
 
@@ -94,7 +94,7 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
         .tap((e) => subject.publish(e))
         .catchError((err) => subject.abort(err))
         .finalize(() => subject.commit())
-        .toPromise()
+        .lastOne()
     })
   }
 
@@ -133,7 +133,7 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
         .tap((e) => subject.publish(e))
         .catchError((err) => subject.abort(err))
         .finalize(() => subject.commit())
-        .toPromise()
+        .lastOne()
     })
   }
 
