@@ -150,12 +150,13 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
   }
 
   static delay(ms: number): IFs<void> {
-    return Fs.generate((sub) =>
-      setTimeout(() => {
+    return Fs.generate((sub) => {
+      const delay = setTimeout(() => {
         sub.publish()
         sub.commit()
       }, ms)
-    )
+      sub.add(() => delay.unref())
+    })
   }
 
   static get ajax() {
