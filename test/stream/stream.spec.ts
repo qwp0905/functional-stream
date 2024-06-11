@@ -61,12 +61,10 @@ describe('generate', () => {
   describe('race', () => {
     it('1', async () => {
       const r = Fs.race(
-        sleep(10).then(() => Fs.range(1)),
-        sleep(30).then(() => Fs.range(3)),
-        sleep(50).then(() => Fs.range(5))
-      )
-        .mergeAll()
-        .toArray()
+        Fs.range(1).delay(10),
+        Fs.range(3).delay(30),
+        Fs.range(5).delay(50)
+      ).toArray()
 
       await expect(r).resolves.toEqual([0])
     })
