@@ -107,7 +107,7 @@ export function fromInterval(interval: number): IFs<number> {
   })
 }
 
-export function fromZip(...v: StreamLike<any>[]): IFs<any[]> {
+export function fromZip(v: StreamLike<any>[]): IFs<any[]> {
   const iters = v.map((e) => Fs.from(e)[Symbol.asyncIterator]())
   const next = async () => Promise.all(iters.map((e) => e.next()))
 
@@ -143,7 +143,7 @@ export function fromMerge<T>(streams: StreamLike<T>[], concurrency: number = -1)
   })
 }
 
-export function fromRace<T>(...streams: StreamLike<T>[]): IFs<T> {
+export function fromRace<T>(streams: StreamLike<T>[]): IFs<T> {
   return Fs.generate((subject) => {
     const s = streams.map((e) => Fs.from(e))
     s.forEach((e) => subject.add(() => e.close()))

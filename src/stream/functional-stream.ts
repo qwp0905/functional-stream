@@ -101,7 +101,7 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
   }
 
   static race<T>(...v: StreamLike<T>[]): IFs<T> {
-    return fromRace(...v)
+    return fromRace(v)
   }
 
   static interval(ms: number): IFs<number> {
@@ -113,7 +113,7 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
   }
 
   static zip(...v: StreamLike<any>[]) {
-    return fromZip(...v)
+    return fromZip(v)
   }
 
   static delay(ms: number): IFs<void> {
