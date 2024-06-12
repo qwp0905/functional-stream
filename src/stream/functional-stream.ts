@@ -15,6 +15,7 @@ import {
   fromLoop,
   fromMerge,
   fromPromise,
+  fromRace,
   fromReadable,
   fromZip
 } from './generators.js'
@@ -100,25 +101,7 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
   }
 
   static race<T>(...v: StreamLike<T>[]): IFs<T> {
-    return Fs.generate((subject) => {
-      const s = v.map((e) => Fs.from(e))
-      s.forEach((e) => subject.add(() => e.close()))
-      let first = false
-      return fromIterable(s)
-        .mergeMap((e) => {
-          if (first) {
-            e.close()
-            return Fs.empty<T>()
-          }
-
-          first = true
-          return e
-        })
-        .tap((e) => subject.publish(e))
-        .catchError((err) => subject.abort(err))
-        .finalize(() => subject.commit())
-        .lastOne()
-    })
+    return fromRace(...v)
   }
 
   static interval(ms: number): IFs<number> {

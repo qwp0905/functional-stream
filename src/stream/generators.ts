@@ -121,12 +121,12 @@ export function fromZip(...v: StreamLike<any>[]): IFs<any[]> {
 }
 
 export function fromDelay(ms: number): IFs<void> {
-  return Fs.generate((sub) => {
+  return Fs.generate((subject) => {
     const delay = setTimeout(() => {
-      sub.publish()
-      sub.commit()
+      subject.publish()
+      subject.commit()
     }, ms)
-    sub.add(() => delay.unref())
+    subject.add(() => delay.unref())
   })
 }
 
@@ -136,6 +136,28 @@ export function fromMerge<T>(streams: StreamLike<T>[], concurrency: number = -1)
     s.forEach((e) => subject.add(() => e.close()))
     return fromIterable(s)
       .mergeAll(concurrency)
+      .tap((e) => subject.publish(e))
+      .catchError((err) => subject.abort(err))
+      .finalize(() => subject.commit())
+      .lastOne()
+  })
+}
+
+export function fromRace<T>(...streams: StreamLike<T>[]): IFs<T> {
+  return Fs.generate((subject) => {
+    const s = streams.map((e) => Fs.from(e))
+    s.forEach((e) => subject.add(() => e.close()))
+    let first = false
+    return fromIterable(s)
+      .mergeMap((e) => {
+        if (first) {
+          e.close()
+          return Fs.empty<T>()
+        }
+
+        first = true
+        return e
+      })
       .tap((e) => subject.publish(e))
       .catchError((err) => subject.abort(err))
       .finalize(() => subject.commit())
