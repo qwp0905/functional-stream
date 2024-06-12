@@ -8,10 +8,12 @@ import { Subject } from '../observer/index.js'
 import { ISubject, HtmlEventMap, IFs, StreamLike } from '../@types/index.js'
 import {
   fromAsyncIterable,
+  fromDelay,
   fromEvent,
   fromInterval,
   fromIterable,
   fromLoop,
+  fromMerge,
   fromPromise,
   fromReadable,
   fromZip
@@ -73,29 +75,11 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
   }
 
   static merge<T>(...streams: StreamLike<T>[]): IFs<T> {
-    return Fs.generate((subject) => {
-      const s = streams.map((e) => Fs.from(e))
-      s.forEach((e) => subject.add(() => e.close()))
-      return fromIterable(s)
-        .mergeAll()
-        .tap((e) => subject.publish(e))
-        .catchError((err) => subject.abort(err))
-        .finalize(() => subject.commit())
-        .lastOne()
-    })
+    return fromMerge(streams)
   }
 
   static concat<T>(...streams: StreamLike<T>[]): IFs<T> {
-    return Fs.generate((subject) => {
-      const s = streams.map((e) => Fs.from(e))
-      s.forEach((e) => subject.add(() => e.close()))
-      return fromIterable(s)
-        .concatAll()
-        .tap((e) => subject.publish(e))
-        .catchError((err) => subject.abort(err))
-        .finalize(() => subject.commit())
-        .lastOne()
-    })
+    return fromMerge(streams, 1)
   }
 
   static range(count: number, start = 0): IFs<number> {
@@ -150,13 +134,7 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
   }
 
   static delay(ms: number): IFs<void> {
-    return Fs.generate((sub) => {
-      const delay = setTimeout(() => {
-        sub.publish()
-        sub.commit()
-      }, ms)
-      sub.add(() => delay.unref())
-    })
+    return fromDelay(ms)
   }
 
   static get ajax() {
