@@ -2,7 +2,7 @@ declare global {
   interface Number {
     add(v: number): number
     subtract(v: number): number
-    multiple(v: number): number
+    multiply(v: number): number
     divide(v: number): number
     remain(v: number): number
     power(v: number): number
@@ -28,7 +28,7 @@ Number.prototype.add = function (v) {
 Number.prototype.subtract = function (v) {
   return this.valueOf() - v
 }
-Number.prototype.multiple = function (v) {
+Number.prototype.multiply = function (v) {
   return this.valueOf() * v
 }
 Number.prototype.divide = function (v) {
