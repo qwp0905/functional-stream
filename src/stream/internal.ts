@@ -222,10 +222,10 @@ export class FsInternal<T> implements IFs<T> {
 
   switchScan<R>(callback: TReduceCallback<R, T, StreamLike<R>>, initialValue: R): IFs<R> {
     let current = 0
-    return this.mergeScan((acc, cur, i) => {
-      current = i
-      return Fs.from(callback(acc, cur, i)).filter(() => current.equal(i))
-    }, initialValue)
+    return this.tap((_, i) => (current = i)).mergeScan(
+      (acc, cur, i) => Fs.from(callback(acc, cur, i)).filter(() => current.equal(i)),
+      initialValue
+    )
   }
 
   mergeScan<R>(
