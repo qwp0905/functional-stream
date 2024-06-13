@@ -383,11 +383,11 @@ export class FsInternal<T> implements IFs<T> {
     let blocked = false
     return this.filter(() => !blocked)
       .tap(() => (blocked = true))
-      .tap((e) =>
-        Fs.from(callback(e))
-          .take(1)
-          .tap(() => (blocked = false))
-          .lastOne()
+      .mergeMap((e) =>
+        Fs.from<T>(callback(e) as any)
+          .startWith(e)
+          .takeWhile((_, i) => i.equal(0))
+          .finalize(() => (blocked = false))
       )
   }
 
