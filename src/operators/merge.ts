@@ -10,8 +10,10 @@ export const mergeScan = <T, R>(
   const queue: Promise<void>[] = []
   return new Pipeline({
     next(event) {
+      const fs = Fs.from(callback(initialValue, event, index++))
+      this.add(() => fs.close())
       queue.push(
-        Fs.from(callback(initialValue, event, index++))
+        fs
           .tap((e) => this.publish(e))
           .lastOne()
           .then((v) => {
