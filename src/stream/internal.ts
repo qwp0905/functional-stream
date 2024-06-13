@@ -372,16 +372,10 @@ export class FsInternal<T> implements IFs<T> {
   audit<R>(callback: TMapCallback<T, StreamLike<R>>): IFs<T> {
     let last: T
     let blocked = false
-    return this.mergeMap((e, i) => {
-      last = e
-
-      if (blocked) {
-        return Fs.empty()
-      }
-
-      blocked = true
-      return Fs.from(callback(e, i)).take(1)
-    })
+    return this.tap((e) => (last = e))
+      .filter(() => !blocked)
+      .tap(() => (blocked = true))
+      .mergeMap((e, i) => Fs.from(callback(e, i)).take(1))
       .map(() => last)
       .tap(() => (blocked = false))
   }
