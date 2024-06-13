@@ -211,14 +211,9 @@ export class FsInternal<T> implements IFs<T> {
 
   exhaustMap<R>(callback: TMapCallback<T, StreamLike<R>>): IFs<R> {
     let blocked = false
-    return this.mergeMap((e, i) => {
-      if (blocked) {
-        return Fs.empty()
-      }
-
-      blocked = true
-      return Fs.from(callback(e, i)).finalize(() => (blocked = false))
-    })
+    return this.filter(() => !blocked)
+      .tap(() => (blocked = true))
+      .mergeMap((e, i) => Fs.from(callback(e, i)).finalize(() => (blocked = false)))
   }
 
   switchMap<R>(callback: TMapCallback<T, StreamLike<R>>): IFs<R> {
