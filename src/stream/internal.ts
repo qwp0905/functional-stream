@@ -38,7 +38,6 @@ import {
   timestamp
 } from '../operators/index.js'
 import { Fs } from './functional-stream.js'
-import { throttle } from '../operators/throttle.js'
 
 export class FsInternal<T> implements IFs<T> {
   protected constructor(protected source: ISubject<T>) {}
@@ -381,7 +380,15 @@ export class FsInternal<T> implements IFs<T> {
   }
 
   throttle<R>(callback: (arg: T) => StreamLike<R>): IFs<T> {
-    return this.pipe(throttle(callback))
+    let blocked = false
+    return this.filter(() => !blocked)
+      .tap(() => (blocked = true))
+      .tap((e) =>
+        Fs.from(callback(e))
+          .take(1)
+          .tap(() => (blocked = false))
+          .lastOne()
+      )
   }
 
   bufferWhen<R>(callback: () => StreamLike<R>): IFs<T[]> {
