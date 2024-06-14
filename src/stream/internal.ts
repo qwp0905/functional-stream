@@ -34,8 +34,7 @@ import {
   takeWhile,
   skipLast,
   takeLast,
-  mergeScan,
-  timestamp
+  mergeScan
 } from '../operators/index.js'
 import { Fs } from './functional-stream.js'
 
@@ -417,7 +416,8 @@ export class FsInternal<T> implements IFs<T> {
   }
 
   timestamp(): IFs<number> {
-    return this.pipe(timestamp())
+    const start = Date.now()
+    return this.map(() => Date.now().subtract(start))
   }
 
   timeInterval(): IFs<number> {
