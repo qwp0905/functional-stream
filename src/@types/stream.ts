@@ -71,6 +71,7 @@ export interface IFs<T> extends AsyncIterable<T> {
   throttle<R>(callback: (arg: T) => StreamLike<R>): IFs<T>
   bufferWhen<R>(callback: () => StreamLike<R>): IFs<T[]>
   timestamp(): IFs<number>
+  throwError(factory: unknown | (() => unknown)): IFs<T>
 }
 
 export type StreamLike<T> =

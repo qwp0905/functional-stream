@@ -134,7 +134,7 @@ export class FsInternal<T> implements IFs<T> {
   }
 
   count(): IFs<number> {
-    return this.reduce((acc) => acc + 1, 0)
+    return this.reduce((acc) => acc.add(1), 0)
   }
 
   some(callback: TFilterCallback<T>): IFs<boolean> {
@@ -424,5 +424,12 @@ export class FsInternal<T> implements IFs<T> {
     return this.timestamp()
       .pairwise()
       .map(([prev, cur]) => cur.subtract(prev))
+  }
+
+  throwError(factory: unknown | (() => unknown)): IFs<T> {
+    return this.tap(() => {
+      const err = typeof factory === 'function' ? factory() : factory
+      throw err
+    })
   }
 }
