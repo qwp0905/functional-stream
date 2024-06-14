@@ -18,22 +18,14 @@ import {
   filter,
   tap,
   reduce,
-  scan,
-  skip,
   bufferCount,
   take,
   catchError,
   defaultIfEmpty,
   throwIfEmpty,
-  groupBy,
-  pairwise,
   split,
-  distinct,
   finalize,
-  skipWhile,
   takeWhile,
-  skipLast,
-  takeLast,
   mergeScan
 } from '../operators/index.js'
 import { Fs } from './functional-stream.js'
@@ -117,20 +109,13 @@ export class FsInternal<T> implements IFs<T> {
   }
 
   toArray(): Promise<T[]> {
-    return this.reduce((acc, cur) => acc.concat([cur]), [] as T[]).lastOne()
+    return this.reduce<T[]>((acc, cur) => acc.concat([cur]), []).lastOne()
   }
 
   forEach(callback: TMapCallback<T, any>): Promise<void> {
-    return new Promise((complete, error) => {
-      let i = 0
-      this.watch({
-        next(data) {
-          callback(data, i++)
-        },
-        error,
-        complete
-      })
-    })
+    return this.tap(callback)
+      .map<void>(() => undefined)
+      .lastOne()
   }
 
   count(): IFs<number> {
@@ -138,11 +123,17 @@ export class FsInternal<T> implements IFs<T> {
   }
 
   some(callback: TFilterCallback<T>): IFs<boolean> {
-    return this.reduce((acc, cur, i) => acc || callback(cur, i), false)
+    return this.filter(callback)
+      .take(1)
+      .map(() => true)
+      .defaultIfEmpty(false)
   }
 
   every(callback: TFilterCallback<T>): IFs<boolean> {
-    return this.reduce((acc, cur, i) => acc && callback(cur, i), true)
+    return this.filter((e, i) => !callback(e, i))
+      .take(1)
+      .map(() => false)
+      .defaultIfEmpty(true)
   }
 
   map<R>(callback: TMapCallback<T, R>): IFs<R> {
@@ -162,7 +153,7 @@ export class FsInternal<T> implements IFs<T> {
   }
 
   scan<A = T>(callback: TReduceCallback<A, T>, initialValue?: A): IFs<A> {
-    return this.pipe(scan(callback, initialValue))
+    return this.map((e, i) => (initialValue = callback(initialValue ?? (e as any), e, i)))
   }
 
   take(count: number): IFs<T> {
@@ -170,7 +161,7 @@ export class FsInternal<T> implements IFs<T> {
   }
 
   skip(count: number): IFs<T> {
-    return this.pipe(skip(count))
+    return this.filter((_, i) => i.greaterThanOrEqual(count))
   }
 
   bufferCount(count: number): IFs<T[]> {
@@ -298,7 +289,18 @@ export class FsInternal<T> implements IFs<T> {
   }
 
   groupBy<R>(callback: TMapCallback<T, R>): IFs<IFs<T>> {
-    return this.pipe(groupBy(callback))
+    const map = new Map<R, Subject<T>>()
+    return this.map<[T, R]>((e, i) => [e, callback(e, i)])
+      .tap(([e, k]) => map.get(k)?.publish(e))
+      .filter(([, k]) => !map.has(k))
+      .map(([e, k]) => {
+        const sub = new Subject<T>()
+        map.set(k, sub)
+        return Fs.from(sub).startWith(e)
+      })
+      .catchError((err) => map.forEach((s) => s.abort(err)))
+      .finalize(() => map.forEach((s) => s.commit()))
+      .finalize(() => map.clear())
   }
 
   timeout(each: number): IFs<T> {
@@ -331,7 +333,7 @@ export class FsInternal<T> implements IFs<T> {
   }
 
   pairwise(): IFs<[T, T]> {
-    return this.pipe(pairwise())
+    return this.scan<[T, T]>(([, prev], e) => [prev, e], [] as any).skip(1)
   }
 
   split(delimiter: string) {
@@ -339,11 +341,12 @@ export class FsInternal<T> implements IFs<T> {
   }
 
   distinct<K>(callback: TMapCallback<T, K> = (e) => e as any): IFs<T> {
-    return this.pipe(distinct(callback))
+    return this.groupBy(callback).mergeMap((e) => e.take(1))
   }
 
   skipWhile(callback: TMapCallback<T, boolean>): IFs<T> {
-    return this.pipe(skipWhile(callback))
+    let started = false
+    return this.tap((e, i) => (started ||= !callback(e, i))).filter(() => started)
   }
 
   takeWhile(callback: TMapCallback<T, boolean>): IFs<T> {
@@ -355,11 +358,16 @@ export class FsInternal<T> implements IFs<T> {
   }
 
   skipLast(count: number): IFs<T> {
-    return this.pipe(skipLast(count))
+    const queue: T[] = []
+    return this.tap((e) => queue.push(e))
+      .skip(count)
+      .map(() => queue.shift()!)
+      .finalize(() => (queue.length = 0))
   }
 
   takeLast(count: number): IFs<T> {
-    return this.pipe(takeLast(count))
+    const len = count.minus().add(1)
+    return this.reduce<T[]>((acc, cur) => acc.slice(len).concat([cur]), []).mergeAll()
   }
 
   audit<R>(callback: TMapCallback<T, StreamLike<R>>): IFs<T> {

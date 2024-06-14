@@ -46,3 +46,15 @@ describe('takeWhile', () => {
     await expect(r).resolves.toStrictEqual([0, 1, 2, 3])
   })
 })
+
+describe('takeLast', () => {
+  it('1', async () => {
+    const r = Fs.range(10).takeLast(3).toArray()
+    await expect(r).resolves.toStrictEqual([7, 8, 9])
+  })
+
+  it('2', async () => {
+    const r = Fs.range(10).takeLast(10).toArray()
+    await expect(r).resolves.toStrictEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+  })
+})
