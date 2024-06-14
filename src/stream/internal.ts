@@ -440,4 +440,10 @@ export class FsInternal<T> implements IFs<T> {
       throw err
     })
   }
+
+  sample(notifier: StreamLike<any>): IFs<T> {
+    return this.bufferWhen(() => notifier)
+      .filter((e) => e.length.greaterThan(0))
+      .map((e) => e.at(-1)!)
+  }
 }
