@@ -73,6 +73,7 @@ export interface IFs<T> extends AsyncIterable<T> {
   timestamp(): IFs<number>
   throwError(factory: unknown | (() => unknown)): IFs<T>
   sample(notifier: StreamLike<any>): IFs<T>
+  discard(): IFs<any>
 }
 
 export type StreamLike<T> =

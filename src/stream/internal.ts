@@ -446,4 +446,8 @@ export class FsInternal<T> implements IFs<T> {
       .filter((e) => e.length.greaterThan(0))
       .map((e) => e.at(-1)!)
   }
+
+  discard(): IFs<any> {
+    return this.filter(() => false)
+  }
 }
