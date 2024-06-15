@@ -9,9 +9,11 @@ import { Fs } from './functional-stream.js'
 
 export function fromAsyncIterable<T>(iter: AsyncIterable<T>): IFs<T> {
   return Fs.generate(async (subject) => {
+    const iterator = iter[Symbol.asyncIterator]()
+    subject.add(() => iterator.return?.())
     try {
-      for await (const data of iter) {
-        subject.publish(data)
+      for (let data = await iterator.next(); !data.done; data = await iterator.next()) {
+        subject.publish(data.value)
       }
     } catch (err) {
       subject.abort(err)
