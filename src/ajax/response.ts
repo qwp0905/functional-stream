@@ -63,7 +63,9 @@ async function getBody(res: Response, type?: ResponseType): Promise<any> {
     case 'application/json':
       return res.json()
     case 'application/x-ndjson':
-      return Fs.from(res.body.pipeThrough(new TextDecoderStream(charset))).split('\n')
+      return Fs.from(res.body.pipeThrough(new TextDecoderStream(charset)))
+        .split('\n')
+        .map((e) => JSON.parse(e))
     case 'application/octet-stream':
       return Fs.from(res.body.pipeThrough(new TextDecoderStream(charset)))
     case 'application/x-www-form-urlencode':
