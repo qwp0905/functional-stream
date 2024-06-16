@@ -16,7 +16,6 @@ import { SubscriptionTimeoutError, EmptyPipelineError } from '../utils/index.js'
 import {
   map,
   filter,
-  tap,
   reduce,
   bufferCount,
   take,
