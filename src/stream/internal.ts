@@ -12,7 +12,11 @@ import {
   TTapCallback
 } from '../@types/index.js'
 import { Subject } from '../observer/index.js'
-import { SubscriptionTimeoutError, EmptyPipelineError } from '../utils/index.js'
+import {
+  SubscriptionTimeoutError,
+  EmptyPipelineError,
+  isFunction
+} from '../utils/index.js'
 import {
   map,
   filter,
@@ -434,7 +438,7 @@ export class FsInternal<T> implements IFs<T> {
 
   throwError(factory: unknown | (() => unknown)): IFs<T> {
     return this.tap(() => {
-      const err = typeof factory === 'function' ? factory() : factory
+      const err = isFunction(factory) ? factory() : factory
       throw err
     })
   }
