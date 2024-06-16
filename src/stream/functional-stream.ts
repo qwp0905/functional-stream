@@ -116,7 +116,7 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
     return fromZip(v)
   }
 
-  static delay(ms: number): IFs<void> {
+  static delay(ms: number): IFs<any> {
     return fromDelay(ms)
   }
 

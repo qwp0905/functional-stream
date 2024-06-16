@@ -304,24 +304,10 @@ export class FsInternal<T> implements IFs<T> {
   }
 
   timeout(each: number): IFs<T> {
-    return this.pipeTo(async (sub) => {
-      try {
-        const iter = this.iter()
-        const next = () =>
-          Promise.race([
-            iter.next(),
-            sleep(each).then(() => Promise.reject(new SubscriptionTimeoutError()))
-          ])
-
-        for (let data = await next(); !data.done; data = await next()) {
-          sub.publish(data.value)
-        }
-      } catch (err) {
-        sub.abort(err)
-      } finally {
-        sub.commit()
-      }
-    })
+    const timeout = setTimeout(() => {
+      throw new SubscriptionTimeoutError()
+    }, each)
+    return this.tap(() => timeout.refresh()).finalize(() => timeout.unref())
   }
 
   startWith(v: T): IFs<T> {
