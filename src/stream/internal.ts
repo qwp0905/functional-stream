@@ -363,7 +363,7 @@ export class FsInternal<T> implements IFs<T> {
 
   takeLast(count: number): IFs<T> {
     const len = count.minus().add(1)
-    return this.reduce<T[]>((acc, cur) => acc.slice(len).concat([cur]), []).mergeAll()
+    return this.reduce<T[]>((a, c) => a.slice(len).concat([c]), []).concatAll()
   }
 
   audit<R>(callback: TMapCallback<T, StreamLike<R>>): IFs<T> {
