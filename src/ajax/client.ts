@@ -83,6 +83,10 @@ export class AjaxClient {
 
     return Fs.generate<AjaxResponse<T>>((sub) => this.sub.publish([sub, merged]))
   }
+
+  close() {
+    return this.sub.close()
+  }
 }
 
 export const defaultAjaxClient = new AjaxClient({
