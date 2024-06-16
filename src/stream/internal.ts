@@ -396,8 +396,7 @@ export class FsInternal<T> implements IFs<T> {
   }
 
   timestamp(): IFs<number> {
-    const start = Date.now()
-    return this.map(() => Date.now().subtract(start))
+    return this.map(() => Date.now())
   }
 
   timeInterval(): IFs<number> {
