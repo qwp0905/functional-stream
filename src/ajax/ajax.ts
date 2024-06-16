@@ -7,10 +7,7 @@ export interface AjaxAdapter {
   dispatch(request: AjaxRequest, subject: ISubject<AjaxResponse<any>>): void
 }
 
-export async function ajaxCall(
-  config: AjaxRequestConfig,
-  subject: ISubject<AjaxResponse<any>>
-) {
+export async function ajaxCall(config: AjaxRequestConfig, subject: ISubject<AjaxResponse<any>>) {
   try {
     const req = new AjaxRequest(config)
     const controller = new AbortController()

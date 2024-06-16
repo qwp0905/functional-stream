@@ -19,8 +19,7 @@ export interface AjaxClientConfig {
 export interface AjaxConfig extends Omit<AjaxRequestConfig, 'method' | 'url' | 'body'> {}
 
 export class AjaxClient {
-  private readonly sub: ISubject<[ISubject<AjaxResponse<any>>, AjaxRequestConfig]> =
-    new Subject()
+  private readonly sub: ISubject<[ISubject<AjaxResponse<any>>, AjaxRequestConfig]> = new Subject()
   constructor(private readonly config: AjaxClientConfig) {
     if ((config.concurrency ?? 0).lessThanOrEqual(0)) {
       this.sub.watch({

@@ -12,11 +12,7 @@ import {
   TTapCallback
 } from '../@types/index.js'
 import { Subject } from '../observer/index.js'
-import {
-  SubscriptionTimeoutError,
-  EmptyPipelineError,
-  isFunction
-} from '../utils/index.js'
+import { SubscriptionTimeoutError, EmptyPipelineError, isFunction } from '../utils/index.js'
 import {
   map,
   filter,
@@ -188,15 +184,8 @@ export class FsInternal<T> implements IFs<T> {
     return this.switchMap((e) => e as any)
   }
 
-  mergeMap<R>(
-    callback: TMapCallback<T, StreamLike<R>>,
-    concurrency: number = -1
-  ): IFs<R> {
-    return this.mergeScan<R>(
-      (_, cur, index) => callback(cur, index),
-      null as R,
-      concurrency
-    )
+  mergeMap<R>(callback: TMapCallback<T, StreamLike<R>>, concurrency: number = -1): IFs<R> {
+    return this.mergeScan<R>((_, cur, index) => callback(cur, index), null as R, concurrency)
   }
 
   concatMap<R>(callback: TMapCallback<T, StreamLike<R>>): IFs<R> {

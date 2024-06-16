@@ -13,9 +13,7 @@ describe('take', () => {
 
   it('take 3', async () => {
     const stream = Fs.range(10)
-    await expect(stream.take(8).toArray()).resolves.toStrictEqual([
-      0, 1, 2, 3, 4, 5, 6, 7
-    ])
+    await expect(stream.take(8).toArray()).resolves.toStrictEqual([0, 1, 2, 3, 4, 5, 6, 7])
   })
 
   it('take 4', async () => {

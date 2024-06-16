@@ -76,8 +76,7 @@ export function fromReadable<T>(readable: ReadableStream<T>): IFs<T> {
 
 export function fromEvent<T>(source: any, event: string | symbol): IFs<T> {
   return Fs.generate<T>((sub) => {
-    const handler = (...args: any[]) =>
-      sub.publish(args.length.greaterThan(1) ? args : args.at(0))
+    const handler = (...args: any[]) => sub.publish(args.length.greaterThan(1) ? args : args.at(0))
 
     if (isHtmlElement(source)) {
       source.addEventListener(event, handler)

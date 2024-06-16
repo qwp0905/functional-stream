@@ -121,8 +121,7 @@ export class AjaxRequest {
     }
 
     if (typeof this.body === 'object') {
-      this.headers['content-type'] =
-        this.headers['content-type'] ?? 'application/json;utf-8'
+      this.headers['content-type'] = this.headers['content-type'] ?? 'application/json;utf-8'
       const marshaled = JSON.stringify(this.body)
       return sliceReader(marshaled, marshaled.length)
     }

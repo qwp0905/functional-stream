@@ -25,11 +25,7 @@ export class AjaxResponse<T> {
     for (const [k, v] of response.headers.entries()) {
       headers[k] = v
     }
-    return new AjaxResponse<T>(
-      response.status,
-      await getBody(response, response_type),
-      headers
-    )
+    return new AjaxResponse<T>(response.status, await getBody(response, response_type), headers)
   }
 }
 
@@ -42,9 +38,7 @@ async function getBody(res: Response, type?: ResponseType): Promise<any> {
   const charset = content_type_header
     ?.find((e) => e.toLowerCase().startsWith('charset='))
     ?.replace(/^charset=/, '')
-  const content_type = content_type_header?.find(
-    (e) => !e.toLowerCase().startsWith('charset=')
-  )
+  const content_type = content_type_header?.find((e) => !e.toLowerCase().startsWith('charset='))
 
   switch (type) {
     case 'json':
