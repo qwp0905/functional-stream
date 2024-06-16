@@ -304,10 +304,22 @@ export class FsInternal<T> implements IFs<T> {
   }
 
   timeout(each: number): IFs<T> {
-    const timeout = setTimeout(() => {
-      throw new SubscriptionTimeoutError()
-    }, each)
-    return this.tap(() => timeout.refresh()).finalize(() => timeout.unref())
+    return this.pipeTo((sub) => {
+      const timeout = setTimeout(() => sub.abort(new SubscriptionTimeoutError()), each)
+      sub.add(() => timeout.unref())
+      this.watch({
+        next(data) {
+          timeout.refresh()
+          sub.publish(data)
+        },
+        error(err) {
+          sub.abort(err)
+        },
+        complete() {
+          sub.commit()
+        }
+      })
+    })
   }
 
   startWith(v: T): IFs<T> {
@@ -319,7 +331,7 @@ export class FsInternal<T> implements IFs<T> {
   }
 
   pairwise(): IFs<[T, T]> {
-    return this.scan<[T, T]>(([, prev], e) => [prev, e], [] as any).skip(1)
+    return this.scan<any>(([, prev], e) => [prev, e], []).skip(1)
   }
 
   split(delimiter: string) {
