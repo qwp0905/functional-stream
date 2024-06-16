@@ -113,9 +113,7 @@ export class FsInternal<T> implements IFs<T> {
   }
 
   forEach(callback: TMapCallback<T, any>): Promise<void> {
-    return this.tap(callback)
-      .map<void>(() => undefined)
-      .lastOne()
+    return this.tap(callback).discard().lastOne()
   }
 
   count(): IFs<number> {
