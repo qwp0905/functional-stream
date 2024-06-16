@@ -12,7 +12,7 @@ import {
   TTapCallback
 } from '../@types/index.js'
 import { Subject } from '../observer/index.js'
-import { SubscriptionTimeoutError, sleep, EmptyPipelineError } from '../utils/index.js'
+import { SubscriptionTimeoutError, EmptyPipelineError } from '../utils/index.js'
 import {
   map,
   filter,
@@ -143,7 +143,10 @@ export class FsInternal<T> implements IFs<T> {
   }
 
   tap(callback: TTapCallback<T>): IFs<T> {
-    return this.pipe(tap(callback))
+    return this.map((e, i) => {
+      callback(e, i)
+      return e
+    })
   }
 
   reduce<A = T>(callback: TReduceCallback<A, T>, initialValue?: A): IFs<A> {
