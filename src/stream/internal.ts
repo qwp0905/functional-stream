@@ -47,7 +47,9 @@ export class FsInternal<T> implements IFs<T> {
   protected pipeTo<R>(generator: (sub: ISubject<R>) => void): IFs<R> {
     const sub = new Subject<R>()
     sub.add(this.source)
-    generator(sub)
+    Promise.resolve(generator(sub))
+      .catch((err) => sub.abort(err))
+      .finally(() => sub.commit())
     return new FsInternal(sub)
   }
 
@@ -221,23 +223,17 @@ export class FsInternal<T> implements IFs<T> {
     }
 
     return this.pipeTo(async (sub) => {
-      try {
-        const iter = this.iter()
-        let index = 0
-        await Promise.all(
-          new Array(concurrency).fill(null).map(async () => {
-            for (let data = await iter.next(); !data.done; data = await iter.next()) {
-              const fs = Fs.from(callback(initialValue, data.value, index++))
-              sub.add(() => fs.close())
-              await fs.tap((e) => sub.publish((initialValue = e))).lastOne()
-            }
-          })
-        )
-      } catch (err) {
-        sub.abort(err)
-      } finally {
-        sub.commit()
-      }
+      const iter = this.iter()
+      let index = 0
+      return Fs.range(concurrency)
+        .mergeScan(async () => {
+          for (let data = await iter.next(); !data.done; data = await iter.next()) {
+            const fs = Fs.from(callback(initialValue, data.value, index++))
+            sub.add(() => fs.close())
+            await fs.tap((e) => sub.publish((initialValue = e))).lastOne()
+          }
+        }, null)
+        .lastOne()
     })
   }
 
@@ -300,18 +296,9 @@ export class FsInternal<T> implements IFs<T> {
     return this.pipeTo((sub) => {
       const timeout = setTimeout(() => sub.abort(new SubscriptionTimeoutError()), each)
       sub.add(() => timeout.unref())
-      this.watch({
-        next(data) {
-          timeout.refresh()
-          sub.publish(data)
-        },
-        error(err) {
-          sub.abort(err)
-        },
-        complete() {
-          sub.commit()
-        }
-      })
+      return this.tap(() => timeout.refresh())
+        .tap((e) => sub.publish(e))
+        .lastOne()
     })
   }
 
@@ -388,18 +375,6 @@ export class FsInternal<T> implements IFs<T> {
     return this.pipeTo((sub) => {
       let queue: T[] = []
       let done = false
-      const trigger = Fs.from(callback())
-      sub.add(() => trigger.close())
-      trigger.watch({
-        next() {
-          sub.publish(queue)
-          queue = []
-          if (done) {
-            sub.commit()
-          }
-        }
-      })
-
       this.watch({
         next(data) {
           queue.push(data)
@@ -411,6 +386,12 @@ export class FsInternal<T> implements IFs<T> {
           done = true
         }
       })
+
+      return Fs.from(callback())
+        .tap(() => sub.publish(queue))
+        .tap(() => (queue = []))
+        .takeWhile(() => !done)
+        .lastOne()
     })
   }
 
