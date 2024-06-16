@@ -374,7 +374,7 @@ export class FsInternal<T> implements IFs<T> {
       .mergeMap((e) =>
         Fs.from<T>(callback(e) as any)
           .startWith(e)
-          .takeWhile(() => false)
+          .takeWhile((_, i) => i.equal(0))
           .finalize(() => (blocked = false))
       )
   }
