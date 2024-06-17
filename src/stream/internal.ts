@@ -220,7 +220,7 @@ export class FsInternal<T> implements IFs<T> {
       return this.pipe(mergeScan(callback, initialValue))
     }
 
-    return this.pipeTo(async (sub) => {
+    return this.pipeTo((sub) => {
       const iter = this.iter()
       let index = 0
       return Fs.range(concurrency)
