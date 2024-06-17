@@ -47,9 +47,7 @@ export class FsInternal<T> implements IFs<T> {
   protected pipeTo<R>(generator: (sub: ISubject<R>) => void): IFs<R> {
     const sub = new Subject<R>()
     sub.add(this.source)
-    Promise.resolve(generator(sub))
-      .catch((err) => sub.abort(err))
-      .finally(() => sub.commit())
+    generator(sub)
     return new FsInternal(sub)
   }
 
@@ -233,6 +231,9 @@ export class FsInternal<T> implements IFs<T> {
             await fs.tap((e) => sub.publish((initialValue = e))).lastOne()
           }
         }, null)
+        .discard()
+        .catchError((err) => sub.abort(err))
+        .finalize(() => sub.commit())
         .lastOne()
     })
   }
@@ -298,6 +299,8 @@ export class FsInternal<T> implements IFs<T> {
       sub.add(() => timeout.unref())
       return this.tap(() => timeout.refresh())
         .tap((e) => sub.publish(e))
+        .catchError((err) => sub.abort(err))
+        .finalize(() => sub.commit())
         .lastOne()
     })
   }
@@ -391,6 +394,8 @@ export class FsInternal<T> implements IFs<T> {
         .tap(() => sub.publish(queue))
         .tap(() => (queue = []))
         .takeWhile(() => !done)
+        .catchError((err) => sub.abort(err))
+        .finalize(() => sub.commit())
         .lastOne()
     })
   }
