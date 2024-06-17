@@ -224,13 +224,13 @@ export class FsInternal<T> implements IFs<T> {
       const iter = this.iter()
       let index = 0
       return Fs.range(concurrency)
-        .mergeScan(async () => {
+        .mergeMap(async () => {
           for (let data = await iter.next(); !data.done; data = await iter.next()) {
             const fs = Fs.from(callback(initialValue, data.value, index++))
             sub.add(() => fs.close())
             await fs.tap((e) => sub.publish((initialValue = e))).lastOne()
           }
-        }, null)
+        })
         .discard()
         .catchError((err) => sub.abort(err))
         .finalize(() => sub.commit())
