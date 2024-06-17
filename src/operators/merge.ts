@@ -12,7 +12,7 @@ export const mergeScan = <T, R>(
     next(event) {
       const fs = Fs.from(callback(initialValue, event, index++))
       this.add(() => fs.close())
-      queue.push(fs.tap((e) => this.publish((initialValue = e))))
+      queue.push(fs.tap((e) => this.publish((initialValue = e))).discard())
     },
     error(err) {
       this.abort(err)
