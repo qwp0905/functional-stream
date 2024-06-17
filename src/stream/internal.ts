@@ -91,7 +91,7 @@ export class FsInternal<T> implements IFs<T> {
   lastOne(): Promise<T> {
     return new Promise((resolve, error) => {
       let result: T
-      this.watch({
+      this.source.watch({
         next(event) {
           result = event
         },
@@ -256,7 +256,7 @@ export class FsInternal<T> implements IFs<T> {
 
   copy(count: number): IFs<T>[] {
     const sub = new Array(count).fill(null).map(() => new Subject<T>())
-    this.watch({
+    this.source.watch({
       next(data) {
         sub.forEach((s) => s.publish(data))
       },
@@ -378,7 +378,7 @@ export class FsInternal<T> implements IFs<T> {
     return this.pipeTo((sub) => {
       let queue: T[] = []
       let done = false
-      this.watch({
+      this.source.watch({
         next(data) {
           queue.push(data)
         },
