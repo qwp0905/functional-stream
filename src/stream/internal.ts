@@ -92,13 +92,9 @@ export class FsInternal<T> implements IFs<T> {
     return new Promise((resolve, error) => {
       let result: T
       this.source.watch({
-        next(event) {
-          result = event
-        },
+        next: (event) => (result = event),
         error,
-        complete() {
-          resolve(result)
-        }
+        complete: () => resolve(result)
       })
     })
   }
