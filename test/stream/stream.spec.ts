@@ -44,7 +44,7 @@ describe('number', () => {
       .mergeMap((e) => sleepWith(e, 100), 3)
       .skip(1)
       .mergeAll(1)
-      .chain([1, 2, 3])
+      .concatWith([1, 2, 3])
       .mergeMap((e) => sleepWith(e, 10))
       .bufferCount(3)
       .toArray()
@@ -58,26 +58,6 @@ describe('number', () => {
 })
 
 describe('generate', () => {
-  describe('race', () => {
-    it('1', async () => {
-      const r = Fs.race(
-        Fs.range(1).delay(10),
-        Fs.range(3).delay(30),
-        Fs.range(5).delay(50)
-      ).toArray()
-
-      await expect(r).resolves.toEqual([0])
-    })
-
-    it('2', async () => {
-      let cb = jest.fn()
-      const r = Fs.race(Fs.interval(10), Fs.interval(20).tap(cb)).take(3).toArray()
-
-      await expect(r).resolves.toStrictEqual([0, 1, 2])
-      expect(cb).not.toHaveBeenCalled()
-    })
-  })
-
   it('readable', async () => {
     const rs = new ReadableStream({
       start(con) {
@@ -94,17 +74,6 @@ describe('generate', () => {
   it('promise', async () => {
     const r = Fs.from(Promise.resolve(10)).lastOne()
     await expect(r).resolves.toEqual(10)
-  })
-
-  it('zip', async () => {
-    const r = Fs.zip(Fs.range(3), Fs.range(5, 3)).toArray()
-    await expect(r).resolves.toStrictEqual([
-      [0, 3],
-      [1, 4],
-      [2, 5],
-      [undefined, 6],
-      [undefined, 7]
-    ])
   })
 })
 

@@ -108,19 +108,6 @@ export function fromInterval(interval: number): IFs<number> {
   })
 }
 
-export function fromZip(v: StreamLike<any>[]): IFs<any[]> {
-  const iters = v.map((e) => Fs.from(e)[Symbol.asyncIterator]())
-  const next = async () => Promise.all(iters.map((e) => e.next()))
-
-  return fromAsyncIterable({
-    async *[Symbol.asyncIterator]() {
-      for (let data = await next(); data.some((e) => !e.done); data = await next()) {
-        yield data.map((e) => e.value)
-      }
-    }
-  })
-}
-
 export function fromDelay(ms: number): IFs<void> {
   return Fs.generate((subject) => {
     const delay = setTimeout(() => {
@@ -128,40 +115,5 @@ export function fromDelay(ms: number): IFs<void> {
       subject.commit()
     }, ms)
     subject.add(() => delay.unref())
-  })
-}
-
-export function fromMerge<T>(streams: StreamLike<T>[], concurrency: number = -1): IFs<T> {
-  return Fs.generate((subject) => {
-    const s = streams.map((e) => Fs.from(e))
-    s.forEach((e) => subject.add(() => e.close()))
-    return fromIterable(s)
-      .mergeAll(concurrency)
-      .tap((e) => subject.publish(e))
-      .catchError((err) => subject.abort(err))
-      .finalize(() => subject.commit())
-      .lastOne()
-  })
-}
-
-export function fromRace<T>(streams: StreamLike<T>[]): IFs<T> {
-  return Fs.generate((subject) => {
-    const s = streams.map((e) => Fs.from(e))
-    s.forEach((e) => subject.add(() => e.close()))
-    let first = false
-    return fromIterable(s)
-      .mergeMap((e) => {
-        if (first) {
-          e.close()
-          return Fs.empty<T>()
-        }
-
-        first = true
-        return e
-      })
-      .tap((e) => subject.publish(e))
-      .catchError((err) => subject.abort(err))
-      .finalize(() => subject.commit())
-      .lastOne()
   })
 }

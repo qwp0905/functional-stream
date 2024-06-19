@@ -44,7 +44,6 @@ export interface IFs<T> extends AsyncIterable<T> {
   switchMap<R>(callback: TMapCallback<T, StreamLike<R>>): IFs<R>
   finalize(callback: TAnyCallback): IFs<T>
   delay(ms: number): IFs<T>
-  chain(stream: StreamLike<T>): IFs<T>
   catchError(callback: TErrorCallback): IFs<T>
   copy(count: number): IFs<T>[]
   groupBy<R>(callback: TMapCallback<T, R>): IFs<IFs<T>>
@@ -74,6 +73,11 @@ export interface IFs<T> extends AsyncIterable<T> {
   throwError(factory: unknown | (() => unknown)): IFs<T>
   sample(notifier: StreamLike<any>): IFs<T>
   discard(): IFs<any>
+  mergeWith(...streams: StreamLike<T>[]): IFs<T>
+  concatWith(...streams: StreamLike<T>[]): IFs<T>
+  raceWith(...streams: StreamLike<T>[]): IFs<T>
+
+  zipWith(...streams: StreamLike<any>[]): IFs<any[]>
 }
 
 export type StreamLike<T> =

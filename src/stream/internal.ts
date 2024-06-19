@@ -244,10 +244,6 @@ export class FsInternal<T> implements IFs<T> {
     return this.mergeMap((e) => Fs.delay(ms).map(() => e))
   }
 
-  chain(stream: StreamLike<T>): IFs<T> {
-    return Fs.concat(this, stream)
-  }
-
   catchError(callback: TErrorCallback): IFs<T> {
     return this.pipe(catchError(callback))
   }
@@ -304,11 +300,11 @@ export class FsInternal<T> implements IFs<T> {
   }
 
   startWith(v: T): IFs<T> {
-    return Fs.of(v).chain(this)
+    return Fs.of(v).concatWith(this)
   }
 
   endWith(v: T): IFs<T> {
-    return this.chain(Fs.of(v))
+    return this.concatWith(Fs.of(v))
   }
 
   pairwise(): IFs<[T, T]> {
@@ -422,5 +418,72 @@ export class FsInternal<T> implements IFs<T> {
 
   discard(): IFs<any> {
     return this.filter(() => false)
+  }
+
+  mergeWith(...streams: StreamLike<T>[]): IFs<T> {
+    const s = streams.map((e) => Fs.from(e))
+    return this.pipeTo((sub) => {
+      s.forEach((e) => sub.add(() => e.close()))
+      return Fs.from([this as IFs<T>].concat(s))
+        .mergeAll()
+        .tap((e) => sub.publish(e))
+        .catchError((err) => sub.abort(err))
+        .finalize(() => sub.commit())
+        .lastOne()
+    })
+  }
+
+  concatWith(...streams: StreamLike<T>[]): IFs<T> {
+    const s = streams.map((e) => Fs.from(e))
+    return this.pipeTo((sub) => {
+      s.forEach((e) => sub.add(() => e.close()))
+      return Fs.from([this as IFs<T>].concat(s))
+        .concatAll()
+        .tap((e) => sub.publish(e))
+        .catchError((err) => sub.abort(err))
+        .finalize(() => sub.commit())
+        .lastOne()
+    })
+  }
+
+  raceWith(...streams: StreamLike<T>[]): IFs<T> {
+    return this.pipeTo((sub) => {
+      const s = streams.map((e) => Fs.from(e))
+      s.forEach((e) => sub.add(() => e.close()))
+      let first = false
+      return Fs.from([this as IFs<T>].concat(s))
+        .mergeMap((e) => {
+          if (first) {
+            e.close()
+            return Fs.empty<T>()
+          }
+
+          first = true
+          return e
+        })
+        .tap((e) => sub.publish(e))
+        .catchError((err) => sub.abort(err))
+        .finalize(() => sub.commit())
+        .lastOne()
+    })
+  }
+
+  zipWith(...streams: StreamLike<any>[]): IFs<any[]> {
+    return this.pipeTo(async (sub) => {
+      const s = streams.map((e) => Fs.from(e))
+      s.forEach((e) => sub.add(() => e.close()))
+      const iters = [this as IFs<T>].concat(s).map((e) => e[Symbol.asyncIterator]())
+      const next = () => Promise.all(iters.map((e) => e.next()))
+      return Fs.loop(
+        await next(),
+        (data) => data.some((e) => !e.done),
+        () => next()
+      )
+        .map((data) => data.map((e) => e.value))
+        .tap((e) => sub.publish(e))
+        .catchError((err) => sub.abort(err))
+        .finalize(() => sub.commit())
+        .lastOne()
+    })
   }
 }

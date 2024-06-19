@@ -13,11 +13,8 @@ import {
   fromInterval,
   fromIterable,
   fromLoop,
-  fromMerge,
   fromPromise,
-  fromRace,
-  fromReadable,
-  fromZip
+  fromReadable
 } from './generators.js'
 import { FsInternal } from './internal.js'
 import { defaultAjaxClient } from '../ajax/index.js'
@@ -75,14 +72,6 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
     return fromEvent(source, event)
   }
 
-  static merge<T>(...streams: StreamLike<T>[]): IFs<T> {
-    return fromMerge(streams)
-  }
-
-  static concat<T>(...streams: StreamLike<T>[]): IFs<T> {
-    return fromMerge(streams, 1)
-  }
-
   static range(count: number, start = 0): IFs<number> {
     const end = start.add(count)
     return Fs.loop(
@@ -96,20 +85,12 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
     return fromLoop(seed, condFunc, nextFunc)
   }
 
-  static race<T>(...v: StreamLike<T>[]): IFs<T> {
-    return fromRace(v)
-  }
-
   static interval(ms: number): IFs<number> {
     return fromInterval(ms)
   }
 
   static empty<T>(): IFs<T> {
     return Fs.generate((sub) => sub.commit())
-  }
-
-  static zip(...v: StreamLike<any>[]) {
-    return fromZip(v)
   }
 
   static delay(ms: number): IFs<any> {

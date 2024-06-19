@@ -1,8 +1,8 @@
 import { Fs } from '../../src/stream/functional-stream.js'
 
-describe('chain', () => {
+describe('concatWith', () => {
   it('1', async () => {
-    const result = Fs.range(5).chain([5, 6]).toArray()
+    const result = Fs.range(5).concatWith([5, 6]).toArray()
     await expect(result).resolves.toEqual([0, 1, 2, 3, 4, 5, 6])
   })
 
@@ -12,7 +12,7 @@ describe('chain', () => {
     )
     const r2 = Fs.range(3)
       .map((e) => -e)
-      .chain(r1)
+      .concatWith(r1)
       .toArray()
 
     await expect(r2).resolves.toEqual([-0, -1, -2, 0, 1, 2, 3, 4])
