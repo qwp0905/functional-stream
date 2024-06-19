@@ -149,8 +149,9 @@ export class FsInternal<T> implements IFs<T> {
   }
 
   scan<A = T>(callback: TReduceCallback<A, T>, seed?: A): IFs<A> {
-    const is_empty = (s: A | undefined, i: number): boolean => i.equal(0) && s === undefined
-    return this.map((e, i) => (seed = (is_empty(seed, i) && (e as any)) || callback(seed!, e, i)))
+    return this.map(
+      (e, i) => (seed = (i.equal(0) && seed === undefined && (e as any)) || callback(seed!, e, i))
+    )
   }
 
   take(count: number): IFs<T> {
