@@ -300,7 +300,13 @@ export class FsInternal<T> implements IFs<T> {
   }
 
   startWith(v: T): IFs<T> {
-    return Fs.of(v).concatWith(this)
+    return this.pipeTo((sub) => {
+      sub.publish(v)
+      return this.tap((e) => sub.publish(e))
+        .catchError((err) => sub.abort(err))
+        .finalize(() => sub.commit())
+        .lastOne()
+    })
   }
 
   endWith(v: T): IFs<T> {
@@ -424,7 +430,8 @@ export class FsInternal<T> implements IFs<T> {
     const s = streams.map((e) => Fs.from(e))
     return this.pipeTo((sub) => {
       s.forEach((e) => sub.add(() => e.close()))
-      return Fs.from([this as IFs<T>].concat(s))
+      return Fs.from(s)
+        .startWith(this)
         .mergeAll()
         .tap((e) => sub.publish(e))
         .catchError((err) => sub.abort(err))
@@ -437,7 +444,8 @@ export class FsInternal<T> implements IFs<T> {
     const s = streams.map((e) => Fs.from(e))
     return this.pipeTo((sub) => {
       s.forEach((e) => sub.add(() => e.close()))
-      return Fs.from([this as IFs<T>].concat(s))
+      return Fs.from(s)
+        .startWith(this)
         .concatAll()
         .tap((e) => sub.publish(e))
         .catchError((err) => sub.abort(err))
@@ -451,7 +459,8 @@ export class FsInternal<T> implements IFs<T> {
       const s = streams.map((e) => Fs.from(e))
       s.forEach((e) => sub.add(() => e.close()))
       let first = false
-      return Fs.from([this as IFs<T>].concat(s))
+      return Fs.from(s)
+        .startWith(this)
         .mergeMap((e) => {
           if (first) {
             e.close()
