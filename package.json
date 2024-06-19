@@ -56,7 +56,7 @@
     },
     "collectCoverageFrom": [
       "<rootDir>/src/**/*.(t|j)s",
-      "!<rootDir>/src/@types/**/*",
+      "!<rootDir>/src/(@types|utils|ajax)/**/*",
       "!<rootDir>/**/*/index.ts"
     ],
     "coverageDirectory": "coverage",

@@ -1,5 +1,5 @@
 import { Fs } from '../../src/stream/functional-stream.js'
-import { sleep, sleepWith } from '../../src/utils/sleep.js'
+import { sleepWith } from '../../src/utils/sleep.js'
 
 describe('number', () => {
   const arr = new Array(10).fill(null).map((_, i) => i)
