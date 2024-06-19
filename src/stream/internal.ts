@@ -479,9 +479,9 @@ export class FsInternal<T> implements IFs<T> {
 
   zipWith(...streams: StreamLike<any>[]): IFs<any[]> {
     return this.pipeTo(async (sub) => {
-      const s = streams.map((e) => Fs.from(e))
+      const s = streams.map((e) => Fs.from(e) as Fs<any>)
       s.forEach((e) => sub.add(() => e.close()))
-      const iters = [this as IFs<T>].concat(s).map((e) => e[Symbol.asyncIterator]())
+      const iters = [this as Fs<any>].concat(s).map((e) => e.iter())
       const next = () => Promise.all(iters.map((e) => e.next()))
       return Fs.loop(
         await next(),
