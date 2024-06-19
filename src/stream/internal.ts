@@ -144,12 +144,14 @@ export class FsInternal<T> implements IFs<T> {
     })
   }
 
-  reduce<A = T>(callback: TReduceCallback<A, T>, initialValue?: A): IFs<A> {
-    return this.pipe(reduce(callback, initialValue))
+  reduce<A = T>(callback: TReduceCallback<A, T>, seed?: A): IFs<A> {
+    return this.pipe(reduce(callback, seed))
   }
 
-  scan<A = T>(callback: TReduceCallback<A, T>, initialValue?: A): IFs<A> {
-    return this.map((e, i) => (initialValue = callback(initialValue ?? (e as any), e, i)))
+  scan<A = T>(callback: TReduceCallback<A, T>, seed?: A): IFs<A> {
+    return this.map(
+      (e, i) => (seed = (i.equal(0) && seed === undefined && (e as any)) || callback(seed!, e, i))
+    )
   }
 
   take(count: number): IFs<T> {
@@ -199,21 +201,21 @@ export class FsInternal<T> implements IFs<T> {
     return this.switchScan((_, cur, i) => callback(cur, i), null as R)
   }
 
-  switchScan<R>(callback: TReduceCallback<R, T, StreamLike<R>>, initialValue: R): IFs<R> {
+  switchScan<R>(callback: TReduceCallback<R, T, StreamLike<R>>, seed: R): IFs<R> {
     let current = 0
     return this.tap((_, i) => (current = i)).mergeScan(
       (acc, cur, i) => Fs.from(callback(acc, cur, i)).filter(() => current.equal(i)),
-      initialValue
+      seed
     )
   }
 
   mergeScan<R>(
     callback: (acc: R, cur: T, index: number) => StreamLike<R>,
-    initialValue: R,
+    seed: R,
     concurrency = -1
   ): IFs<R> {
     if (concurrency.lessThanOrEqual(0)) {
-      return this.pipe(mergeScan(callback, initialValue))
+      return this.pipe(mergeScan(callback, seed))
     }
 
     return this.pipeTo((sub) => {
@@ -222,9 +224,9 @@ export class FsInternal<T> implements IFs<T> {
       return Fs.range(concurrency)
         .mergeMap(async () => {
           for (let data = await iter.next(); !data.done; data = await iter.next()) {
-            const fs = Fs.from(callback(initialValue, data.value, index++))
+            const fs = Fs.from(callback(seed, data.value, index++))
             sub.add(() => fs.close())
-            await fs.tap((e) => sub.publish((initialValue = e))).lastOne()
+            await fs.tap((e) => sub.publish((seed = e))).lastOne()
           }
         })
         .discard()
@@ -408,8 +410,7 @@ export class FsInternal<T> implements IFs<T> {
 
   throwError(factory: unknown | (() => unknown)): IFs<T> {
     return this.tap(() => {
-      const err = isFunction(factory) ? factory() : factory
-      throw err
+      throw (isFunction(factory) && factory()) || factory
     })
   }
 

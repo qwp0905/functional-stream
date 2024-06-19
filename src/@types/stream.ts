@@ -28,8 +28,8 @@ export interface IFs<T> extends AsyncIterable<T> {
   map<R>(callback: TMapCallback<T, R>): IFs<R>
   filter(callback: TFilterCallback<T>): IFs<T>
   tap(callback: TTapCallback<T>): IFs<T>
-  reduce<A = T>(callback: TReduceCallback<A, T>, initialValue?: A): IFs<A>
-  scan<A = T>(callback: TReduceCallback<A, T>, initialValue?: A): IFs<A>
+  reduce<A = T>(callback: TReduceCallback<A, T>, seed?: A): IFs<A>
+  scan<A = T>(callback: TReduceCallback<A, T>, seed?: A): IFs<A>
   take(count: number): IFs<T>
   skip(count: number): IFs<T>
   bufferCount(count: number): IFs<T[]>
@@ -63,10 +63,10 @@ export interface IFs<T> extends AsyncIterable<T> {
   timeInterval(): IFs<number>
   mergeScan<R>(
     callback: TReduceCallback<R, T, StreamLike<R>>,
-    initialValue: R,
+    seed: R,
     concurrency?: number
   ): IFs<R>
-  switchScan<R>(callback: TReduceCallback<R, T, StreamLike<R>>, initialValue: R): IFs<R>
+  switchScan<R>(callback: TReduceCallback<R, T, StreamLike<R>>, seed: R): IFs<R>
   audit<R>(callback: TMapCallback<T, StreamLike<R>>): IFs<T>
   throttle<R>(callback: (arg: T) => StreamLike<R>): IFs<T>
   bufferWhen<R>(callback: () => StreamLike<R>): IFs<T[]>

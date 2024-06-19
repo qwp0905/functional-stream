@@ -34,13 +34,13 @@ export function fromIterable<T>(iter: Iterable<T>): IFs<T> {
 }
 
 export function fromLoop<T>(
-  initialValue: T,
+  seed: T,
   condFunc: (x: T) => boolean,
   nextFunc: (x: T) => T | Promise<T>
 ): IFs<T> {
   return fromAsyncIterable({
     async *[Symbol.asyncIterator]() {
-      for (let x = initialValue; condFunc(x); x = await nextFunc(x)) {
+      for (let x = seed; condFunc(x); x = await nextFunc(x)) {
         yield x
       }
     }

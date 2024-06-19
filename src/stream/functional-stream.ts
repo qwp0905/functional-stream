@@ -92,12 +92,8 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
     )
   }
 
-  static loop<T>(
-    initialValue: T,
-    condFunc: (x: T) => boolean,
-    nextFunc: (x: T) => T | Promise<T>
-  ): IFs<T> {
-    return fromLoop(initialValue, condFunc, nextFunc)
+  static loop<T>(seed: T, condFunc: (x: T) => boolean, nextFunc: (x: T) => T | Promise<T>): IFs<T> {
+    return fromLoop(seed, condFunc, nextFunc)
   }
 
   static race<T>(...v: StreamLike<T>[]): IFs<T> {
