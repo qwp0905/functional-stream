@@ -37,14 +37,6 @@ export class FsInternal<T> implements IFs<T> {
     return this.source[Symbol.asyncIterator]()
   }
 
-  // protected pp<R>(pipeline: IPipeline<T, R>): IFs<R> {
-  //   this.source.watch(pipeline)
-  //   pipeline.add(this.source)
-  //   const next = this as unknown as Fs<R>
-  //   next.source = pipeline
-  //   return next
-  // }
-
   protected pipeTo<R>(generator: (sub: ISubject<R>) => void): IFs<R> {
     const sub = new Subject<R>()
     sub.add(this.source)
