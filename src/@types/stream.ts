@@ -76,7 +76,6 @@ export interface IFs<T> extends AsyncIterable<T> {
   mergeWith(...streams: StreamLike<T>[]): IFs<T>
   concatWith(...streams: StreamLike<T>[]): IFs<T>
   raceWith(...streams: StreamLike<T>[]): IFs<T>
-
   zipWith(...streams: StreamLike<any>[]): IFs<any[]>
 }
 
