@@ -1,43 +1,46 @@
-import { IPipeline } from '../@types/index.js'
-import { Pipeline } from '../observer/index.js'
+import { OperatorPipe } from '../@types/index.js'
 
-export const defaultIfEmpty = <T>(v: T): IPipeline<T> => {
-  let is_empty = true
-  return new Pipeline({
-    next(event) {
-      if (is_empty) {
-        is_empty = false
+export const defaultIfEmpty = <T>(v: T): OperatorPipe<T> => {
+  return (source) => (dest) => {
+    let is_empty = true
+    source.watch({
+      next(event) {
+        if (is_empty) {
+          is_empty = false
+        }
+        dest.publish(event)
+      },
+      error(err) {
+        dest.abort(err)
+      },
+      complete() {
+        is_empty && dest.publish(v)
+        dest.commit()
       }
-      this.publish(event)
-    },
-    error(err) {
-      this.abort(err)
-    },
-    complete() {
-      is_empty && this.publish(v)
-      this.commit()
-    }
-  })
+    })
+  }
 }
 
-export const throwIfEmpty = <T>(err: any): IPipeline<T> => {
-  let is_empty = true
-  return new Pipeline({
-    next(event) {
-      if (is_empty) {
-        is_empty = false
+export const throwIfEmpty = <T>(err: any): OperatorPipe<T> => {
+  return (source) => (dest) => {
+    let is_empty = true
+    source.watch({
+      next(event) {
+        if (is_empty) {
+          is_empty = false
+        }
+        dest.publish(event)
+      },
+      error(err) {
+        dest.abort(err)
+      },
+      complete() {
+        if (is_empty) {
+          dest.abort(err)
+        } else {
+          dest.commit()
+        }
       }
-      this.publish(event)
-    },
-    error(err) {
-      this.abort(err)
-    },
-    complete() {
-      if (is_empty) {
-        this.abort(err)
-      } else {
-        this.commit()
-      }
-    }
-  })
+    })
+  }
 }

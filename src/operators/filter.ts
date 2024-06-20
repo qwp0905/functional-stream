@@ -1,17 +1,18 @@
-import { TFilterCallback, IPipeline } from '../@types/index.js'
-import { Pipeline } from '../observer/index.js'
+import { TFilterCallback, OperatorPipe } from '../@types/index.js'
 
-export const filter = <T>(callback: TFilterCallback<T>): IPipeline<T> => {
-  let index = 0
-  return new Pipeline({
-    next(event) {
-      callback(event, index++) && this.publish(event)
-    },
-    error(err) {
-      this.abort(err)
-    },
-    complete() {
-      this.commit()
-    }
-  })
+export const filter = <T>(callback: TFilterCallback<T>): OperatorPipe<T> => {
+  return (source) => (dest) => {
+    let index = 0
+    source.watch({
+      next(event) {
+        callback(event, index++) && dest.publish(event)
+      },
+      error(err) {
+        dest.abort(err)
+      },
+      complete() {
+        dest.commit()
+      }
+    })
+  }
 }

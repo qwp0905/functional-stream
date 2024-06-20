@@ -86,3 +86,5 @@ export type StreamLike<T> =
   | IFs<T>
   | ISubject<T>
   | Promise<T>
+
+export type OperatorPipe<T, R = T> = (source: ISubject<T>) => (dest: ISubject<R>) => void

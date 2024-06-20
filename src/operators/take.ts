@@ -1,40 +1,42 @@
-import { IPipeline, TMapCallback } from '../@types/index.js'
-import { Pipeline } from '../observer/index.js'
+import { OperatorPipe, TMapCallback } from '../@types/index.js'
 
-export const take = <T>(count: number): IPipeline<T> => {
+export const take = <T>(count: number): OperatorPipe<T> => {
   let index = 0
-  return new Pipeline({
-    next(event) {
-      index++
-      this.publish(event)
-      if (index.equal(count)) {
-        this.commit()
+  return (source) => (dest) => {
+    source.watch({
+      next(event) {
+        index++
+        dest.publish(event)
+        if (index.equal(count)) {
+          dest.commit()
+        }
+      },
+      error(err) {
+        dest.abort(err)
+      },
+      complete() {
+        dest.commit()
       }
-    },
-    error(err) {
-      this.abort(err)
-    },
-    complete() {
-      this.commit()
-    }
-  })
+    })
+  }
 }
 
-export const takeWhile = <T>(callback: TMapCallback<T, boolean>): IPipeline<T> => {
-  let index = 0
-
-  return new Pipeline({
-    next(event) {
-      if (callback(event, index++)) {
-        return this.publish(event)
+export const takeWhile = <T>(callback: TMapCallback<T, boolean>): OperatorPipe<T> => {
+  return (source) => (dest) => {
+    let index = 0
+    source.watch({
+      next(event) {
+        if (callback(event, index++)) {
+          return dest.publish(event)
+        }
+        dest.commit()
+      },
+      error(err) {
+        dest.abort(err)
+      },
+      complete() {
+        dest.commit()
       }
-      this.commit()
-    },
-    error(err) {
-      this.abort(err)
-    },
-    complete() {
-      this.commit()
-    }
-  })
+    })
+  }
 }

@@ -1,17 +1,18 @@
-import { IPipeline, TErrorCallback } from '../@types/index.js'
-import { Pipeline } from '../observer/index.js'
+import { OperatorPipe, TErrorCallback } from '../@types/index.js'
 
-export const catchError = <T>(callback: TErrorCallback): IPipeline<T> => {
-  return new Pipeline({
-    next(event) {
-      this.publish(event)
-    },
-    async error(err) {
-      await Promise.resolve(callback(err))
-      this.commit()
-    },
-    complete() {
-      this.commit()
-    }
-  })
+export const catchError = <T>(callback: TErrorCallback): OperatorPipe<T> => {
+  return (source) => (dest) => {
+    source.watch({
+      next(event) {
+        dest.publish(event)
+      },
+      async error(err) {
+        await Promise.resolve(callback(err))
+        dest.commit()
+      },
+      complete() {
+        dest.commit()
+      }
+    })
+  }
 }

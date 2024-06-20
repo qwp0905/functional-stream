@@ -9,7 +9,8 @@ import {
   TFilterCallback,
   TMapCallback,
   TReduceCallback,
-  TTapCallback
+  TTapCallback,
+  OperatorPipe
 } from '../@types/index.js'
 import { Subject } from '../observer/index.js'
 import { SubscriptionTimeoutError, EmptyPipelineError, isFunction } from '../utils/index.js'
@@ -36,19 +37,26 @@ export class FsInternal<T> implements IFs<T> {
     return this.source[Symbol.asyncIterator]()
   }
 
-  protected pipe<R>(pipeline: IPipeline<T, R>): IFs<R> {
-    this.source.watch(pipeline)
-    pipeline.add(this.source)
-    const next = this as unknown as Fs<R>
-    next.source = pipeline
-    return next
-  }
+  // protected pp<R>(pipeline: IPipeline<T, R>): IFs<R> {
+  //   this.source.watch(pipeline)
+  //   pipeline.add(this.source)
+  //   const next = this as unknown as Fs<R>
+  //   next.source = pipeline
+  //   return next
+  // }
 
   protected pipeTo<R>(generator: (sub: ISubject<R>) => void): IFs<R> {
     const sub = new Subject<R>()
     sub.add(this.source)
     generator(sub)
     return new FsInternal(sub)
+  }
+
+  protected pipe<R = T>(callback: OperatorPipe<T, R>): IFs<R> {
+    return Fs.generate((dest) => {
+      dest.add(this.source)
+      callback(this.source)(dest)
+    })
   }
 
   protected copyTo(sub: ISubject<T>): IFs<T> {
@@ -214,26 +222,7 @@ export class FsInternal<T> implements IFs<T> {
     seed: R,
     concurrency = -1
   ): IFs<R> {
-    if (concurrency.lessThanOrEqual(0)) {
-      return this.pipe(mergeScan(callback, seed))
-    }
-
-    return this.pipeTo((sub) => {
-      const iter = this.iter()
-      let index = 0
-      return Fs.range(concurrency)
-        .mergeMap(async () => {
-          for (let data = await iter.next(); !data.done; data = await iter.next()) {
-            const fs = Fs.from(callback(seed, data.value, index++))
-            sub.add(() => fs.close())
-            await fs.tap((e) => sub.publish((seed = e))).lastOne()
-          }
-        })
-        .discard()
-        .catchError((err) => sub.abort(err))
-        .finalize(() => sub.commit())
-        .lastOne()
-    })
+    return this.pipe(mergeScan(callback, seed, concurrency))
   }
 
   finalize(callback: TAnyCallback): IFs<T> {

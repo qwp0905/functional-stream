@@ -1,17 +1,18 @@
-import { TMapCallback, IPipeline } from '../@types/index.js'
-import { Pipeline } from '../observer/index.js'
+import { TMapCallback, OperatorPipe } from '../@types/index.js'
 
-export const map = <T, R>(callback: TMapCallback<T, R>): IPipeline<T, R> => {
-  let index = 0
-  return new Pipeline({
-    next(event) {
-      this.publish(callback(event, index++))
-    },
-    error(err) {
-      this.abort(err)
-    },
-    complete() {
-      this.commit()
-    }
-  })
+export const map = <T, R>(callback: TMapCallback<T, R>): OperatorPipe<T, R> => {
+  return (source) => (dest) => {
+    let index = 0
+    source.watch({
+      next(event) {
+        dest.publish(callback(event, index++))
+      },
+      error(err) {
+        dest.abort(err)
+      },
+      complete() {
+        dest.commit()
+      }
+    })
+  }
 }
