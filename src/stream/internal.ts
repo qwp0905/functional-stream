@@ -49,10 +49,6 @@ export class FsInternal<T> implements IFs<T> {
     })
   }
 
-  protected iter(): AsyncIterator<T> {
-    return this[Symbol.asyncIterator]()
-  }
-
   watch(options: IStreamReadOptions<T>) {
     const [sub, out] = [new Subject<T>(), new Subject<T>()]
     sub.add(out)
@@ -348,7 +344,7 @@ export class FsInternal<T> implements IFs<T> {
       .map(([prev, cur]) => cur.subtract(prev))
   }
 
-  throwError(factory: unknown | (() => unknown)): IFs<T> {
+  throwError<Err = unknown>(factory: Err | (() => Err)): IFs<T> {
     return this.tap(() => {
       throw (isFunction(factory) && factory()) || factory
     })

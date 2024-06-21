@@ -5,11 +5,12 @@ import {
   isOnOffEventSource,
   InvalidEventSourceError
 } from '../utils/index.js'
+import { toAsyncIter } from '../utils/iterator.js'
 import { Fs } from './functional-stream.js'
 
 export function fromAsyncIterable<T>(iter: AsyncIterable<T>): IFs<T> {
   return Fs.generate(async (subject) => {
-    const iterator = iter[Symbol.asyncIterator]()
+    const iterator = toAsyncIter(iter)
     subject.add(() => iterator.return?.())
     try {
       for (let data = await iterator.next(); !data.done; data = await iterator.next()) {

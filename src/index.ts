@@ -1,3 +1,4 @@
+import './utils/number.js'
 export { Fs } from './stream/index.js'
 export { Subject } from './observer/index.js'
 export * from './@types/index.js'

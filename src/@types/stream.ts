@@ -6,7 +6,7 @@ import {
   TReduceCallback,
   TTapCallback
 } from './callback.js'
-import { ISubject } from './observer.js'
+import { Closable, ISubject } from './observer.js'
 
 export interface IStreamReadOptions<T> {
   next(data: T): any
@@ -14,7 +14,7 @@ export interface IStreamReadOptions<T> {
   complete?(): any
 }
 
-export interface IFs<T> extends AsyncIterable<T> {
+export interface IFs<T> extends Closable<T> {
   watch(options: IStreamReadOptions<T>): void
   close(): void
   lastOne(): Promise<T>
@@ -72,7 +72,7 @@ export interface IFs<T> extends AsyncIterable<T> {
   throttle<R>(callback: (arg: T) => StreamLike<R>): IFs<T>
   bufferWhen<R>(callback: () => StreamLike<R>): IFs<T[]>
   timestamp(): IFs<number>
-  throwError(factory: unknown | (() => unknown)): IFs<T>
+  throwError<Err = unknown>(factory: Err | (() => Err)): IFs<T>
   sample(notifier: StreamLike<any>): IFs<T>
   discard(): IFs<any>
   mergeWith(...streams: StreamLike<T>[]): IFs<T>

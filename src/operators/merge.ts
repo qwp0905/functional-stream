@@ -1,5 +1,6 @@
 import { StreamLike, IFs, OperatorPipe } from '../@types/index.js'
 import { Fs } from '../stream/index.js'
+import { toAsyncIter } from '../utils/iterator.js'
 
 export const mergeScan = <T, R>(
   callback: (acc: R, cur: T, index: number) => StreamLike<R>,
@@ -9,7 +10,7 @@ export const mergeScan = <T, R>(
   if (concurrency.greaterThan(0) && concurrency.isFinite()) {
     return (source) => (dest) => {
       let index = 0
-      const iter = source[Symbol.asyncIterator]()
+      const iter = toAsyncIter(source)
       return Fs.range(concurrency)
         .mergeMap(async () => {
           for (let data = await iter.next(); !data.done; data = await iter.next()) {
@@ -52,7 +53,7 @@ export const mergeWith = <T>(streams: StreamLike<T>[]): OperatorPipe<T> => {
     const list = streams.map((s) => Fs.from(s))
     list.forEach((fs) => dest.add(() => fs.close()))
 
-    return Fs.from([source, ...list])
+    return Fs.from([source as StreamLike<T>].concat(list))
       .mergeAll()
       .tap((e) => dest.publish(e))
       .catchError((err) => dest.abort(err))

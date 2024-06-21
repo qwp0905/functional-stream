@@ -1,4 +1,4 @@
-import { Fs, OperatorPipe, StreamLike } from '../index.js'
+import { Closable, Fs, OperatorPipe, StreamLike } from '../index.js'
 
 export const raceWith = <T>(streams: StreamLike<T>[]): OperatorPipe<T> => {
   return (source) => (dest) => {
@@ -6,7 +6,7 @@ export const raceWith = <T>(streams: StreamLike<T>[]): OperatorPipe<T> => {
     const list = streams.map((s) => Fs.from(s))
     list.forEach((fs) => dest.add(() => fs.close()))
 
-    return Fs.from([source, ...list])
+    return Fs.from([source as Closable<T>].concat(list))
       .mergeMap((e) => {
         if (first) {
           e.close()

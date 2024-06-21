@@ -6,7 +6,7 @@
   "types": "dist/src/index.d.ts",
   "type": "module",
   "scripts": {
-    "build": "rimraf dist && tsc --build tsconfig.json",
+    "build": "rimraf dist && tsc --build build/*",
     "format": "prettier --config .prettierrc --write \"{src,test}/**/*.{ts,js}\"",
     "lint": "eslint \"{src,test}/**/*.{ts,js}\"",
     "test": "jest",
@@ -77,5 +77,26 @@
   "packageManager": "yarn@4.2.2",
   "engines": {
     "node": ">=18.0.0"
+  },
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "browser": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      },
+      "webpack": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.js"
+      }
+    }
   }
 }

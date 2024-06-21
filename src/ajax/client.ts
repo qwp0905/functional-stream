@@ -5,6 +5,7 @@ import { AjaxRequestConfig, HttpMethod } from './request.js'
 import { AjaxResponse } from './response.js'
 import { ISubject } from '../@types/index.js'
 import { Fs } from '../stream/index.js'
+import { toAsyncIter } from '../utils/iterator.js'
 
 export interface AjaxClientConfig {
   readonly base_url?: string
@@ -30,7 +31,7 @@ export class AjaxClient {
       return
     }
 
-    const iter = this.sub[Symbol.asyncIterator]()
+    const iter = toAsyncIter(this.sub)
     Promise.all(
       new Array(config.concurrency).fill(null).map(async () => {
         for (let data = await iter.next(); !data.done; data = await iter.next()) {
