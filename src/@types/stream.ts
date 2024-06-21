@@ -28,7 +28,9 @@ export interface IFs<T> extends AsyncIterable<T> {
   map<R>(callback: TMapCallback<T, R>): IFs<R>
   filter(callback: TFilterCallback<T>): IFs<T>
   tap(callback: TTapCallback<T>): IFs<T>
-  reduce<A = T>(callback: TReduceCallback<A, T>, seed?: A): IFs<A>
+  reduce(callback: TReduceCallback<T, T>): IFs<T>
+  reduce<A = T>(callback: TReduceCallback<A, T>, seed: A): IFs<A>
+  scan(callback: TReduceCallback<T, T>): IFs<T>
   scan<A = T>(callback: TReduceCallback<A, T>, seed?: A): IFs<A>
   take(count: number): IFs<T>
   skip(count: number): IFs<T>
@@ -76,6 +78,15 @@ export interface IFs<T> extends AsyncIterable<T> {
   mergeWith(...streams: StreamLike<T>[]): IFs<T>
   concatWith(...streams: StreamLike<T>[]): IFs<T>
   raceWith(...streams: StreamLike<T>[]): IFs<T>
+  zipWith<R>(stream: StreamLike<R>): IFs<[T, R]>
+  zipWith<R, Q>(s1: StreamLike<R>, s2: StreamLike<Q>): IFs<[T, R, Q]>
+  zipWith<R, Q, K>(s1: StreamLike<R>, s2: StreamLike<Q>, s3: StreamLike<K>): IFs<[T, R, Q, K]>
+  zipWith<R, Q, K, J>(
+    s1: StreamLike<R>,
+    s2: StreamLike<Q>,
+    s3: StreamLike<K>,
+    s4: StreamLike<J>
+  ): IFs<[T, R, Q, K, J]>
   zipWith(...streams: StreamLike<any>[]): IFs<any[]>
 }
 

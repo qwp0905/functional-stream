@@ -12,5 +12,3 @@ export interface ISubject<T> extends AsyncIterable<T> {
   add<R>(next: ISubject<R> | (() => void)): void
   close(): void
 }
-
-export interface IPipeline<T, R = T> extends ISubject<R>, IObserver<T> {}

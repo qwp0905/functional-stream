@@ -2,7 +2,6 @@ import {
   IFs,
   IStreamReadOptions,
   StreamLike,
-  IPipeline,
   ISubject,
   TAnyCallback,
   TErrorCallback,
@@ -13,7 +12,7 @@ import {
   OperatorPipe
 } from '../@types/index.js'
 import { Subject } from '../observer/index.js'
-import { SubscriptionTimeoutError, EmptyPipelineError, isFunction } from '../utils/index.js'
+import { EmptyPipelineError, isFunction } from '../utils/index.js'
 import {
   map,
   filter,
@@ -26,7 +25,13 @@ import {
   split,
   finalize,
   takeWhile,
-  mergeScan
+  mergeScan,
+  timeout,
+  bufferWhen,
+  mergeWith,
+  concatWith,
+  raceWith,
+  zipWith
 } from '../operators/index.js'
 import { Fs } from './functional-stream.js'
 
@@ -37,23 +42,11 @@ export class FsInternal<T> implements IFs<T> {
     return this.source[Symbol.asyncIterator]()
   }
 
-  protected pipeTo<R>(generator: (sub: ISubject<R>) => void): IFs<R> {
-    const sub = new Subject<R>()
-    sub.add(this.source)
-    generator(sub)
-    return new FsInternal(sub)
-  }
-
   protected pipe<R = T>(callback: OperatorPipe<T, R>): IFs<R> {
     return Fs.generate((dest) => {
       dest.add(this.source)
       callback(this.source)(dest)
     })
-  }
-
-  protected copyTo(sub: ISubject<T>): IFs<T> {
-    sub.add(this.source)
-    return new FsInternal<T>(sub)
   }
 
   protected iter(): AsyncIterator<T> {
@@ -242,7 +235,7 @@ export class FsInternal<T> implements IFs<T> {
         sub.forEach((s) => s.commit())
       }
     })
-    return sub.map((s) => this.copyTo(s))
+    return sub.map((s) => new FsInternal(s))
   }
 
   defaultIfEmpty(v: T): IFs<T> {
@@ -269,25 +262,11 @@ export class FsInternal<T> implements IFs<T> {
   }
 
   timeout(each: number): IFs<T> {
-    return this.pipeTo((sub) => {
-      const timeout = setTimeout(() => sub.abort(new SubscriptionTimeoutError()), each)
-      sub.add(() => timeout.unref())
-      return this.tap(() => timeout.refresh())
-        .tap((e) => sub.publish(e))
-        .catchError((err) => sub.abort(err))
-        .finalize(() => sub.commit())
-        .lastOne()
-    })
+    return this.pipe(timeout(each))
   }
 
   startWith(v: T): IFs<T> {
-    return this.pipeTo((sub) => {
-      sub.publish(v)
-      return this.tap((e) => sub.publish(e))
-        .catchError((err) => sub.abort(err))
-        .finalize(() => sub.commit())
-        .lastOne()
-    })
+    return Fs.of(v).concatWith(this)
   }
 
   endWith(v: T): IFs<T> {
@@ -356,29 +335,7 @@ export class FsInternal<T> implements IFs<T> {
   }
 
   bufferWhen<R>(callback: () => StreamLike<R>): IFs<T[]> {
-    return this.pipeTo((sub) => {
-      let queue: T[] = []
-      let done = false
-      this.source.watch({
-        next(data) {
-          queue.push(data)
-        },
-        error(err) {
-          sub.abort(err)
-        },
-        complete() {
-          done = true
-        }
-      })
-
-      return Fs.from(callback())
-        .tap(() => sub.publish(queue))
-        .tap(() => (queue = []))
-        .takeWhile(() => !done)
-        .catchError((err) => sub.abort(err))
-        .finalize(() => sub.commit())
-        .lastOne()
-    })
+    return this.pipe(bufferWhen(callback))
   }
 
   timestamp(): IFs<number> {
@@ -408,72 +365,27 @@ export class FsInternal<T> implements IFs<T> {
   }
 
   mergeWith(...streams: StreamLike<T>[]): IFs<T> {
-    const s = streams.map((e) => Fs.from(e))
-    return this.pipeTo((sub) => {
-      s.forEach((e) => sub.add(() => e.close()))
-      return Fs.from(s)
-        .startWith(this)
-        .mergeAll()
-        .tap((e) => sub.publish(e))
-        .catchError((err) => sub.abort(err))
-        .finalize(() => sub.commit())
-        .lastOne()
-    })
+    return this.pipe(mergeWith(streams))
   }
 
   concatWith(...streams: StreamLike<T>[]): IFs<T> {
-    const s = streams.map((e) => Fs.from(e))
-    return this.pipeTo((sub) => {
-      s.forEach((e) => sub.add(() => e.close()))
-      return Fs.from(s)
-        .startWith(this)
-        .concatAll()
-        .tap((e) => sub.publish(e))
-        .catchError((err) => sub.abort(err))
-        .finalize(() => sub.commit())
-        .lastOne()
-    })
+    return this.pipe(concatWith(streams))
   }
 
   raceWith(...streams: StreamLike<T>[]): IFs<T> {
-    return this.pipeTo((sub) => {
-      const s = streams.map((e) => Fs.from(e))
-      s.forEach((e) => sub.add(() => e.close()))
-      let first = false
-      return Fs.from(s)
-        .startWith(this)
-        .mergeMap((e) => {
-          if (first) {
-            e.close()
-            return Fs.empty<T>()
-          }
-
-          first = true
-          return e
-        })
-        .tap((e) => sub.publish(e))
-        .catchError((err) => sub.abort(err))
-        .finalize(() => sub.commit())
-        .lastOne()
-    })
+    return this.pipe(raceWith(streams))
   }
 
+  zipWith<R>(stream: StreamLike<R>): IFs<[T, R]>
+  zipWith<R, E>(s1: StreamLike<R>, s2: StreamLike<E>): IFs<[T, R, E]>
+  zipWith<R, E, W>(s1: StreamLike<R>, s2: StreamLike<E>, s3: StreamLike<W>): IFs<[T, R, E, W]>
+  zipWith<R, Q, K, J>(
+    s1: StreamLike<R>,
+    s2: StreamLike<Q>,
+    s3: StreamLike<K>,
+    s4: StreamLike<J>
+  ): IFs<[T, R, Q, K, J]>
   zipWith(...streams: StreamLike<any>[]): IFs<any[]> {
-    return this.pipeTo(async (sub) => {
-      const s = streams.map((e) => Fs.from(e) as Fs<any>)
-      s.forEach((e) => sub.add(() => e.close()))
-      const iters = [this as Fs<any>].concat(s).map((e) => e.iter())
-      const next = () => Promise.all(iters.map((e) => e.next()))
-      return Fs.loop(
-        await next(),
-        (data) => data.some((e) => !e.done),
-        () => next()
-      )
-        .map((data) => data.map((e) => e.value))
-        .tap((e) => sub.publish(e))
-        .catchError((err) => sub.abort(err))
-        .finalize(() => sub.commit())
-        .lastOne()
-    })
+    return this.pipe(zipWith(streams))
   }
 }

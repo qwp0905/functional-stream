@@ -1,4 +1,5 @@
-import { OperatorPipe } from '../@types/index.js'
+import { OperatorPipe, StreamLike } from '../@types/index.js'
+import { Fs } from '../index.js'
 
 export const bufferCount = <T>(count: number): OperatorPipe<T, T[]> => {
   return (source) => (dest) => {
@@ -23,5 +24,34 @@ export const bufferCount = <T>(count: number): OperatorPipe<T, T[]> => {
         dest.commit()
       }
     })
+  }
+}
+
+export const bufferWhen = <T, R>(callback: () => StreamLike<R>): OperatorPipe<T, T[]> => {
+  return (source) => (dest) => {
+    let queue: T[] = []
+    let done = false
+    source.watch({
+      next(event) {
+        queue.push(event)
+      },
+      error(err) {
+        dest.abort(err)
+      },
+      complete() {
+        done = true
+      }
+    })
+
+    const trigger = Fs.from(callback())
+    dest.add(() => trigger.close())
+
+    return trigger
+      .tap(() => dest.publish(queue))
+      .tap(() => (queue = []))
+      .takeWhile(() => !done)
+      .catchError((err) => dest.abort(err))
+      .finalize(() => dest.commit())
+      .lastOne()
   }
 }
