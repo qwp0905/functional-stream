@@ -1,11 +1,11 @@
 {
   "name": "@qwp0905/functional-stream",
-  "version": "0.5.5",
+  "version": "0.5.6",
   "description": "",
   "type": "module",
-  "main": "dist/cjs/index.cjs",
+  "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
-  "types": "dist/cjs/index.d.cts",
+  "types": "dist/cjs/index.d.ts",
   "scripts": {
     "build": "tsc --build build/*",
     "format": "prettier --config .prettierrc --write \"{src,test}/**/*.{ts,js}\"",
@@ -79,15 +79,13 @@
     "node": ">=18.0.0"
   },
   "exports": {
-    ".": {
-      "import": {
-        "types": "./dist/esm/index.d.ts",
-        "default": "./dist/esm/index.js"
-      },
-      "require": {
-        "types": "./dist/cjs/index.d.ts",
-        "default": "./dist/cjs/index.js"
-      }
+    "import": {
+      "types": "./dist/esm/index.d.ts",
+      "default": "./dist/esm/index.js"
+    },
+    "require": {
+      "types": "./dist/cjs/index.d.ts",
+      "default": "./dist/cjs/index.js"
     }
   }
 }
