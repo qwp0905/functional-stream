@@ -1,3 +1,5 @@
+export {}
+
 declare global {
   interface Number {
     add(v: number): number
