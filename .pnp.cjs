@@ -4836,7 +4836,7 @@ const RAW_RUNTIME_STATE =
           ["whatwg-encoding", "npm:2.0.0"],\
           ["whatwg-mimetype", "npm:3.0.0"],\
           ["whatwg-url", "npm:11.0.0"],\
-          ["ws", "virtual:d1ca81f1e9b83b786691fdb8e4dc150d149054195be86f7dc87b11e7f1ecdf9f4bfbc9594934620d1ad2bfe4d87819b63e66340c7311a8cc1255dbf16aa44b6b#npm:8.17.0"],\
+          ["ws", "virtual:d1ca81f1e9b83b786691fdb8e4dc150d149054195be86f7dc87b11e7f1ecdf9f4bfbc9594934620d1ad2bfe4d87819b63e66340c7311a8cc1255dbf16aa44b6b#npm:8.17.1"],\
           ["xml-name-validator", "npm:4.0.0"]\
         ],\
         "packagePeers": [\
@@ -6724,17 +6724,17 @@ const RAW_RUNTIME_STATE =
       }]\
     ]],\
     ["ws", [\
-      ["npm:8.17.0", {\
-        "packageLocation": "./.yarn/cache/ws-npm-8.17.0-05fb441faf-55241ec93a.zip/node_modules/ws/",\
+      ["npm:8.17.1", {\
+        "packageLocation": "./.yarn/cache/ws-npm-8.17.1-f57fb24a2c-f4a49064af.zip/node_modules/ws/",\
         "packageDependencies": [\
-          ["ws", "npm:8.17.0"]\
+          ["ws", "npm:8.17.1"]\
         ],\
         "linkType": "SOFT"\
       }],\
-      ["virtual:d1ca81f1e9b83b786691fdb8e4dc150d149054195be86f7dc87b11e7f1ecdf9f4bfbc9594934620d1ad2bfe4d87819b63e66340c7311a8cc1255dbf16aa44b6b#npm:8.17.0", {\
-        "packageLocation": "./.yarn/__virtual__/ws-virtual-9815a43e90/0/cache/ws-npm-8.17.0-05fb441faf-55241ec93a.zip/node_modules/ws/",\
+      ["virtual:d1ca81f1e9b83b786691fdb8e4dc150d149054195be86f7dc87b11e7f1ecdf9f4bfbc9594934620d1ad2bfe4d87819b63e66340c7311a8cc1255dbf16aa44b6b#npm:8.17.1", {\
+        "packageLocation": "./.yarn/__virtual__/ws-virtual-a9bd2a7eb4/0/cache/ws-npm-8.17.1-f57fb24a2c-f4a49064af.zip/node_modules/ws/",\
         "packageDependencies": [\
-          ["ws", "virtual:d1ca81f1e9b83b786691fdb8e4dc150d149054195be86f7dc87b11e7f1ecdf9f4bfbc9594934620d1ad2bfe4d87819b63e66340c7311a8cc1255dbf16aa44b6b#npm:8.17.0"],\
+          ["ws", "virtual:d1ca81f1e9b83b786691fdb8e4dc150d149054195be86f7dc87b11e7f1ecdf9f4bfbc9594934620d1ad2bfe4d87819b63e66340c7311a8cc1255dbf16aa44b6b#npm:8.17.1"],\
           ["@types/bufferutil", null],\
           ["@types/utf-8-validate", null],\
           ["bufferutil", null],\
