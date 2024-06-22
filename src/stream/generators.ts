@@ -1,4 +1,4 @@
-import { IFs, StreamLike } from '../@types/index.js'
+import { IFs } from '../@types/index.js'
 import {
   isEventSource,
   isHtmlElement,

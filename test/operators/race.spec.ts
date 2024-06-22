@@ -8,7 +8,7 @@ describe('race', () => {
   })
 
   it('2', async () => {
-    let cb = jest.fn()
+    const cb = jest.fn()
     const r = Fs.interval(10).raceWith(Fs.interval(20).tap(cb)).take(3).toArray()
 
     await expect(r).resolves.toStrictEqual([0, 1, 2])

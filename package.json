@@ -11,8 +11,8 @@
     "format": "prettier --config .prettierrc --write \"{src,test}/**/*.{ts,js}\"",
     "lint": "eslint \"{src,test}/**/*.{ts,js}\"",
     "test": "jest",
-    "test:cov": "rimraf coverage; jest --coverage",
-    "test:cov:result": "yarn test:cov && open ./coverage/lcov-report/index.html"
+    "test:cov": "jest --coverage",
+    "test:cov:result": "rimraf coverage; yarn test:cov; open ./coverage/lcov-report/index.html"
   },
   "repository": {
     "type": "git",
