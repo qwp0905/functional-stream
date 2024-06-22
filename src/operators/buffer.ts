@@ -14,14 +14,13 @@ export const bufferCount = <T>(count: number): OperatorPipe<T, T[]> => {
         queue = []
       },
       error(err) {
-        queue.length && dest.publish(queue)
-        queue = []
         dest.abort(err)
+        queue = []
       },
       complete() {
         queue.length && dest.publish(queue)
-        queue = []
         dest.commit()
+        queue = []
       }
     })
   }
