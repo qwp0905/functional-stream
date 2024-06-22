@@ -39,7 +39,6 @@ export const mergeScan = <T, R>(
         dest.abort(err)
       },
       async complete() {
-        ;``
         while (queue.length.greaterThan(0)) {
           await queue
             .shift()!
