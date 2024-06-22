@@ -31,6 +31,10 @@ export const bufferWhen = <T, R>(callback: () => StreamLike<R>): OperatorPipe<T,
   return (source) => (dest) => {
     let queue: T[] = []
     let done = false
+
+    const trigger = Fs.from(callback())
+    dest.add(() => trigger.close())
+
     source.watch({
       next(event) {
         queue.push(event)
@@ -42,9 +46,6 @@ export const bufferWhen = <T, R>(callback: () => StreamLike<R>): OperatorPipe<T,
         done = true
       }
     })
-
-    const trigger = Fs.from(callback())
-    dest.add(() => trigger.close())
 
     return trigger
       .tap(() => dest.publish(queue))
