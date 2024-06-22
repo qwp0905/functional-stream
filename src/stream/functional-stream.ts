@@ -21,7 +21,7 @@ import { FsInternal } from "./internal.js"
 import { defaultAjaxClient } from "../ajax/index.js"
 
 export class Fs<T> extends FsInternal<T> implements IFs<T> {
-  constructor(source: ISubject<T>) {
+  protected constructor(source: ISubject<T>) {
     super(source)
   }
 

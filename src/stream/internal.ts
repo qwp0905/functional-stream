@@ -227,15 +227,11 @@ export abstract class FsInternal<T> implements IFs<T> {
   }
 
   groupBy<R>(callback: TMapCallback<T, R>): IFs<IFs<T>> {
-    const map = new Map<R, Subject<T>>()
+    const map = new Map<R, ISubject<T>>()
     return this.map<[T, R]>((e, i) => [e, callback(e, i)])
       .tap(([e, k]) => map.get(k)?.publish(e))
       .filter(([, k]) => !map.has(k))
-      .map(([e, k]) => {
-        const sub = new Subject<T>()
-        map.set(k, sub)
-        return Fs.from(sub).startWith(e)
-      })
+      .map(([e, k]) => Fs.new<T>((sub) => map.set(k, sub)).startWith(e))
       .catchError((err) => map.forEach((s) => s.abort(err)))
       .finalize(() => map.forEach((s) => s.commit()))
       .finalize(() => map.clear())
@@ -307,11 +303,11 @@ export abstract class FsInternal<T> implements IFs<T> {
     return this.filter(() => !blocked)
       .tap(() => (blocked = true))
       .mergeMap((e) =>
-        Fs.from<T>(callback(e) as any)
-          .startWith(e)
-          .takeWhile((_, i) => i.equal(0))
-          .finalize(() => (blocked = false))
+        Fs.from(callback(e))
+          .take(1)
+          .map(() => e)
       )
+      .tap(() => (blocked = false))
   }
 
   bufferWhen<R>(callback: () => StreamLike<R>): IFs<T[]> {
