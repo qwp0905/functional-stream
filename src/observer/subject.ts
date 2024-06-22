@@ -1,5 +1,5 @@
-import { IObserver, ISubject, RejectFunction, ResolveFunction } from '../@types/index.js'
-import { AlreadySubscribedError } from '../utils/index.js'
+import { IObserver, ISubject, RejectFunction, ResolveFunction } from "../@types/index.js"
+import { AlreadySubscribedError } from "../utils/index.js"
 
 enum EventKind {
   next,
@@ -83,7 +83,7 @@ export class Subject<T> implements ISubject<T> {
     this.queue.length = 0
     for (const finalizer of this.finalizers.values()) {
       this.finalizers.delete(finalizer)
-      if (typeof finalizer === 'function') {
+      if (typeof finalizer === "function") {
         finalizer()
       } else {
         finalizer.commit()

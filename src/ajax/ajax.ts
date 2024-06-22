@@ -1,7 +1,7 @@
-import { ISubject } from '../@types/index.js'
-import { AjaxError, AjaxTimeoutError } from './error.js'
-import { AjaxRequestConfig, AjaxRequest } from './request.js'
-import { AjaxResponse } from './response.js'
+import { ISubject } from "../@types/index.js"
+import { AjaxError, AjaxTimeoutError } from "./error.js"
+import { AjaxRequestConfig, AjaxRequest } from "./request.js"
+import { AjaxResponse } from "./response.js"
 
 export interface AjaxAdapter {
   dispatch(request: AjaxRequest, subject: ISubject<AjaxResponse<any>>): void
@@ -21,7 +21,7 @@ export async function ajaxCall(config: AjaxRequestConfig, subject: ISubject<Ajax
       body: req.getBody(),
       headers: req.getHeaders(),
       signal: controller.signal,
-      ...(typeof process !== undefined ? { duplex: 'half' } : {})
+      ...(typeof process !== undefined ? { duplex: "half" } : {})
     } as any)
 
     const parsed = await AjaxResponse.parseFrom(res, req.getResponseType())

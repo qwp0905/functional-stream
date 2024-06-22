@@ -1,6 +1,6 @@
-export { Fs } from './stream/index.js'
-export { Subject } from './observer/index.js'
-export * from './@types/index.js'
+export { Fs } from "./stream/index.js"
+export { Subject } from "./observer/index.js"
+export * from "./@types/index.js"
 export {
   AjaxClient,
   AjaxClientConfig,
@@ -8,11 +8,11 @@ export {
   AjaxResponse,
   AjaxError,
   BodyTypeNotSupportError
-} from './ajax/index.js'
+} from "./ajax/index.js"
 export {
   AlreadySubscribedError,
   NotSupportTypeError,
   InvalidEventSourceError,
   SubscriptionTimeoutError,
   Duration
-} from './utils/index.js'
+} from "./utils/index.js"

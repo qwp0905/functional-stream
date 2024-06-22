@@ -1,4 +1,4 @@
-import { Fs, OperatorPipe, StreamLike } from '../index.js'
+import { Fs, OperatorPipe, StreamLike } from "../index.js"
 
 export const concatWith = <T>(streams: StreamLike<T>[]): OperatorPipe<T> => {
   return (source) => async (dest) => {

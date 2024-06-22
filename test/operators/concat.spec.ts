@@ -1,12 +1,12 @@
-import { Fs } from '../../src/stream/functional-stream.js'
+import { Fs } from "../../src/stream/functional-stream.js"
 
-describe('concatWith', () => {
-  it('1', async () => {
+describe("concatWith", () => {
+  it("1", async () => {
     const result = Fs.range(5).concatWith([5, 6]).toArray()
     await expect(result).resolves.toEqual([0, 1, 2, 3, 4, 5, 6])
   })
 
-  it('2', async () => {
+  it("2", async () => {
     const r1 = Fs.range(5).mergeMap(
       (e) => new Promise<number>((resolve) => setTimeout(() => resolve(e), 100))
     )

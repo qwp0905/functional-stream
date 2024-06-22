@@ -1,9 +1,9 @@
-import { Fs } from '../../src/stream/functional-stream.js'
-import { IFs } from '../../src/index.js'
-import { sleep } from '../../src/utils/sleep.js'
+import { Fs } from "../../src/stream/functional-stream.js"
+import { IFs } from "../../src/index.js"
+import { sleep } from "../../src/utils/sleep.js"
 
-describe('switch', () => {
-  it('1', async () => {
+describe("switch", () => {
+  it("1", async () => {
     const r = Fs.generate<IFs<number>>((sub) => {
       Promise.resolve()
         .then(async () => {

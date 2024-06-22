@@ -1,5 +1,5 @@
-import { Fs } from '../stream/functional-stream.js'
-import { ResponseType } from './request.js'
+import { Fs } from "../stream/functional-stream.js"
+import { ResponseType } from "./request.js"
 
 export class AjaxResponse<T> {
   constructor(
@@ -34,41 +34,41 @@ async function getBody(res: Response, type?: ResponseType): Promise<any> {
     return {}
   }
 
-  const content_type_header = res.headers.get('content-type')?.split(';')
+  const content_type_header = res.headers.get("content-type")?.split(";")
   const charset = content_type_header
-    ?.find((e) => e.toLowerCase().startsWith('charset='))
-    ?.replace(/^charset=/, '')
-  const content_type = content_type_header?.find((e) => !e.toLowerCase().startsWith('charset='))
+    ?.find((e) => e.toLowerCase().startsWith("charset="))
+    ?.replace(/^charset=/, "")
+  const content_type = content_type_header?.find((e) => !e.toLowerCase().startsWith("charset="))
 
   switch (type) {
-    case 'json':
+    case "json":
       return res.json()
-    case 'arraybuffer':
+    case "arraybuffer":
       return res.arrayBuffer()
-    case 'text':
+    case "text":
       return res.text()
-    case 'blob':
+    case "blob":
       return res.blob()
-    case 'stream':
+    case "stream":
       return Fs.from(res.body.pipeThrough(new TextDecoderStream(charset)))
   }
 
   switch (content_type) {
-    case 'application/json':
+    case "application/json":
       return res.json()
-    case 'application/x-ndjson':
+    case "application/x-ndjson":
       return Fs.from(res.body.pipeThrough(new TextDecoderStream(charset)))
-        .split('\n')
+        .split("\n")
         .map((e) => JSON.parse(e))
-    case 'application/octet-stream':
+    case "application/octet-stream":
       return Fs.from(res.body.pipeThrough(new TextDecoderStream(charset)))
-    case 'application/x-www-form-urlencode':
+    case "application/x-www-form-urlencode":
       const body: Record<string, string> = {}
       for (const [k, v] of new URLSearchParams(await res.text()).entries()) {
         body[k] = v
       }
       return body
-    case 'multipart/formed-data':
+    case "multipart/formed-data":
       return res.formData()
     default:
       return res.text()

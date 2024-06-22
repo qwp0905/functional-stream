@@ -1,7 +1,7 @@
-import { fromAsyncIterable } from '../../src/stream/generators.js'
+import { fromAsyncIterable } from "../../src/stream/generators.js"
 
-describe('iterator', () => {
-  it('1', async () => {
+describe("iterator", () => {
+  it("1", async () => {
     const r = fromAsyncIterable({
       async *[Symbol.asyncIterator]() {
         for (let i = 0; i < 10; i++) {

@@ -4,9 +4,9 @@ import {
   isIterable,
   isReadableStream,
   NotSupportTypeError
-} from '../utils/index.js'
-import { Subject } from '../observer/index.js'
-import { ISubject, HtmlEventMap, IFs, StreamLike } from '../@types/index.js'
+} from "../utils/index.js"
+import { Subject } from "../observer/index.js"
+import { ISubject, HtmlEventMap, IFs, StreamLike } from "../@types/index.js"
 import {
   fromAsyncIterable,
   fromDelay,
@@ -16,9 +16,9 @@ import {
   fromLoop,
   fromPromise,
   fromReadable
-} from './generators.js'
-import { FsInternal } from './internal.js'
-import { defaultAjaxClient } from '../ajax/index.js'
+} from "./generators.js"
+import { FsInternal } from "./internal.js"
+import { defaultAjaxClient } from "../ajax/index.js"
 
 export class Fs<T> extends FsInternal<T> implements IFs<T> {
   protected constructor(source: ISubject<T>) {

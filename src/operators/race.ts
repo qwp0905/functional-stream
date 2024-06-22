@@ -1,4 +1,4 @@
-import { Closable, Fs, OperatorPipe, StreamLike } from '../index.js'
+import { Closable, Fs, OperatorPipe, StreamLike } from "../index.js"
 
 export const raceWith = <T>(streams: StreamLike<T>[]): OperatorPipe<T> => {
   return (source) => (dest) => {

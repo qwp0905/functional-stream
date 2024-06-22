@@ -1,4 +1,4 @@
-import { TFilterCallback, OperatorPipe } from '../@types/index.js'
+import { TFilterCallback, OperatorPipe } from "../@types/index.js"
 
 export const filter = <T>(callback: TFilterCallback<T>): OperatorPipe<T> => {
   return (source) => (dest) => {

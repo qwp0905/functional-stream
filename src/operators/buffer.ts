@@ -1,5 +1,5 @@
-import { OperatorPipe, StreamLike } from '../@types/index.js'
-import { Fs } from '../index.js'
+import { OperatorPipe, StreamLike } from "../@types/index.js"
+import { Fs } from "../index.js"
 
 export const bufferCount = <T>(count: number): OperatorPipe<T, T[]> => {
   return (source) => (dest) => {

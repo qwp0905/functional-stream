@@ -1,11 +1,11 @@
-import { Subject } from '../observer/index.js'
-import { ajaxCall } from './ajax.js'
-import { Duration } from '../utils/index.js'
-import { AjaxRequestConfig, HttpMethod } from './request.js'
-import { AjaxResponse } from './response.js'
-import { ISubject } from '../@types/index.js'
-import { Fs } from '../stream/index.js'
-import { toAsyncIter } from '../utils/iterator.js'
+import { Subject } from "../observer/index.js"
+import { ajaxCall } from "./ajax.js"
+import { Duration } from "../utils/index.js"
+import { AjaxRequestConfig, HttpMethod } from "./request.js"
+import { AjaxResponse } from "./response.js"
+import { ISubject } from "../@types/index.js"
+import { Fs } from "../stream/index.js"
+import { toAsyncIter } from "../utils/iterator.js"
 
 export interface AjaxClientConfig {
   readonly base_url?: string
@@ -17,7 +17,7 @@ export interface AjaxClientConfig {
   readonly concurrency?: number
 }
 
-export interface AjaxConfig extends Omit<AjaxRequestConfig, 'method' | 'url' | 'body'> {}
+export interface AjaxConfig extends Omit<AjaxRequestConfig, "method" | "url" | "body"> {}
 
 export class AjaxClient {
   private readonly sub: ISubject<[ISubject<AjaxResponse<any>>, AjaxRequestConfig]> = new Subject()
@@ -68,13 +68,13 @@ export class AjaxClient {
   protected request<T>(
     url: string,
     method: HttpMethod,
-    config: AjaxConfig & Pick<AjaxRequestConfig, 'body'>
+    config: AjaxConfig & Pick<AjaxRequestConfig, "body">
   ) {
     const merged = {
       ...config,
       method,
       headers: { ...(this.config.headers ?? {}), ...(config.headers ?? {}) },
-      url: (this.config.base_url ?? '').concat(url),
+      url: (this.config.base_url ?? "").concat(url),
       validate: config.validate ?? this.config.validate,
       timeout: config.timeout ?? this.config.timeout,
       user: config.user ?? this.config.user,

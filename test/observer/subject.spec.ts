@@ -1,7 +1,7 @@
-import { Subject } from '../../src/index.js'
+import { Subject } from "../../src/index.js"
 
-describe('subject', () => {
-  it('1', () => {
+describe("subject", () => {
+  it("1", () => {
     const next = jest.fn()
     const error = jest.fn()
     const complete = jest.fn()
@@ -21,12 +21,12 @@ describe('subject', () => {
     expect(complete).toHaveBeenCalledTimes(1)
   })
 
-  it('2', () => {
+  it("2", () => {
     const next = jest.fn()
     const error = jest.fn()
     const complete = jest.fn()
     const sub = new Subject()
-    const err = new Error('123')
+    const err = new Error("123")
     sub.watch({ next, error, complete })
     sub.abort(err)
     expect(next).toHaveBeenCalledTimes(0)
@@ -35,7 +35,7 @@ describe('subject', () => {
     expect(complete).toHaveBeenCalledTimes(0)
   })
 
-  it('3', () => {
+  it("3", () => {
     const next = jest.fn()
     const error = jest.fn()
     const complete = jest.fn()
@@ -57,7 +57,7 @@ describe('subject', () => {
     expect(complete).toHaveBeenCalledTimes(1)
   })
 
-  it('add', async () => {
+  it("add", async () => {
     const f = jest.fn()
     const sub = new Subject()
     sub.watch({ next() {} })
@@ -66,7 +66,7 @@ describe('subject', () => {
     expect(f).toHaveBeenCalledTimes(1)
   })
 
-  it('iter', async () => {
+  it("iter", async () => {
     const sub = new Subject<number>()
     Promise.resolve().then(() => {
       for (let i = 0; i < 10; i++) {

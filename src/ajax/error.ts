@@ -1,8 +1,8 @@
-import { AjaxResponse } from './response.js'
+import { AjaxResponse } from "./response.js"
 
 export class BodyTypeNotSupportError extends Error {
   constructor() {
-    super('body type not support.')
+    super("body type not support.")
   }
 }
 
@@ -17,6 +17,6 @@ export class AjaxError extends Error {
 
 export class AjaxTimeoutError extends Error {
   constructor() {
-    super('request timeout.')
+    super("request timeout.")
   }
 }

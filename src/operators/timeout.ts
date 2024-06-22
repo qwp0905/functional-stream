@@ -1,4 +1,4 @@
-import { OperatorPipe, SubscriptionTimeoutError } from '../index.js'
+import { OperatorPipe, SubscriptionTimeoutError } from "../index.js"
 
 export const timeout = <T>(each: number): OperatorPipe<T> => {
   return (source) => (dest) => {

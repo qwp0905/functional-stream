@@ -2,15 +2,15 @@
  * @jest-environment jsdom
  */
 
-import { Fs } from '../../src/stream/functional-stream.js'
-import { isHtmlElement } from '../../src/utils/functions.js'
+import { Fs } from "../../src/stream/functional-stream.js"
+import { isHtmlElement } from "../../src/utils/functions.js"
 
-describe('dom', () => {
+describe("dom", () => {
   let el: HTMLDivElement
-  const spy = jest.spyOn(EventTarget.prototype, 'removeEventListener')
+  const spy = jest.spyOn(EventTarget.prototype, "removeEventListener")
   beforeEach(() => {
-    el = document.createElement('div')
-    el.textContent = 'abc'
+    el = document.createElement("div")
+    el.textContent = "abc"
   })
 
   afterEach(() => {
@@ -18,14 +18,14 @@ describe('dom', () => {
     spy.mockReset()
   })
 
-  it('generator', () => {
+  it("generator", () => {
     expect(isHtmlElement(el)).toBeTruthy()
   })
 
-  it('fs', async () => {
+  it("fs", async () => {
     const a: any[] = []
     const b: any[] = []
-    const r = Fs.fromEvent(el, 'click')
+    const r = Fs.fromEvent(el, "click")
     r.watch({
       next(e) {
         a.push(e.target)
@@ -43,7 +43,7 @@ describe('dom', () => {
     r.close()
 
     expect(a).toEqual([el, el, el])
-    expect(b).toEqual(['abc', 'abc', 'abc'])
+    expect(b).toEqual(["abc", "abc", "abc"])
     expect(spy).toHaveBeenCalledTimes(1)
   })
 })

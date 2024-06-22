@@ -1,4 +1,4 @@
-import { OperatorPipe, TMapCallback } from '../@types/index.js'
+import { OperatorPipe, TMapCallback } from "../@types/index.js"
 
 export const take = <T>(count: number): OperatorPipe<T> => {
   let index = 0

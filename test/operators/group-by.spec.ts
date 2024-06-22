@@ -1,7 +1,7 @@
-import { Fs } from '../../src/stream/functional-stream.js'
+import { Fs } from "../../src/stream/functional-stream.js"
 
-describe('group by', () => {
-  it('1', async () => {
+describe("group by", () => {
+  it("1", async () => {
     const result = Fs.range(10)
       .groupBy((e) => e % 3)
       .concatMap((e) => e.toArray())
@@ -14,7 +14,7 @@ describe('group by', () => {
     ])
   })
 
-  it('2', async () => {
+  it("2", async () => {
     const result = Fs.range(10)
       .groupBy((e) => e)
       .concatAll()

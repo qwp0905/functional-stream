@@ -1,17 +1,17 @@
-import { Duration } from '../index.js'
-import { BodyTypeNotSupportError } from './error.js'
+import { Duration } from "../index.js"
+import { BodyTypeNotSupportError } from "./error.js"
 
 const CHUNK_SIZE = 4096
 
-export type ResponseType = 'arraybuffer' | 'blob' | 'json' | 'text' | 'stream'
+export type ResponseType = "arraybuffer" | "blob" | "json" | "text" | "stream"
 
 export enum HttpMethod {
-  get = 'get',
-  post = 'post',
-  put = 'put',
-  patch = 'patch',
-  delete = 'delete',
-  head = 'head'
+  get = "get",
+  post = "post",
+  put = "put",
+  patch = "patch",
+  delete = "delete",
+  head = "head"
 }
 
 export interface AjaxRequestConfig {
@@ -59,20 +59,20 @@ export class AjaxRequest {
     this.validate = validate ?? ((status) => status.lessThan(400))
 
     if (user || password) {
-      this.headers['Authorization'] =
-        `Basic ${btoa((user ?? '').concat(':').concat(password ?? ''))}`
+      this.headers["Authorization"] =
+        `Basic ${btoa((user ?? "").concat(":").concat(password ?? ""))}`
     }
   }
 
   getUrl(): string {
-    const [base, params] = this.url.split('?')
+    const [base, params] = this.url.split("?")
     if (!params) {
-      return base.concat('?').concat(new URLSearchParams(this.params).toString())
+      return base.concat("?").concat(new URLSearchParams(this.params).toString())
     }
 
     const p = new URLSearchParams(params)
     new URLSearchParams(this.params).forEach((v, k) => p.set(k, v))
-    return base.concat('?').concat(p.toString())
+    return base.concat("?").concat(p.toString())
   }
 
   getMethod(): HttpMethod {
@@ -88,11 +88,11 @@ export class AjaxRequest {
       return
     }
 
-    if (typeof this.body === 'string') {
+    if (typeof this.body === "string") {
       return sliceReader(this.body, this.body.length)
     }
 
-    if (typeof FormData !== 'undefined' && this.body instanceof FormData) {
+    if (typeof FormData !== "undefined" && this.body instanceof FormData) {
       return iterableReader(this.body)
     }
 
@@ -120,8 +120,8 @@ export class AjaxRequest {
       return sliceReader(this.body.buffer, this.body.buffer.byteLength)
     }
 
-    if (typeof this.body === 'object') {
-      this.headers['content-type'] = this.headers['content-type'] ?? 'application/json;utf-8'
+    if (typeof this.body === "object") {
+      this.headers["content-type"] = this.headers["content-type"] ?? "application/json;utf-8"
       const marshaled = JSON.stringify(this.body)
       return sliceReader(marshaled, marshaled.length)
     }
@@ -143,15 +143,15 @@ function toStringEq(data: any, type: string) {
 }
 
 function isFile(data: any): data is File {
-  return typeof File !== 'undefined' && toStringEq(data, 'File')
+  return typeof File !== "undefined" && toStringEq(data, "File")
 }
 
 function isArrayBuffer(data: any): data is ArrayBuffer {
-  return typeof ArrayBuffer !== 'undefined' && toStringEq(data, 'ArrayBuffer')
+  return typeof ArrayBuffer !== "undefined" && toStringEq(data, "ArrayBuffer")
 }
 
 function isBlob(data: any): data is Blob {
-  return typeof Blob !== 'undefined' && toStringEq(data, 'Blob')
+  return typeof Blob !== "undefined" && toStringEq(data, "Blob")
 }
 
 interface Slice {
@@ -159,7 +159,7 @@ interface Slice {
 }
 
 function sliceReader(buf: Slice, size: number) {
-  if (typeof ReadableStream === 'undefined') {
+  if (typeof ReadableStream === "undefined") {
     return buf
   }
 
@@ -174,7 +174,7 @@ function sliceReader(buf: Slice, size: number) {
 }
 
 function iterableReader(iter: Iterable<any>) {
-  if (typeof ReadableStream === 'undefined') {
+  if (typeof ReadableStream === "undefined") {
     return iter
   }
 

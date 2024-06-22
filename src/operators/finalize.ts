@@ -1,4 +1,4 @@
-import { OperatorPipe, TAnyCallback } from '../index.js'
+import { OperatorPipe, TAnyCallback } from "../index.js"
 
 export const finalize = <T>(callback: TAnyCallback): OperatorPipe<T> => {
   return (source) => (dest) => {

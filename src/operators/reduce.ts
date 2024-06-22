@@ -1,4 +1,4 @@
-import { OperatorPipe, TReduceCallback } from '../@types/index.js'
+import { OperatorPipe, TReduceCallback } from "../@types/index.js"
 
 export const reduce = <A, C = A>(callback: TReduceCallback<A, C>, seed?: A): OperatorPipe<C, A> => {
   return (source) => (dest) => {

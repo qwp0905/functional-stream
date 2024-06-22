@@ -5,8 +5,8 @@ import {
   TMapCallback,
   TReduceCallback,
   TTapCallback
-} from './callback.js'
-import { Closable, ISubject } from './observer.js'
+} from "./callback.js"
+import { Closable, ISubject } from "./observer.js"
 
 export interface IStreamReadOptions<T> {
   next(data: T): any

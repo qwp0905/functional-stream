@@ -1,12 +1,12 @@
-import { IFs } from '../@types/index.js'
+import { IFs } from "../@types/index.js"
 import {
   isEventSource,
   isHtmlElement,
   isOnOffEventSource,
   InvalidEventSourceError
-} from '../utils/index.js'
-import { toAsyncIter } from '../utils/iterator.js'
-import { Fs } from './functional-stream.js'
+} from "../utils/index.js"
+import { toAsyncIter } from "../utils/iterator.js"
+import { Fs } from "./functional-stream.js"
 
 export function fromAsyncIterable<T>(iter: AsyncIterable<T>): IFs<T> {
   return Fs.generate(async (subject) => {

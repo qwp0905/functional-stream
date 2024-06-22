@@ -1,5 +1,5 @@
 export function isFunction(v: any): v is (...args: any[]) => any {
-  return typeof v === 'function'
+  return typeof v === "function"
 }
 
 export function isAsyncIterable<T = any>(v: any): v is AsyncIterable<T> {
@@ -11,7 +11,7 @@ export function isIterable<T = any>(v: any): v is Iterable<T> {
 }
 
 export function isReadableStream<T = any>(v: any): v is ReadableStream<T> {
-  return typeof ReadableStream !== 'undefined' && v instanceof ReadableStream
+  return typeof ReadableStream !== "undefined" && v instanceof ReadableStream
 }
 
 export function isEventSource(v: any): boolean {

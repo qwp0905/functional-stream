@@ -1,4 +1,4 @@
-import { OperatorPipe } from '../@types/index.js'
+import { OperatorPipe } from "../@types/index.js"
 
 export const defaultIfEmpty = <T>(v: T): OperatorPipe<T> => {
   return (source) => (dest) => {

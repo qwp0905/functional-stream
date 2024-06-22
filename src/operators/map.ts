@@ -1,4 +1,4 @@
-import { TMapCallback, OperatorPipe } from '../@types/index.js'
+import { TMapCallback, OperatorPipe } from "../@types/index.js"
 
 export const map = <T, R>(callback: TMapCallback<T, R>): OperatorPipe<T, R> => {
   return (source) => (dest) => {

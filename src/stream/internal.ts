@@ -10,9 +10,9 @@ import {
   TReduceCallback,
   TTapCallback,
   OperatorPipe
-} from '../@types/index.js'
-import { Subject } from '../observer/index.js'
-import { EmptyPipelineError, isFunction } from '../utils/index.js'
+} from "../@types/index.js"
+import { Subject } from "../observer/index.js"
+import { EmptyPipelineError } from "../utils/index.js"
 import {
   map,
   filter,
@@ -32,8 +32,8 @@ import {
   concatWith,
   raceWith,
   zipWith
-} from '../operators/index.js'
-import { Fs } from './functional-stream.js'
+} from "../operators/index.js"
+import { Fs } from "./functional-stream.js"
 
 export abstract class FsInternal<T> implements IFs<T> {
   protected constructor(protected source: ISubject<T>) {}

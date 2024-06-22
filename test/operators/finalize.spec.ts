@@ -1,7 +1,7 @@
-import { Fs } from '../../src/stream/functional-stream.js'
+import { Fs } from "../../src/stream/functional-stream.js"
 
-describe('finalize', () => {
-  it('1', async () => {
+describe("finalize", () => {
+  it("1", async () => {
     let i = false
     const cb = jest.fn(() => {
       i = false

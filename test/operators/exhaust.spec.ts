@@ -1,8 +1,8 @@
-import { Fs } from '../../src/stream/functional-stream.js'
-import { sleep } from '../../src/utils/sleep.js'
+import { Fs } from "../../src/stream/functional-stream.js"
+import { sleep } from "../../src/utils/sleep.js"
 
-describe('exhaust', () => {
-  it('1', async () => {
+describe("exhaust", () => {
+  it("1", async () => {
     const r = Fs.generate((sub) => {
       Promise.resolve().then(async () => {
         sub.publish(Fs.range(10).concatMap((e) => sleep(100).then(() => e)))
