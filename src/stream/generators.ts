@@ -105,7 +105,7 @@ export function fromInterval(interval: number): IFs<number> {
   let i = 0
   return Fs.generate((subject) => {
     const timer = setInterval(() => subject.publish(i++), interval)
-    subject.add(() => timer.unref())
+    subject.add(() => clearInterval(timer))
   })
 }
 
@@ -115,6 +115,6 @@ export function fromDelay(ms: number): IFs<void> {
       subject.publish()
       subject.commit()
     }, ms)
-    subject.add(() => delay.unref())
+    subject.add(() => clearTimeout(delay))
   })
 }

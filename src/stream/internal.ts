@@ -148,7 +148,7 @@ export class FsInternal<T> implements IFs<T> {
   }
 
   skip(count: number): IFs<T> {
-    return this.filter((_, i) => i.greaterThanOrEqual(count))
+    return this.filter((_, i) => !i.lessThan(count))
   }
 
   bufferCount(count: number): IFs<T[]> {
