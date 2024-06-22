@@ -82,8 +82,8 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
     )
   }
 
-  static loop<T>(seed: T, condFunc: (x: T) => boolean, nextFunc: (x: T) => T | Promise<T>): IFs<T> {
-    return fromLoop(seed, condFunc, nextFunc)
+  static loop<T>(seed: T, cond: (x: T) => boolean, next: (x: T) => T | Promise<T>): IFs<T> {
+    return fromLoop(seed, cond, next)
   }
 
   static interval(ms: number): IFs<number> {
