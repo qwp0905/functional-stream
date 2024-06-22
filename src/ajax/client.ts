@@ -81,7 +81,7 @@ export class AjaxClient {
       password: config.password ?? this.config.password
     }
 
-    return Fs.generate<AjaxResponse<T>>((sub) => this.sub.publish([sub, merged]))
+    return Fs.new<AjaxResponse<T>>((sub) => this.sub.publish([sub, merged]))
   }
 
   close() {

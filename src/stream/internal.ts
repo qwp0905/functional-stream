@@ -43,7 +43,7 @@ export abstract class FsInternal<T> implements IFs<T> {
   }
 
   protected pipe<R = T>(callback: OperatorPipe<T, R>): IFs<R> {
-    return Fs.generate((dest) => {
+    return Fs.new((dest) => {
       dest.add(this.source)
       callback(this.source)(dest)
     })

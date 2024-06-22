@@ -21,11 +21,11 @@ import { FsInternal } from "./internal.js"
 import { defaultAjaxClient } from "../ajax/index.js"
 
 export class Fs<T> extends FsInternal<T> implements IFs<T> {
-  protected constructor(source: ISubject<T>) {
+  constructor(source: ISubject<T>) {
     super(source)
   }
 
-  static generate<T>(generator: (sub: ISubject<T>) => void): IFs<T> {
+  static new<T>(generator: (sub: ISubject<T>) => void): IFs<T> {
     const sub = new Subject<T>()
     generator(sub)
     return new Fs(sub)
@@ -91,7 +91,7 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
   }
 
   static empty<T>(): IFs<T> {
-    return Fs.generate((sub) => sub.commit())
+    return Fs.new((sub) => sub.commit())
   }
 
   static delay(ms: number): IFs<any> {
@@ -99,7 +99,7 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
   }
 
   static throw<T>(factory: unknown | (() => unknown)): IFs<T> {
-    return Fs.generate((sub) => sub.abort(isFunction(factory) ? factory() : factory))
+    return Fs.new((sub) => sub.abort(isFunction(factory) ? factory() : factory))
   }
 
   static get ajax() {

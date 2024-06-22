@@ -4,7 +4,7 @@ import { sleep } from "../../src/utils/sleep.js"
 
 describe("switch", () => {
   it("1", async () => {
-    const r = Fs.generate<IFs<number>>((sub) => {
+    const r = Fs.new<IFs<number>>((sub) => {
       Promise.resolve()
         .then(async () => {
           sub.publish(Fs.range(10).concatMap((e) => sleep(100).then(() => e)))

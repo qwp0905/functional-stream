@@ -3,7 +3,7 @@ import { sleep } from "../../src/utils/sleep.js"
 
 describe("exhaust", () => {
   it("1", async () => {
-    const r = Fs.generate((sub) => {
+    const r = Fs.new((sub) => {
       Promise.resolve().then(async () => {
         sub.publish(Fs.range(10).concatMap((e) => sleep(100).then(() => e)))
         sub.publish(Fs.range(10))
@@ -19,7 +19,7 @@ describe("exhaust", () => {
   })
 
   it("2", async () => {
-    const r = Fs.generate((s) => {
+    const r = Fs.new((s) => {
       s.publish(
         Fs.interval(100)
           .take(3)

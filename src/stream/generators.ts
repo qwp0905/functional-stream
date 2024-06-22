@@ -9,7 +9,7 @@ import { toAsyncIter } from "../utils/iterator.js"
 import { Fs } from "./functional-stream.js"
 
 export function fromAsyncIterable<T>(iter: AsyncIterable<T>): IFs<T> {
-  return Fs.generate(async (subject) => {
+  return Fs.new(async (subject) => {
     const iterator = toAsyncIter(iter)
     subject.add(() => iterator.return?.())
     try {
@@ -49,7 +49,7 @@ export function fromLoop<T>(
 }
 
 export function fromPromise<T>(p: Promise<T>): IFs<T> {
-  return Fs.generate(async (subject) => {
+  return Fs.new(async (subject) => {
     try {
       subject.publish(await p)
     } catch (err) {
@@ -76,7 +76,7 @@ export function fromReadable<T>(readable: ReadableStream<T>): IFs<T> {
 }
 
 export function fromEvent<T>(source: any, event: string | symbol): IFs<T> {
-  return Fs.generate<T>((sub) => {
+  return Fs.new<T>((sub) => {
     const handler = (...args: any[]) => sub.publish(args.length.greaterThan(1) ? args : args.at(0))
 
     if (isHtmlElement(source)) {
@@ -103,14 +103,14 @@ export function fromEvent<T>(source: any, event: string | symbol): IFs<T> {
 
 export function fromInterval(interval: number): IFs<number> {
   let i = 0
-  return Fs.generate((subject) => {
+  return Fs.new((subject) => {
     const timer = setInterval(() => subject.publish(i++), interval)
     subject.add(() => clearInterval(timer))
   })
 }
 
 export function fromDelay(ms: number): IFs<void> {
-  return Fs.generate((subject) => {
+  return Fs.new((subject) => {
     const delay = setTimeout(() => {
       subject.publish()
       subject.commit()
