@@ -2,11 +2,10 @@ import { Fs } from "../../src/stream/functional-stream.js"
 
 describe("tap", () => {
   it("1", async () => {
-    let c = 0
-    await Fs.range(100)
-      .tap(() => c++)
-      .lastOne()
+    const cb = jest.fn()
+    const r = Fs.range(100).tap(cb).lastOne()
 
-    expect(c).toBe(100)
+    await expect(r).resolves.toBe(99)
+    expect(cb).toHaveBeenCalledTimes(100)
   })
 })

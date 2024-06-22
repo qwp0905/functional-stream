@@ -31,7 +31,8 @@ import {
   mergeWith,
   concatWith,
   raceWith,
-  zipWith
+  zipWith,
+  repeat
 } from "../operators/index.js"
 import { Fs } from "./functional-stream.js"
 
@@ -361,5 +362,9 @@ export abstract class FsInternal<T> implements IFs<T> {
   ): IFs<[T, R, Q, K, J]>
   zipWith(...streams: StreamLike<any>[]): IFs<any[]> {
     return this.pipe(zipWith(streams))
+  }
+
+  repeat(count: number): IFs<T> {
+    return this.pipe(repeat(count))
   }
 }
