@@ -23,7 +23,7 @@ describe('error', () => {
 describe('throwError', () => {
   it('1', async () => {
     const err = new Error('123')
-    const r = Fs.range(10).throwError(err).lastOne()
+    const r = Fs.throw(err).lastOne()
     await expect(r).rejects.toThrow(err)
   })
 })

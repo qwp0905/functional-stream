@@ -1,5 +1,6 @@
 import {
   isAsyncIterable,
+  isFunction,
   isIterable,
   isReadableStream,
   NotSupportTypeError
@@ -95,6 +96,10 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
 
   static delay(ms: number): IFs<any> {
     return fromDelay(ms)
+  }
+
+  static throw<T>(factory: unknown | (() => unknown)): IFs<T> {
+    return Fs.generate((sub) => sub.abort(isFunction(factory) ? factory() : factory))
   }
 
   static get ajax() {

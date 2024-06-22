@@ -35,7 +35,7 @@ import {
 } from '../operators/index.js'
 import { Fs } from './functional-stream.js'
 
-export class FsInternal<T> implements IFs<T> {
+export abstract class FsInternal<T> implements IFs<T> {
   protected constructor(protected source: ISubject<T>) {}
 
   [Symbol.asyncIterator]() {
@@ -326,12 +326,6 @@ export class FsInternal<T> implements IFs<T> {
     return this.timestamp()
       .pairwise()
       .map(([prev, cur]) => cur.subtract(prev))
-  }
-
-  throwError<Err = unknown>(factory: Err | (() => Err)): IFs<T> {
-    return this.tap(() => {
-      throw (isFunction(factory) && factory()) || factory
-    })
   }
 
   sample(notifier: StreamLike<any>): IFs<T> {
