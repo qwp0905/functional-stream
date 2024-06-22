@@ -47,7 +47,6 @@ export interface IFs<T> extends Closable<T> {
   finalize(callback: TAnyCallback): IFs<T>
   delay(ms: number): IFs<T>
   catchError(callback: TErrorCallback): IFs<T>
-  copy(count: number): IFs<T>[]
   groupBy<R>(callback: TMapCallback<T, R>): IFs<IFs<T>>
   defaultIfEmpty(v: T): IFs<T>
   throwIfEmpty(err?: unknown): IFs<T>

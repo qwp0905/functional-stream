@@ -218,22 +218,6 @@ export class FsInternal<T> implements IFs<T> {
     return this.pipe(catchError(callback))
   }
 
-  copy(count: number): IFs<T>[] {
-    const sub = new Array(count).fill(null).map(() => new Subject<T>())
-    this.source.watch({
-      next(data) {
-        sub.forEach((s) => s.publish(data))
-      },
-      error(err) {
-        sub.forEach((s) => s.abort(err))
-      },
-      complete() {
-        sub.forEach((s) => s.commit())
-      }
-    })
-    return sub.map((s) => new FsInternal(s))
-  }
-
   defaultIfEmpty(v: T): IFs<T> {
     return this.pipe(defaultIfEmpty(v))
   }
