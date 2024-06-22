@@ -33,17 +33,19 @@ export const mergeScan = <T, R>(
       next(event) {
         const fs = Fs.from(callback(seed, event, index++))
         dest.add(() => fs.close())
-        queue.push(fs.tap((e) => dest.publish((seed = e))).discard())
+        queue.push(
+          fs
+            .tap((e) => dest.publish((seed = e)))
+            .catchError((err) => dest.abort(err))
+            .discard()
+        )
       },
       error(err) {
         dest.abort(err)
       },
       async complete() {
         while (queue.length.greaterThan(0)) {
-          await queue
-            .shift()!
-            .catchError((err) => dest.abort(err))
-            .lastOne()
+          await queue.shift()!.lastOne()
         }
         dest.commit()
       }
