@@ -70,7 +70,7 @@ export interface IFs<T> extends Closable<T> {
   audit<R>(callback: TMapCallback<T, StreamLike<R>>): IFs<T>
   throttle<R>(callback: (arg: T) => StreamLike<R>): IFs<T>
   bufferWhen<R>(callback: () => StreamLike<R>): IFs<T[]>
-  timestamp(): IFs<number>
+  timestamp(): IFs<{ value: T; timestamp: number }>
   sample(notifier: StreamLike<any>): IFs<T>
   discard(): IFs<any>
   mergeWith(...streams: StreamLike<T>[]): IFs<T>

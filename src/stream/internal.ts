@@ -314,12 +314,13 @@ export abstract class FsInternal<T> implements IFs<T> {
     return this.pipe(bufferWhen(callback))
   }
 
-  timestamp(): IFs<number> {
-    return this.map(() => Date.now())
+  timestamp() {
+    return this.map((value) => ({ timestamp: Date.now(), value }))
   }
 
   timeInterval(): IFs<number> {
     return this.timestamp()
+      .map(({ timestamp }) => timestamp)
       .pairwise()
       .map(([prev, cur]) => cur.subtract(prev))
   }
