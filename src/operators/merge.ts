@@ -53,13 +53,13 @@ export const mergeScan = <T, R>(
   }
 }
 
-export const mergeWith = <T>(streams: StreamLike<T>[]): OperatorPipe<T> => {
+export const mergeWith = <T>(streams: StreamLike<T>[], concurrency: number): OperatorPipe<T> => {
   return (source) => (dest) => {
     const list = streams.map((s) => Fs.from(s))
     list.forEach((fs) => dest.add(() => fs.close()))
 
     return Fs.from([source as StreamLike<T>].concat(list))
-      .mergeAll()
+      .mergeAll(concurrency)
       .tap((e) => dest.publish(e))
       .catchError((err) => dest.abort(err))
       .finalize(() => dest.commit())

@@ -29,7 +29,6 @@ import {
   timeout,
   bufferWhen,
   mergeWith,
-  concatWith,
   raceWith,
   zipWith,
   repeat
@@ -340,11 +339,11 @@ export abstract class FsInternal<T> implements IFs<T> {
   }
 
   mergeWith(...streams: StreamLike<T>[]): IFs<T> {
-    return this.pipe(mergeWith(streams))
+    return this.pipe(mergeWith(streams, -1))
   }
 
   concatWith(...streams: StreamLike<T>[]): IFs<T> {
-    return this.pipe(concatWith(streams))
+    return this.pipe(mergeWith(streams, 1))
   }
 
   raceWith(...streams: StreamLike<T>[]): IFs<T> {
