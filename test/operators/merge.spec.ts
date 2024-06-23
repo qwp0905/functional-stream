@@ -137,6 +137,7 @@ describe("mergeWith", () => {
     await jest.advanceTimersByTimeAsync(1)
     expect(fn).toHaveBeenCalledTimes(4)
     expect(fn).toHaveBeenLastCalledWith(1, 3)
+
     await jest.advanceTimersByTimeAsync(1)
     expect(fn).toHaveBeenCalledTimes(4)
     await jest.advanceTimersByTimeAsync(1)

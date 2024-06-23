@@ -87,11 +87,7 @@ describe("buffer time", () => {
   it("2", async () => {
     const err = new Error("123123")
     const r = Fs.range(10)
-      .tap((_, i) => {
-        if (i === 3) {
-          throw err
-        }
-      })
+      .mergeMap(() => Fs.throw(err))
       .bufferTime(3)
       .lastOne()
     await expect(r).rejects.toThrow(err)
