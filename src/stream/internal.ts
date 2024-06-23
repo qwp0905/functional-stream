@@ -31,7 +31,8 @@ import {
   mergeWith,
   raceWith,
   zipWith,
-  repeat
+  repeat,
+  sample
 } from "../operators/index.js"
 import { Fs } from "./functional-stream.js"
 
@@ -289,25 +290,15 @@ export abstract class FsInternal<T> implements IFs<T> {
 
   audit<R>(callback: TMapCallback<T, StreamLike<R>>): IFs<T> {
     let last: T
-    let blocked = false
-    return this.tap((e) => (last = e))
-      .filter(() => !blocked)
-      .tap(() => (blocked = true))
-      .mergeMap((e, i) => Fs.from(callback(e, i)).take(1))
-      .map(() => last)
-      .tap(() => (blocked = false))
+    return this.tap((e) => (last = e)).exhaustMap((e, i) =>
+      Fs.from<any>(callback(e, i))
+        .take(1)
+        .map(() => last)
+    )
   }
 
   throttle<R>(callback: (arg: T) => StreamLike<R>): IFs<T> {
-    let blocked = false
-    return this.filter(() => !blocked)
-      .tap(() => (blocked = true))
-      .mergeMap((e) =>
-        Fs.from(callback(e))
-          .take(1)
-          .map(() => e)
-      )
-      .tap(() => (blocked = false))
+    return this.exhaustMap((e) => Fs.from<any>(callback(e)).take(1).discard().startWith(e))
   }
 
   bufferWhen<R>(callback: () => StreamLike<R>): IFs<T[]> {
@@ -327,9 +318,7 @@ export abstract class FsInternal<T> implements IFs<T> {
   }
 
   sample(notifier: StreamLike<any>): IFs<T> {
-    return this.bufferWhen(() => notifier)
-      .filter((e) => e.length.greaterThan(0))
-      .map((e) => e.at(-1)!)
+    return this.pipe(sample(notifier))
   }
 
   discard(): IFs<any> {

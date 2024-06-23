@@ -76,13 +76,12 @@ describe("buffer time", () => {
     expect(fn).toHaveBeenCalledTimes(3)
     expect(fn).toHaveBeenLastCalledWith([6, 7, 8], 2)
 
-    jest.advanceTimersByTime(bt - 1)
-    expect(fn).toHaveBeenCalledTimes(3)
-    jest.advanceTimersByTime(1)
+    jest.runAllTimers()
     expect(fn).toHaveBeenCalledTimes(4)
     expect(fn).toHaveBeenLastCalledWith([9], 3)
 
     await expect(r).resolves.toEqual([[0, 1, 2], [3, 4, 5], [6, 7, 8], [9]])
+    expect(fn).toHaveBeenCalledTimes(4)
   })
 
   it("2", async () => {

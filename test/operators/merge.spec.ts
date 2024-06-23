@@ -90,3 +90,59 @@ describe("merge", () => {
     })
   })
 })
+
+describe("mergeWith", () => {
+  const fn = jest.fn()
+  beforeEach(() => {
+    jest.useFakeTimers()
+  })
+
+  afterEach(() => {
+    jest.clearAllTimers()
+    fn.mockClear()
+  })
+
+  it("1", async () => {
+    const r = Fs.interval(100)
+      .take(3)
+      .map(() => 1)
+      .mergeWith(
+        Fs.interval(151)
+          .take(2)
+          .map(() => 2)
+      )
+      .tap(fn)
+      .toArray()
+
+    await jest.advanceTimersByTimeAsync(99)
+    expect(fn).not.toHaveBeenCalled()
+    await jest.advanceTimersByTimeAsync(1)
+    expect(fn).toHaveBeenCalledTimes(1)
+    expect(fn).toHaveBeenLastCalledWith(1, 0)
+
+    await jest.advanceTimersByTimeAsync(50)
+    expect(fn).toHaveBeenCalledTimes(1)
+    await jest.advanceTimersByTimeAsync(1)
+    expect(fn).toHaveBeenCalledTimes(2)
+    expect(fn).toHaveBeenLastCalledWith(2, 1)
+
+    await jest.advanceTimersByTimeAsync(48)
+    expect(fn).toHaveBeenCalledTimes(2)
+    await jest.advanceTimersByTimeAsync(1)
+    expect(fn).toHaveBeenCalledTimes(3)
+    expect(fn).toHaveBeenLastCalledWith(1, 2)
+
+    await jest.advanceTimersByTimeAsync(99)
+    expect(fn).toHaveBeenCalledTimes(3)
+    await jest.advanceTimersByTimeAsync(1)
+    expect(fn).toHaveBeenCalledTimes(4)
+    expect(fn).toHaveBeenLastCalledWith(1, 3)
+    await jest.advanceTimersByTimeAsync(1)
+    expect(fn).toHaveBeenCalledTimes(4)
+    await jest.advanceTimersByTimeAsync(1)
+    expect(fn).toHaveBeenCalledTimes(5)
+    expect(fn).toHaveBeenLastCalledWith(2, 4)
+
+    await expect(r).resolves.toEqual([1, 2, 1, 1, 2])
+  })
+})

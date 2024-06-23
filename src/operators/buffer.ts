@@ -29,7 +29,6 @@ export const bufferCount = <T>(count: number): OperatorPipe<T, T[]> => {
 export const bufferWhen = <T, R>(callback: () => StreamLike<R>): OperatorPipe<T, T[]> => {
   return (source) => (dest) => {
     let queue: T[] = []
-    let done = false
 
     const trigger = Fs.from(callback())
     dest.add(() => trigger.close())
@@ -42,16 +41,16 @@ export const bufferWhen = <T, R>(callback: () => StreamLike<R>): OperatorPipe<T,
         dest.abort(err)
       },
       complete() {
-        done = true
+        queue.length && dest.publish(queue)
+        dest.commit()
+        queue = []
       }
     })
 
     return trigger
       .tap(() => dest.publish(queue))
       .tap(() => (queue = []))
-      .takeWhile(() => !done)
       .catchError((err) => dest.abort(err))
-      .finalize(() => dest.commit())
       .lastOne()
   }
 }
