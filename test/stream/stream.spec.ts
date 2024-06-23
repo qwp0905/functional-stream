@@ -55,4 +55,11 @@ describe("number", () => {
       [2, 3]
     ])
   })
+
+  it("firstOne", async () => {
+    const r = Fs.interval(100)
+      .map(() => 100)
+      .firstOne()
+    await expect(r).resolves.toEqual(100)
+  })
 })

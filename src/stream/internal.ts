@@ -319,9 +319,9 @@ export abstract class FsInternal<T> implements IFs<T> {
   }
 
   timeInterval(): IFs<number> {
-    return this.startWith(null as any)
-      .timestamp()
+    return this.timestamp()
       .map(({ timestamp }) => timestamp)
+      .startWith(Date.now())
       .pairwise()
       .map(([prev, cur]) => cur.subtract(prev))
   }

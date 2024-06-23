@@ -57,5 +57,10 @@
   "typescript.enablePromptUseWorkspaceTsdk": true,
   "code-runner.executorMap": {
     "typescript": "yarn node --loader ts-node/esm"
-  }
+  },
+  "jest.runMode": {
+    "type": "watch",
+    "coverage": true
+  },
+  "jest.enable": true
 }
