@@ -42,11 +42,46 @@ describe("buffer count", () => {
 })
 
 describe("buffer time", () => {
+  let fn = jest.fn()
+
+  beforeEach(() => {
+    jest.useFakeTimers()
+  })
+
+  afterEach(() => {
+    jest.clearAllTimers()
+    fn.mockClear()
+  })
+
   it("1", async () => {
-    const r = Fs.range(10)
-      .concatMap((e) => Fs.of(e).delay(100))
-      .bufferTime(320)
-      .toArray()
+    const bt = 320
+
+    const r = Fs.interval(100).take(10).bufferTime(bt).tap(fn).toArray()
+
+    jest.advanceTimersByTime(bt - 1)
+    expect(fn).not.toHaveBeenCalled()
+    jest.advanceTimersByTime(1)
+    expect(fn).toHaveBeenCalledTimes(1)
+    expect(fn).toHaveBeenLastCalledWith([0, 1, 2], 0)
+
+    jest.advanceTimersByTime(bt - 1)
+    expect(fn).toHaveBeenCalledTimes(1)
+    jest.advanceTimersByTime(1)
+    expect(fn).toHaveBeenCalledTimes(2)
+    expect(fn).toHaveBeenLastCalledWith([3, 4, 5], 1)
+
+    jest.advanceTimersByTime(bt - 1)
+    expect(fn).toHaveBeenCalledTimes(2)
+    jest.advanceTimersByTime(1)
+    expect(fn).toHaveBeenCalledTimes(3)
+    expect(fn).toHaveBeenLastCalledWith([6, 7, 8], 2)
+
+    jest.advanceTimersByTime(bt - 1)
+    expect(fn).toHaveBeenCalledTimes(3)
+    jest.advanceTimersByTime(1)
+    expect(fn).toHaveBeenCalledTimes(4)
+    expect(fn).toHaveBeenLastCalledWith([9], 3)
+
     await expect(r).resolves.toEqual([[0, 1, 2], [3, 4, 5], [6, 7, 8], [9]])
   })
 

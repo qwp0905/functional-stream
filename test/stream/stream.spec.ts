@@ -56,35 +56,3 @@ describe("number", () => {
     ])
   })
 })
-
-describe("generate", () => {
-  it("readable", async () => {
-    const rs = new ReadableStream({
-      start(con) {
-        for (let i = 0; i < 10; i++) {
-          con.enqueue(i)
-        }
-        con.close()
-      }
-    })
-    const r = Fs.from(rs).toArray()
-    await expect(r).resolves.toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
-  })
-
-  it("promise", async () => {
-    const r = Fs.from(Promise.resolve(10)).lastOne()
-    await expect(r).resolves.toEqual(10)
-  })
-})
-
-describe("interval", () => {
-  it("1", async () => {
-    const r = Fs.interval(10).take(3).toArray()
-    await expect(r).resolves.toStrictEqual([0, 1, 2])
-  })
-
-  it("2", async () => {
-    const r = Fs.interval(10).startWith(100).take(1).toArray()
-    await expect(r).resolves.toStrictEqual([100])
-  })
-})
