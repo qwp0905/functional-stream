@@ -42,7 +42,7 @@ describe("buffer count", () => {
 })
 
 describe("buffer time", () => {
-  let fn = jest.fn()
+  const fn = jest.fn()
 
   beforeEach(() => {
     jest.useFakeTimers()

@@ -1,7 +1,7 @@
 import { Fs } from "../../release/cjs/dist/index.js"
 
 describe("delay", () => {
-  let fn = jest.fn()
+  const fn = jest.fn()
   beforeEach(() => {
     jest.useFakeTimers()
   })
