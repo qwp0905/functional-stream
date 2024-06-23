@@ -12,6 +12,17 @@ describe("iterator", () => {
 
     await expect(r).resolves.toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
   })
+
+  it("2", async () => {
+    const err = new Error("123")
+    const r = fromAsyncIterable({
+      async *[Symbol.asyncIterator]() {
+        throw err
+      }
+    }).lastOne()
+
+    await expect(r).rejects.toThrow(err)
+  })
 })
 
 describe("readable", () => {

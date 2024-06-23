@@ -60,7 +60,8 @@
   },
   "jest.runMode": {
     "type": "watch",
-    "coverage": true
+    "coverage": true,
+    "runAllTestsOnStartup": true
   },
   "jest.enable": true
 }
