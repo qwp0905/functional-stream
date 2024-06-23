@@ -1,4 +1,4 @@
-import { Fs } from "../../release/cjs/dist/index.js"
+import { Fs } from "../../src/index.js"
 
 describe("delay", () => {
   const fn = jest.fn()
