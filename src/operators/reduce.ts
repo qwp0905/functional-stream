@@ -5,9 +5,11 @@ export const reduce = <A, C = A>(callback: TReduceCallback<A, C>, seed?: A): Ope
     let index = 0
     source.watch({
       next(event) {
-        seed =
-          (index.equal(0) && seed === undefined && (event as any)) ||
-          callback(seed!, event, index++)
+        if ((index++).equal(0) && seed === undefined) {
+          return (seed = event as any)
+        }
+
+        seed = callback(seed!, event, index)
       },
       error(err) {
         dest.abort(err)

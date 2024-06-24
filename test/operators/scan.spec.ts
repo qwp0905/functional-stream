@@ -15,4 +15,11 @@ describe("scan", () => {
       .toArray()
     await expect(r).resolves.toStrictEqual([1, 3, 6, 10, 15])
   })
+
+  it("3", async () => {
+    const r = Fs.range(4)
+      .scan((a, c) => a + c)
+      .toArray()
+    await expect(r).resolves.toStrictEqual([0, 1, 3, 6])
+  })
 })

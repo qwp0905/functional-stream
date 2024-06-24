@@ -5,7 +5,7 @@ export const split = (delimiter: string): OperatorPipe<string> => {
     let tmp = ""
     source.watch({
       next(event) {
-        const lines = (tmp + event).split(delimiter)
+        const lines = tmp.concat(event).split(delimiter)
         tmp = lines.pop() ?? ""
         for (const line of lines) {
           dest.publish(line)

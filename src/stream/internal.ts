@@ -140,7 +140,7 @@ export abstract class FsInternal<T> implements IFs<T> {
 
   scan<A = T>(callback: TReduceCallback<A, T>, seed?: A): IFs<A> {
     return this.map(
-      (e, i) => (seed = (i.equal(0) && seed === undefined && (e as any)) || callback(seed!, e, i))
+      (e, i) => (seed = i.equal(0) && seed === undefined ? (e as any) : callback(seed!, e, i))
     )
   }
 

@@ -52,8 +52,8 @@ export class AjaxRequest {
     this.url = url
     this.method = method
     this.body = body
-    this.params = params || {}
-    this.headers = headers || {}
+    this.params = params ?? {}
+    this.headers = headers ?? {}
     this.responseType = responseType
     this.timeout = timeout ?? Duration.minute(2)
     this.validate = validate ?? ((status) => status.lessThan(400))
