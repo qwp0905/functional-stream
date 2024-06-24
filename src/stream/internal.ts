@@ -291,14 +291,14 @@ export abstract class FsInternal<T> implements IFs<T> {
   audit<R>(callback: TMapCallback<T, StreamLike<R>>): IFs<T> {
     let last: T
     return this.tap((e) => (last = e)).exhaustMap((e, i) =>
-      Fs.from<any>(callback(e, i))
+      Fs.from(callback(e, i))
         .take(1)
         .map(() => last)
     )
   }
 
   throttle<R>(callback: (arg: T) => StreamLike<R>): IFs<T> {
-    return this.exhaustMap((e) => Fs.from<any>(callback(e)).take(1).discard().startWith(e))
+    return this.exhaustMap((e) => Fs.from(callback(e)).take(1).discard().startWith(e))
   }
 
   bufferWhen<R>(callback: () => StreamLike<R>): IFs<T[]> {
