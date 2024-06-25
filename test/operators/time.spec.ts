@@ -4,7 +4,7 @@ describe("timeInterval", () => {
   const fn = jest.fn()
 
   beforeEach(() => {
-    jest.useFakeTimers({ now: 10 })
+    jest.useFakeTimers()
   })
 
   afterEach(() => {
