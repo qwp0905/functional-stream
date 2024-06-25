@@ -3,9 +3,9 @@ import {
   isEventSource,
   isHtmlElement,
   isOnOffEventSource,
-  InvalidEventSourceError
+  InvalidEventSourceError,
+  toAsyncIter
 } from "../utils/index.js"
-import { toAsyncIter } from "../utils/iterator.js"
 import { Fs } from "./functional-stream.js"
 
 export function fromAsyncIterable<T>(iter: AsyncIterable<T>): IFs<T> {

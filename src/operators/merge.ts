@@ -1,6 +1,6 @@
 import { StreamLike, IFs, OperatorPipe } from "../@types/index.js"
 import { Fs } from "../stream/index.js"
-import { toAsyncIter } from "../utils/iterator.js"
+import { toAsyncIter } from "../utils/index.js"
 
 export const mergeScan = <T, R>(
   callback: (acc: R, cur: T, index: number) => StreamLike<R>,

@@ -1,5 +1,5 @@
 import { Fs, OperatorPipe, StreamLike } from "../index.js"
-import { toAsyncIter } from "../utils/iterator.js"
+import { toAsyncIter } from "../utils/index.js"
 
 export const zipWith = <T>(streams: StreamLike<any>[]): OperatorPipe<T, any[]> => {
   return (source) => (dest) => {

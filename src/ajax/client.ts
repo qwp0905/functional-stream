@@ -5,7 +5,7 @@ import { AjaxRequestConfig, HttpMethod } from "./request.js"
 import { AjaxResponse } from "./response.js"
 import { ISubject } from "../@types/index.js"
 import { Fs } from "../stream/index.js"
-import { toAsyncIter } from "../utils/iterator.js"
+import { toAsyncIter } from "../utils/index.js"
 
 export interface AjaxClientConfig {
   readonly base_url?: string
