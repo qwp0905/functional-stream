@@ -1,4 +1,4 @@
-import { OperatorPipe, TMapCallback } from "../@types/index.js"
+import { OperatorPipe, IMapCallback } from "../@types/index.js"
 
 export const take = <T>(count: number): OperatorPipe<T> => {
   let index = 0
@@ -21,7 +21,7 @@ export const take = <T>(count: number): OperatorPipe<T> => {
   }
 }
 
-export const takeWhile = <T>(callback: TMapCallback<T, boolean>): OperatorPipe<T> => {
+export const takeWhile = <T>(callback: IMapCallback<T, boolean>): OperatorPipe<T> => {
   return (source) => (dest) => {
     let index = 0
     source.watch({

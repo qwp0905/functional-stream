@@ -1,10 +1,12 @@
 import {
-  TAnyCallback,
-  TErrorCallback,
-  TFilterCallback,
-  TMapCallback,
-  TReduceCallback,
-  TTapCallback
+  IAnyCallback,
+  IFunction0,
+  IErrorCallback,
+  IFilterCallback,
+  IMapCallback,
+  IFunction1,
+  IReduceCallback,
+  ITapCallback
 } from "./callback.js"
 import { Closable, ISubject } from "./observer.js"
 
@@ -14,24 +16,33 @@ export interface IStreamReadOptions<T> {
   complete?(): any
 }
 
+export interface Timestamp<T> {
+  value: T
+  timestamp: number
+}
+export interface TimeInterval<T> {
+  value: T
+  interval: number
+}
+
 export interface IFs<T> extends Closable<T> {
   watch(options: IStreamReadOptions<T>): void
   close(): void
   lastOne(): Promise<T>
   firstOne(): Promise<T>
   toArray(): Promise<T[]>
-  forEach(callback: TMapCallback<T, any>): Promise<void>
+  forEach(callback: IMapCallback<T, any>): Promise<void>
 
   count(): IFs<number>
-  some(callback: TFilterCallback<T>): IFs<boolean>
-  every(callback: TFilterCallback<T>): IFs<boolean>
-  map<R>(callback: TMapCallback<T, R>): IFs<R>
-  filter(callback: TFilterCallback<T>): IFs<T>
-  tap(callback: TTapCallback<T>): IFs<T>
-  reduce(callback: TReduceCallback<T, T>): IFs<T>
-  reduce<A = T>(callback: TReduceCallback<A, T>, seed: A): IFs<A>
-  scan(callback: TReduceCallback<T, T>): IFs<T>
-  scan<A = T>(callback: TReduceCallback<A, T>, seed?: A): IFs<A>
+  some(callback: IFilterCallback<T>): IFs<boolean>
+  every(callback: IFilterCallback<T>): IFs<boolean>
+  map<R>(callback: IMapCallback<T, R>): IFs<R>
+  filter(callback: IFilterCallback<T>): IFs<T>
+  tap(callback: ITapCallback<T>): IFs<T>
+  reduce(callback: IReduceCallback<T, T>): IFs<T>
+  reduce<A = T>(callback: IReduceCallback<A, T>, seed: A): IFs<A>
+  scan(callback: IReduceCallback<T, T>): IFs<T>
+  scan<A = T>(callback: IReduceCallback<A, T>, seed?: A): IFs<A>
   take(count: number): IFs<T>
   skip(count: number): IFs<T>
   bufferCount(count: number): IFs<T[]>
@@ -40,14 +51,14 @@ export interface IFs<T> extends Closable<T> {
   concatAll(): IFs<T extends StreamLike<infer K> ? K : never>
   exhaustAll(): IFs<T extends StreamLike<infer K> ? K : never>
   switchAll(): IFs<T extends StreamLike<infer K> ? K : never>
-  mergeMap<R>(callback: TMapCallback<T, StreamLike<R>>, concurrency?: number): IFs<R>
-  concatMap<R>(callback: TMapCallback<T, StreamLike<R>>): IFs<R>
-  exhaustMap<R>(callback: TMapCallback<T, StreamLike<R>>): IFs<R>
-  switchMap<R>(callback: TMapCallback<T, StreamLike<R>>): IFs<R>
-  finalize(callback: TAnyCallback): IFs<T>
+  mergeMap<R>(callback: IMapCallback<T, StreamLike<R>>, concurrency?: number): IFs<R>
+  concatMap<R>(callback: IMapCallback<T, StreamLike<R>>): IFs<R>
+  exhaustMap<R>(callback: IMapCallback<T, StreamLike<R>>): IFs<R>
+  switchMap<R>(callback: IMapCallback<T, StreamLike<R>>): IFs<R>
+  finalize(callback: IAnyCallback): IFs<T>
   delay(ms: number): IFs<T>
-  catchError(callback: TErrorCallback): IFs<T>
-  groupBy<R>(callback: TMapCallback<T, R>): IFs<IFs<T>>
+  catchError(callback: IErrorCallback): IFs<T>
+  groupBy<R>(callback: IMapCallback<T, R>): IFs<IFs<T>>
   defaultIfEmpty(v: T): IFs<T>
   throwIfEmpty(err?: unknown): IFs<T>
   timeout(each: number): IFs<T>
@@ -55,22 +66,22 @@ export interface IFs<T> extends Closable<T> {
   endWith(v: T): IFs<T>
   pairwise(): IFs<[T, T]>
   split(delimiter: string): IFs<T extends string ? string : never>
-  distinct<K>(callback?: TMapCallback<T, K>): IFs<T>
-  takeWhile(callback: TMapCallback<T, boolean>): IFs<T>
-  skipWhile(callback: TMapCallback<T, boolean>): IFs<T>
+  distinct<K>(callback?: IMapCallback<T, K>): IFs<T>
+  takeWhile(callback: IMapCallback<T, boolean>): IFs<T>
+  skipWhile(callback: IMapCallback<T, boolean>): IFs<T>
   takeLast(count: number): IFs<T>
   skipLast(count: number): IFs<T>
-  timeInterval(): IFs<{ value: T; interval: number }>
+  timeInterval(): IFs<TimeInterval<T>>
   mergeScan<R>(
-    callback: TReduceCallback<R, T, StreamLike<R>>,
+    callback: IReduceCallback<R, T, StreamLike<R>>,
     seed: R,
     concurrency?: number
   ): IFs<R>
-  switchScan<R>(callback: TReduceCallback<R, T, StreamLike<R>>, seed: R): IFs<R>
-  audit<R>(callback: TMapCallback<T, StreamLike<R>>): IFs<T>
-  throttle<R>(callback: (arg: T) => StreamLike<R>): IFs<T>
-  bufferWhen<R>(callback: () => StreamLike<R>): IFs<T[]>
-  timestamp(): IFs<{ value: T; timestamp: number }>
+  switchScan<R>(callback: IReduceCallback<R, T, StreamLike<R>>, seed: R): IFs<R>
+  audit<R>(callback: IMapCallback<T, StreamLike<R>>): IFs<T>
+  throttle<R>(callback: IFunction1<T, StreamLike<R>>): IFs<T>
+  bufferWhen<R>(callback: IFunction0<StreamLike<R>>): IFs<T[]>
+  timestamp(): IFs<Timestamp<T>>
   sample(notifier: StreamLike<any>): IFs<T>
   discard(): IFs<any>
   mergeWith(...streams: StreamLike<T>[]): IFs<T>
@@ -97,4 +108,5 @@ export type StreamLike<T> =
   | ISubject<T>
   | Promise<T>
 
-export type OperatorPipe<T, R = T> = (source: ISubject<T>) => (dest: ISubject<R>) => void
+export interface OperatorPipe<T, R = T>
+  extends IFunction1<ISubject<T>, IFunction1<ISubject<R>, void>> {}

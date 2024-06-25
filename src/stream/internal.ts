@@ -3,13 +3,15 @@ import {
   IStreamReadOptions,
   StreamLike,
   ISubject,
-  TAnyCallback,
-  TErrorCallback,
-  TFilterCallback,
-  TMapCallback,
-  TReduceCallback,
-  TTapCallback,
-  OperatorPipe
+  IAnyCallback,
+  IErrorCallback,
+  IFilterCallback,
+  IMapCallback,
+  IReduceCallback,
+  ITapCallback,
+  OperatorPipe,
+  IFunction1,
+  IFunction0
 } from "../@types/index.js"
 import { Subject } from "../observer/index.js"
 import { EmptyPipelineError } from "../utils/index.js"
@@ -98,7 +100,7 @@ export abstract class FsInternal<T> implements IFs<T> {
     return this.reduce<T[]>((acc, cur) => acc.concat([cur]), []).lastOne()
   }
 
-  forEach(callback: TMapCallback<T, any>): Promise<void> {
+  forEach(callback: IMapCallback<T, any>): Promise<void> {
     return this.tap(callback).discard().lastOne()
   }
 
@@ -106,40 +108,40 @@ export abstract class FsInternal<T> implements IFs<T> {
     return this.reduce((acc) => acc.add(1), 0)
   }
 
-  some(callback: TFilterCallback<T>): IFs<boolean> {
+  some(callback: IFilterCallback<T>): IFs<boolean> {
     return this.filter(callback)
       .take(1)
       .map(() => true)
       .defaultIfEmpty(false)
   }
 
-  every(callback: TFilterCallback<T>): IFs<boolean> {
+  every(callback: IFilterCallback<T>): IFs<boolean> {
     return this.filter((e, i) => !callback(e, i))
       .take(1)
       .map(() => false)
       .defaultIfEmpty(true)
   }
 
-  map<R>(callback: TMapCallback<T, R>): IFs<R> {
+  map<R>(callback: IMapCallback<T, R>): IFs<R> {
     return this.pipe(map(callback))
   }
 
-  filter(callback: TFilterCallback<T>): IFs<T> {
+  filter(callback: IFilterCallback<T>): IFs<T> {
     return this.pipe(filter(callback))
   }
 
-  tap(callback: TTapCallback<T>): IFs<T> {
+  tap(callback: ITapCallback<T>): IFs<T> {
     return this.map((e, i) => {
       callback(e, i)
       return e
     })
   }
 
-  reduce<A = T>(callback: TReduceCallback<A, T>, seed?: A): IFs<A> {
+  reduce<A = T>(callback: IReduceCallback<A, T>, seed?: A): IFs<A> {
     return this.pipe(reduce(callback, seed))
   }
 
-  scan<A = T>(callback: TReduceCallback<A, T>, seed?: A): IFs<A> {
+  scan<A = T>(callback: IReduceCallback<A, T>, seed?: A): IFs<A> {
     return this.map(
       (e, i) => (seed = i.equal(0) && seed === undefined ? (e as any) : callback(seed!, e, i))
     )
@@ -173,26 +175,26 @@ export abstract class FsInternal<T> implements IFs<T> {
     return this.switchMap((e) => e as any)
   }
 
-  mergeMap<R>(callback: TMapCallback<T, StreamLike<R>>, concurrency: number = -1): IFs<R> {
+  mergeMap<R>(callback: IMapCallback<T, StreamLike<R>>, concurrency: number = -1): IFs<R> {
     return this.mergeScan<R>((_, cur, index) => callback(cur, index), null as R, concurrency)
   }
 
-  concatMap<R>(callback: TMapCallback<T, StreamLike<R>>): IFs<R> {
+  concatMap<R>(callback: IMapCallback<T, StreamLike<R>>): IFs<R> {
     return this.mergeMap(callback, 1)
   }
 
-  exhaustMap<R>(callback: TMapCallback<T, StreamLike<R>>): IFs<R> {
+  exhaustMap<R>(callback: IMapCallback<T, StreamLike<R>>): IFs<R> {
     let blocked = false
     return this.filter(() => !blocked)
       .tap(() => (blocked = true))
       .mergeMap((e, i) => Fs.from(callback(e, i)).finalize(() => (blocked = false)))
   }
 
-  switchMap<R>(callback: TMapCallback<T, StreamLike<R>>): IFs<R> {
+  switchMap<R>(callback: IMapCallback<T, StreamLike<R>>): IFs<R> {
     return this.switchScan((_, cur, i) => callback(cur, i), null as R)
   }
 
-  switchScan<R>(callback: TReduceCallback<R, T, StreamLike<R>>, seed: R): IFs<R> {
+  switchScan<R>(callback: IReduceCallback<R, T, StreamLike<R>>, seed: R): IFs<R> {
     let current = 0
     return this.tap((_, i) => (current = i)).mergeScan(
       (acc, cur, i) => Fs.from(callback(acc, cur, i)).filter(() => current.equal(i)),
@@ -200,15 +202,11 @@ export abstract class FsInternal<T> implements IFs<T> {
     )
   }
 
-  mergeScan<R>(
-    callback: (acc: R, cur: T, index: number) => StreamLike<R>,
-    seed: R,
-    concurrency = -1
-  ): IFs<R> {
+  mergeScan<R>(callback: IReduceCallback<R, T, StreamLike<R>>, seed: R, concurrency = -1): IFs<R> {
     return this.pipe(mergeScan(callback, seed, concurrency))
   }
 
-  finalize(callback: TAnyCallback): IFs<T> {
+  finalize(callback: IAnyCallback): IFs<T> {
     return this.pipe(finalize(callback))
   }
 
@@ -216,7 +214,7 @@ export abstract class FsInternal<T> implements IFs<T> {
     return this.mergeMap((e) => Fs.delay(ms).map(() => e))
   }
 
-  catchError(callback: TErrorCallback): IFs<T> {
+  catchError(callback: IErrorCallback): IFs<T> {
     return this.pipe(catchError(callback))
   }
 
@@ -228,7 +226,7 @@ export abstract class FsInternal<T> implements IFs<T> {
     return this.pipe(throwIfEmpty(err))
   }
 
-  groupBy<R>(callback: TMapCallback<T, R>): IFs<IFs<T>> {
+  groupBy<R>(callback: IMapCallback<T, R>): IFs<IFs<T>> {
     const map = new Map<R, ISubject<T>>()
     return this.map<[T, R]>((e, i) => [e, callback(e, i)])
       .tap(([e, k]) => map.get(k)?.publish(e))
@@ -259,16 +257,16 @@ export abstract class FsInternal<T> implements IFs<T> {
     return this.pipe(split(delimiter) as any) as any
   }
 
-  distinct<K>(callback: TMapCallback<T, K> = (e) => e as any): IFs<T> {
+  distinct<K>(callback: IMapCallback<T, K> = (e) => e as any): IFs<T> {
     return this.groupBy(callback).mergeMap((e) => e.take(1))
   }
 
-  skipWhile(callback: TMapCallback<T, boolean>): IFs<T> {
+  skipWhile(callback: IMapCallback<T, boolean>): IFs<T> {
     let started = false
     return this.tap((e, i) => (started ||= !callback(e, i))).filter(() => started)
   }
 
-  takeWhile(callback: TMapCallback<T, boolean>): IFs<T> {
+  takeWhile(callback: IMapCallback<T, boolean>): IFs<T> {
     return this.pipe(takeWhile(callback))
   }
 
@@ -289,7 +287,7 @@ export abstract class FsInternal<T> implements IFs<T> {
     return this.reduce<T[]>((a, c) => a.slice(len).concat([c]), []).concatAll()
   }
 
-  audit<R>(callback: TMapCallback<T, StreamLike<R>>): IFs<T> {
+  audit<R>(callback: IMapCallback<T, StreamLike<R>>): IFs<T> {
     let last: T
     return this.tap((e) => (last = e)).exhaustMap((e, i) =>
       Fs.from(callback(e, i))
@@ -298,11 +296,11 @@ export abstract class FsInternal<T> implements IFs<T> {
     )
   }
 
-  throttle<R>(callback: (arg: T) => StreamLike<R>): IFs<T> {
+  throttle<R>(callback: IFunction1<T, StreamLike<R>>): IFs<T> {
     return this.exhaustMap((e) => Fs.from(callback(e)).take(1).discard().startWith(e))
   }
 
-  bufferWhen<R>(callback: () => StreamLike<R>): IFs<T[]> {
+  bufferWhen<R>(callback: IFunction0<StreamLike<R>>): IFs<T[]> {
     return this.pipe(bufferWhen(callback))
   }
 

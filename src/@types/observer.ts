@@ -1,3 +1,5 @@
+import { IFunction0 } from "./callback.js"
+
 export interface Closable<T> extends AsyncIterable<T> {
   close(): void
 }
@@ -13,5 +15,5 @@ export interface ISubject<T> extends Closable<T> {
   publish(event: T): void
   abort(err: unknown): void
   commit(): void
-  add<R>(next: ISubject<R> | (() => void)): void
+  add<R>(next: ISubject<R> | IFunction0<void>): void
 }

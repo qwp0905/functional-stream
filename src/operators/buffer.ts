@@ -1,4 +1,4 @@
-import { OperatorPipe, StreamLike } from "../@types/index.js"
+import { IFunction0, OperatorPipe, StreamLike } from "../@types/index.js"
 import { Fs } from "../index.js"
 
 export const bufferCount = <T>(count: number): OperatorPipe<T, T[]> => {
@@ -26,7 +26,7 @@ export const bufferCount = <T>(count: number): OperatorPipe<T, T[]> => {
   }
 }
 
-export const bufferWhen = <T, R>(callback: () => StreamLike<R>): OperatorPipe<T, T[]> => {
+export const bufferWhen = <T, R>(callback: IFunction0<StreamLike<R>>): OperatorPipe<T, T[]> => {
   return (source) => (dest) => {
     let queue: T[] = []
 

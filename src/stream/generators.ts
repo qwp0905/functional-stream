@@ -1,4 +1,4 @@
-import { IFs } from "../@types/index.js"
+import { IFs, IFunction1, OrPromise } from "../@types/index.js"
 import {
   isEventSource,
   isHtmlElement,
@@ -36,8 +36,8 @@ export function fromIterable<T>(iter: Iterable<T>): IFs<T> {
 
 export function fromLoop<T>(
   seed: T,
-  cond: (x: T) => boolean,
-  next: (x: T) => T | Promise<T>
+  cond: IFunction1<T, boolean>,
+  next: IFunction1<T, OrPromise<T>>
 ): IFs<T> {
   return fromAsyncIterable({
     async *[Symbol.asyncIterator]() {

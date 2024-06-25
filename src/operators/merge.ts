@@ -1,9 +1,9 @@
-import { StreamLike, IFs, OperatorPipe } from "../@types/index.js"
+import { StreamLike, IFs, OperatorPipe, IReduceCallback } from "../@types/index.js"
 import { Fs } from "../stream/index.js"
 import { toAsyncIter } from "../utils/index.js"
 
 export const mergeScan = <T, R>(
-  callback: (acc: R, cur: T, index: number) => StreamLike<R>,
+  callback: IReduceCallback<R, T, StreamLike<R>>,
   seed: R,
   concurrency: number
 ): OperatorPipe<T, R> => {
@@ -26,8 +26,8 @@ export const mergeScan = <T, R>(
     }
   }
 
-  const queue: IFs<R>[] = []
   return (source) => (dest) => {
+    const queue: IFs<R>[] = []
     let index = 0
     source.watch({
       next(event) {

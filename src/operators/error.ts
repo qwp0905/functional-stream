@@ -1,6 +1,6 @@
-import { OperatorPipe, TErrorCallback } from "../@types/index.js"
+import { OperatorPipe, IErrorCallback } from "../@types/index.js"
 
-export const catchError = <T>(callback: TErrorCallback): OperatorPipe<T> => {
+export const catchError = <T>(callback: IErrorCallback): OperatorPipe<T> => {
   return (source) => (dest) => {
     source.watch({
       next(event) {

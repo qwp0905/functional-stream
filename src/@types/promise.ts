@@ -1,2 +1,4 @@
-export type ResolveFunction<T> = (v: IteratorResult<T> | PromiseLike<IteratorResult<T>>) => void
-export type RejectFunction = (reason: any) => void
+import { IFunction1, OrPromise } from "./callback.js"
+
+export interface ResolveFunction<T> extends IFunction1<OrPromise<IteratorResult<T>>, void> {}
+export interface RejectFunction extends IFunction1<any, void> {}

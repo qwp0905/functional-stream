@@ -1,6 +1,6 @@
-import { OperatorPipe, TReduceCallback } from "../@types/index.js"
+import { OperatorPipe, IReduceCallback } from "../@types/index.js"
 
-export const reduce = <A, C = A>(callback: TReduceCallback<A, C>, seed?: A): OperatorPipe<C, A> => {
+export const reduce = <A, C = A>(callback: IReduceCallback<A, C>, seed?: A): OperatorPipe<C, A> => {
   return (source) => (dest) => {
     let index = 0
     source.watch({

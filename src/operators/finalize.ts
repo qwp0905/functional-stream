@@ -1,6 +1,6 @@
-import { OperatorPipe, TAnyCallback } from "../index.js"
+import { OperatorPipe, IAnyCallback } from "../index.js"
 
-export const finalize = <T>(callback: TAnyCallback): OperatorPipe<T> => {
+export const finalize = <T>(callback: IAnyCallback): OperatorPipe<T> => {
   return (source) => (dest) => {
     source.watch({
       next(event) {

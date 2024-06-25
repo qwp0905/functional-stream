@@ -6,7 +6,15 @@ import {
   NotSupportTypeError
 } from "../utils/index.js"
 import { Subject } from "../observer/index.js"
-import { ISubject, HtmlEventMap, IFs, StreamLike } from "../@types/index.js"
+import {
+  ISubject,
+  HtmlEventMap,
+  IFs,
+  StreamLike,
+  IFunction1,
+  OrPromise,
+  IFunction0
+} from "../@types/index.js"
 import {
   fromAsyncIterable,
   fromDelay,
@@ -25,7 +33,7 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
     super(source)
   }
 
-  static new<T>(generator: (sub: ISubject<T>) => void): IFs<T> {
+  static new<T>(generator: IFunction1<ISubject<T>, void>): IFs<T> {
     const sub = new Subject<T>()
     generator(sub)
     return new Fs(sub)
@@ -82,7 +90,7 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
     )
   }
 
-  static loop<T>(seed: T, cond: (x: T) => boolean, next: (x: T) => T | Promise<T>): IFs<T> {
+  static loop<T>(seed: T, cond: IFunction1<T, boolean>, next: IFunction1<T, OrPromise<T>>): IFs<T> {
     return fromLoop(seed, cond, next)
   }
 
@@ -98,7 +106,7 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
     return fromDelay(ms)
   }
 
-  static throw<T>(factory: unknown | (() => unknown)): IFs<T> {
+  static throw<T>(factory: unknown | IFunction0<unknown>): IFs<T> {
     return Fs.new((sub) => sub.abort(isFunction(factory) ? factory() : factory))
   }
 

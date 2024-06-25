@@ -1,4 +1,4 @@
-import { Duration } from "../index.js"
+import { Duration, IFunction1 } from "../index.js"
 import { BodyTypeNotSupportError } from "./error.js"
 
 const CHUNK_SIZE = 4096
@@ -24,7 +24,7 @@ export interface AjaxRequestConfig {
   timeout?: number
   user?: string
   password?: string
-  validate?: (status: number) => boolean
+  validate?: IFunction1<number, boolean>
 }
 
 export class AjaxRequest {
@@ -35,7 +35,7 @@ export class AjaxRequest {
   private readonly headers: Record<string, string>
   private readonly responseType?: ResponseType
   private readonly timeout: number
-  readonly validate: (status: number) => boolean
+  readonly validate: IFunction1<number, boolean>
 
   constructor({
     url,

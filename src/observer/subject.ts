@@ -1,4 +1,10 @@
-import { IObserver, ISubject, RejectFunction, ResolveFunction } from "../@types/index.js"
+import {
+  IFunction0,
+  IObserver,
+  ISubject,
+  RejectFunction,
+  ResolveFunction
+} from "../@types/index.js"
 import { AlreadySubscribedError } from "../utils/index.js"
 
 enum EventKind {
@@ -130,7 +136,7 @@ export class Subject<T> implements ISubject<T> {
     return this._commit()
   }
 
-  add<R>(fn: (() => void) | ISubject<R>) {
+  add<R>(fn: IFunction0<void> | ISubject<R>) {
     this.finalizers.add(fn)
   }
 

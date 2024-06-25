@@ -3,7 +3,7 @@ import { ajaxCall } from "./ajax.js"
 import { Duration } from "../utils/index.js"
 import { AjaxRequestConfig, HttpMethod } from "./request.js"
 import { AjaxResponse } from "./response.js"
-import { ISubject } from "../@types/index.js"
+import { IFunction1, ISubject } from "../@types/index.js"
 import { Fs } from "../stream/index.js"
 import { toAsyncIter } from "../utils/index.js"
 
@@ -12,7 +12,7 @@ export interface AjaxClientConfig {
   readonly timeout?: number
   readonly user?: string
   readonly password?: string
-  readonly validate?: (status: number) => boolean
+  readonly validate?: IFunction1<number, boolean>
   readonly headers?: Record<string, string>
   readonly concurrency?: number
 }
