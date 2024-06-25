@@ -310,12 +310,11 @@ export abstract class FsInternal<T> implements IFs<T> {
     return this.map((value) => ({ timestamp: Date.now(), value }))
   }
 
-  timeInterval(): IFs<number> {
+  timeInterval() {
     return this.startWith(null as any)
       .timestamp()
-      .map(({ timestamp }) => timestamp)
       .pairwise()
-      .map(([prev, cur]) => cur.subtract(prev))
+      .map(([{ timestamp: p }, { value, timestamp: c }]) => ({ value, interval: c.subtract(p) }))
   }
 
   sample(notifier: StreamLike<any>): IFs<T> {

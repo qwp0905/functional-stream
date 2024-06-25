@@ -60,7 +60,7 @@ export interface IFs<T> extends Closable<T> {
   skipWhile(callback: TMapCallback<T, boolean>): IFs<T>
   takeLast(count: number): IFs<T>
   skipLast(count: number): IFs<T>
-  timeInterval(): IFs<number>
+  timeInterval(): IFs<{ value: T; interval: number }>
   mergeScan<R>(
     callback: TReduceCallback<R, T, StreamLike<R>>,
     seed: R,
