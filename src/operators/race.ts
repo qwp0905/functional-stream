@@ -6,7 +6,8 @@ export const raceWith = <T>(streams: StreamLike<T>[]): OperatorPipe<T> => {
     const list = streams.map((s) => Fs.from(s))
     list.forEach((fs) => dest.add(() => fs.close()))
 
-    return Fs.from([source as Closable<T>].concat(list))
+    return Fs.from<Closable<T>>(list)
+      .startWith(source)
       .mergeMap((e) => {
         if (first) {
           e.close()

@@ -57,8 +57,8 @@ export const mergeWith = <T>(streams: StreamLike<T>[], concurrency: number): Ope
   return (source) => (dest) => {
     const list = streams.map((s) => Fs.from(s))
     list.forEach((fs) => dest.add(() => fs.close()))
-
-    return Fs.from([source as StreamLike<T>].concat(list))
+    return Fs.from<StreamLike<T>>(list)
+      .startWith(source)
       .mergeAll(concurrency)
       .tap((e) => dest.publish(e))
       .catchError((err) => dest.abort(err))

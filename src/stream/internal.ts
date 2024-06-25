@@ -32,7 +32,8 @@ import {
   raceWith,
   zipWith,
   repeat,
-  sample
+  sample,
+  startWith
 } from "../operators/index.js"
 import { Fs } from "./functional-stream.js"
 
@@ -243,7 +244,7 @@ export abstract class FsInternal<T> implements IFs<T> {
   }
 
   startWith(v: T): IFs<T> {
-    return Fs.of(v).concatWith(this)
+    return this.pipe(startWith(v))
   }
 
   endWith(v: T): IFs<T> {
