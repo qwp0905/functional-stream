@@ -6,7 +6,8 @@ export const finalize = <T>(callback: TAnyCallback): OperatorPipe<T> => {
       next(event) {
         dest.publish(event)
       },
-      error(err) {
+      async error(err) {
+        await Promise.resolve(callback())
         dest.abort(err)
       },
       async complete() {
