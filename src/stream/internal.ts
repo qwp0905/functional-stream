@@ -3,7 +3,6 @@ import {
   IStreamReadOptions,
   StreamLike,
   ISubject,
-  IAnyCallback,
   IErrorCallback,
   IFilterCallback,
   IMapCallback,
@@ -206,7 +205,7 @@ export abstract class FsInternal<T> implements IFs<T> {
     return this.pipe(mergeScan(callback, seed, concurrency))
   }
 
-  finalize(callback: IAnyCallback): IFs<T> {
+  finalize(callback: IFunction0<void>): IFs<T> {
     return this.pipe(finalize(callback))
   }
 
@@ -214,8 +213,16 @@ export abstract class FsInternal<T> implements IFs<T> {
     return this.mergeMap((e) => Fs.delay(ms).map(() => e))
   }
 
-  catchError(callback: IErrorCallback): IFs<T> {
+  onErrWith(callback: IFunction1<unknown, StreamLike<T>>): IFs<T> {
     return this.pipe(catchError(callback))
+  }
+
+  catchErr(callback: IErrorCallback): IFs<T> {
+    return this.onErrWith((err) =>
+      Fs.of(err)
+        .tap((e) => callback(e))
+        .discard()
+    )
   }
 
   defaultIfEmpty(v: T): IFs<T> {
@@ -232,7 +239,7 @@ export abstract class FsInternal<T> implements IFs<T> {
       .tap(([e, k]) => map.get(k)?.publish(e))
       .filter(([, k]) => !map.has(k))
       .map(([e, k]) => Fs.new<T>((sub) => map.set(k, sub)).startWith(e))
-      .catchError((err) => map.forEach((s) => s.abort(err)))
+      .catchErr((err) => map.forEach((s) => s.abort(err)))
       .finalize(() => map.forEach((s) => s.commit()))
       .finalize(() => map.clear())
   }

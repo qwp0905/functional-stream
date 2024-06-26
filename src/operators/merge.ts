@@ -20,7 +20,7 @@ export const mergeScan = <T, R>(
           }
         })
         .discard()
-        .catchError((err) => dest.abort(err))
+        .catchErr((err) => dest.abort(err))
         .finalize(() => dest.commit())
         .lastOne()
     }
@@ -36,7 +36,7 @@ export const mergeScan = <T, R>(
         queue.push(
           fs
             .tap((e) => dest.publish((seed = e)))
-            .catchError((err) => dest.abort(err))
+            .catchErr((err) => dest.abort(err))
             .discard()
         )
       },
@@ -61,7 +61,7 @@ export const mergeWith = <T>(streams: StreamLike<T>[], concurrency: number): Ope
       .startWith(source)
       .mergeAll(concurrency)
       .tap((e) => dest.publish(e))
-      .catchError((err) => dest.abort(err))
+      .catchErr((err) => dest.abort(err))
       .finalize(() => dest.commit())
       .lastOne()
   }

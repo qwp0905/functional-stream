@@ -18,7 +18,7 @@ export const raceWith = <T>(streams: StreamLike<T>[]): OperatorPipe<T> => {
         return e
       })
       .tap((e) => dest.publish(e))
-      .catchError((err) => dest.abort(err))
+      .catchErr((err) => dest.abort(err))
       .finalize(() => dest.commit())
       .lastOne()
   }

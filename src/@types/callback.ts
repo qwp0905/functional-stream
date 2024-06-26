@@ -13,8 +13,7 @@ export interface IFunction3<Arg1, Arg2, Arg3, Return> {
   (arg: Arg1, arg2: Arg2, arg3: Arg3): Return
 }
 
-export interface IAnyCallback extends IFunction0<any> {}
-export interface IErrorCallback extends IFunction1<unknown, OrPromise<void>> {}
+export interface IErrorCallback extends IFunction1<unknown, void> {}
 export interface IMapCallback<T, R> extends IFunction2<T, number, R> {}
 export interface ITapCallback<T> extends IMapCallback<T, void> {}
 export interface IFilterCallback<T> extends IMapCallback<T, boolean> {}

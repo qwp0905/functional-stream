@@ -23,7 +23,7 @@ export const sample = <T, R>(notifier: StreamLike<R>): OperatorPipe<T> => {
       .filter(() => now !== unique)
       .tap(() => dest.publish(now as T))
       .tap(() => (now = unique))
-      .catchError((err) => dest.abort(err))
+      .catchErr((err) => dest.abort(err))
       .lastOne()
   }
 }

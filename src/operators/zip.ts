@@ -13,7 +13,7 @@ export const zipWith = <T>(streams: StreamLike<any>[]): OperatorPipe<T, any[]> =
       .concatMap((seed) => Fs.loop(seed, (data) => data.some((e) => !e.done), next))
       .map((data) => data.map((e) => e.value))
       .tap((e) => dest.publish(e))
-      .catchError((err) => dest.abort(err))
+      .catchErr((err) => dest.abort(err))
       .finalize(() => dest.commit())
       .lastOne()
   }

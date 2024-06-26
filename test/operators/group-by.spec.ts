@@ -34,7 +34,7 @@ describe("group by", () => {
         return e
       })
       .groupBy((e) => e.remain(3))
-      .map((e) => e.catchError(fn))
+      .map((e) => e.catchErr(fn))
       .concatAll()
       .toArray()
 

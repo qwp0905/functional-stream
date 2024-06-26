@@ -1,17 +1,16 @@
-import { OperatorPipe, IAnyCallback } from "../index.js"
+import { OperatorPipe, IFunction0 } from "../index.js"
 
-export const finalize = <T>(callback: IAnyCallback): OperatorPipe<T> => {
+export const finalize = <T>(callback: IFunction0<void>): OperatorPipe<T> => {
   return (source, dest) => {
+    dest.add(callback)
     source.watch({
       next(event) {
         dest.publish(event)
       },
-      async error(err) {
-        await Promise.resolve(callback())
+      error(err) {
         dest.abort(err)
       },
-      async complete() {
-        await Promise.resolve(callback())
+      complete() {
         dest.commit()
       }
     })

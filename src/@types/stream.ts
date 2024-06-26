@@ -1,5 +1,4 @@
 import {
-  IAnyCallback,
   IFunction0,
   IErrorCallback,
   IFilterCallback,
@@ -56,9 +55,10 @@ export interface IFs<T> extends Closable<T> {
   concatMap<R>(callback: IMapCallback<T, StreamLike<R>>): IFs<R>
   exhaustMap<R>(callback: IMapCallback<T, StreamLike<R>>): IFs<R>
   switchMap<R>(callback: IMapCallback<T, StreamLike<R>>): IFs<R>
-  finalize(callback: IAnyCallback): IFs<T>
+  finalize(callback: IFunction0<void>): IFs<T>
   delay(ms: number): IFs<T>
-  catchError(callback: IErrorCallback): IFs<T>
+  onErrWith(callback: IFunction1<unknown, StreamLike<T>>): IFs<T>
+  catchErr(callback: IErrorCallback): IFs<T>
   groupBy<R>(callback: IMapCallback<T, R>): IFs<IFs<T>>
   defaultIfEmpty(v: T): IFs<T>
   throwIfEmpty(err?: unknown): IFs<T>
