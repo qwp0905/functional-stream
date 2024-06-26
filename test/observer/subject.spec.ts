@@ -43,22 +43,26 @@ describe("subject", () => {
     sub.watch({ next, error, complete })
 
     sub.publish(1)
-    expect(next).toHaveBeenNthCalledWith(1, 1)
+    expect(next).toHaveBeenCalledTimes(1)
+    expect(next).toHaveBeenLastCalledWith(1)
     expect(error).not.toHaveBeenCalled()
     expect(complete).not.toHaveBeenCalled()
 
     sub.publish(2)
-    expect(next).toHaveBeenNthCalledWith(2, 2)
+    expect(next).toHaveBeenCalledTimes(2)
+    expect(next).toHaveBeenLastCalledWith(2)
     expect(error).not.toHaveBeenCalled()
     expect(complete).not.toHaveBeenCalled()
 
     sub.publish(3)
-    expect(next).toHaveBeenNthCalledWith(3, 3)
+    expect(next).toHaveBeenCalledTimes(3)
+    expect(next).toHaveBeenLastCalledWith(3)
     expect(error).not.toHaveBeenCalled()
     expect(complete).not.toHaveBeenCalled()
 
     sub.publish(4)
-    expect(next).toHaveBeenNthCalledWith(4, 4)
+    expect(next).toHaveBeenCalledTimes(4)
+    expect(next).toHaveBeenLastCalledWith(4)
     expect(error).not.toHaveBeenCalled()
     expect(complete).not.toHaveBeenCalled()
 
