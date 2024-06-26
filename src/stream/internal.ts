@@ -218,11 +218,11 @@ export abstract class FsInternal<T> implements IFs<T> {
   }
 
   catchErr(callback: IErrorCallback): IFs<T> {
-    return this.onErrWith((err) =>
-      Fs.of(err)
+    return this.onErrWith((err) => {
+      return Fs.of(err)
         .tap((e) => callback(e))
         .discard()
-    )
+    })
   }
 
   defaultIfEmpty(v: T): IFs<T> {
