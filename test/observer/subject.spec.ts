@@ -43,17 +43,28 @@ describe("subject", () => {
     sub.watch({ next, error, complete })
 
     sub.publish(1)
-    sub.publish(2)
-    sub.publish(3)
-    sub.publish(4)
-    sub.commit()
-
     expect(next).toHaveBeenNthCalledWith(1, 1)
+    expect(error).not.toHaveBeenCalled()
+    expect(complete).not.toHaveBeenCalled()
+
+    sub.publish(2)
     expect(next).toHaveBeenNthCalledWith(2, 2)
+    expect(error).not.toHaveBeenCalled()
+    expect(complete).not.toHaveBeenCalled()
+
+    sub.publish(3)
     expect(next).toHaveBeenNthCalledWith(3, 3)
+    expect(error).not.toHaveBeenCalled()
+    expect(complete).not.toHaveBeenCalled()
+
+    sub.publish(4)
     expect(next).toHaveBeenNthCalledWith(4, 4)
+    expect(error).not.toHaveBeenCalled()
+    expect(complete).not.toHaveBeenCalled()
+
+    sub.commit()
     expect(next).toHaveBeenCalledTimes(4)
-    expect(error).toHaveBeenCalledTimes(0)
+    expect(error).not.toHaveBeenCalled()
     expect(complete).toHaveBeenCalledTimes(1)
   })
 
