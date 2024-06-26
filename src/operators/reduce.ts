@@ -1,7 +1,7 @@
 import { OperatorPipe, IReduceCallback } from "../@types/index.js"
 
 export const reduce = <A, C = A>(callback: IReduceCallback<A, C>, seed?: A): OperatorPipe<C, A> => {
-  return (source) => (dest) => {
+  return (source, dest) => {
     let index = 0
     source.watch({
       next(event) {

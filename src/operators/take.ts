@@ -2,7 +2,7 @@ import { OperatorPipe, IMapCallback } from "../@types/index.js"
 
 export const take = <T>(count: number): OperatorPipe<T> => {
   let index = 0
-  return (source) => (dest) => {
+  return (source, dest) => {
     source.watch({
       next(event) {
         index++
@@ -22,7 +22,7 @@ export const take = <T>(count: number): OperatorPipe<T> => {
 }
 
 export const takeWhile = <T>(callback: IMapCallback<T, boolean>): OperatorPipe<T> => {
-  return (source) => (dest) => {
+  return (source, dest) => {
     let index = 0
     source.watch({
       next(event) {

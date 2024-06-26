@@ -2,7 +2,7 @@ import { Fs, OperatorPipe, StreamLike } from "../index.js"
 import { toAsyncIter } from "../utils/index.js"
 
 export const zipWith = <T>(streams: StreamLike<any>[]): OperatorPipe<T, any[]> => {
-  return (source) => (dest) => {
+  return (source, dest) => {
     const list = streams.map((e) => Fs.from(e))
     list.forEach((e) => dest.add(() => e.close()))
 

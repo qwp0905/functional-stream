@@ -1,7 +1,7 @@
 import { OperatorPipe } from "../index.js"
 
 export const split = (delimiter: string): OperatorPipe<string> => {
-  return (source) => (dest) => {
+  return (source, dest) => {
     let tmp = ""
     source.watch({
       next(event) {

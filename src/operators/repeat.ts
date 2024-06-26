@@ -1,7 +1,7 @@
 import { OperatorPipe } from "../index.js"
 
 export const repeat = <T>(count: number): OperatorPipe<T> => {
-  return (source) => (dest) => {
+  return (source, dest) => {
     const queue: [T, number][] = []
     const start = Date.now()
 

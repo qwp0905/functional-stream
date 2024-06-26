@@ -1,7 +1,7 @@
 import { Closable, Fs, OperatorPipe, StreamLike } from "../index.js"
 
 export const raceWith = <T>(streams: StreamLike<T>[]): OperatorPipe<T> => {
-  return (source) => (dest) => {
+  return (source, dest) => {
     let first = false
     const list = streams.map((s) => Fs.from(s))
     list.forEach((fs) => dest.add(() => fs.close()))

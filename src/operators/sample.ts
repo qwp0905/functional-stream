@@ -1,7 +1,7 @@
 import { Fs, OperatorPipe, StreamLike } from "../index.js"
 
 export const sample = <T, R>(notifier: StreamLike<R>): OperatorPipe<T> => {
-  return (source) => (dest) => {
+  return (source, dest) => {
     const trigger = Fs.from(notifier)
     dest.add(() => trigger.close())
 

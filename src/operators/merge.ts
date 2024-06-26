@@ -8,7 +8,7 @@ export const mergeScan = <T, R>(
   concurrency: number
 ): OperatorPipe<T, R> => {
   if (concurrency.greaterThan(0) && concurrency.isFinite()) {
-    return (source) => (dest) => {
+    return (source, dest) => {
       let index = 0
       const iter = toAsyncIter(source)
       return Fs.range(concurrency)
@@ -26,7 +26,7 @@ export const mergeScan = <T, R>(
     }
   }
 
-  return (source) => (dest) => {
+  return (source, dest) => {
     const queue: IFs<R>[] = []
     let index = 0
     source.watch({
@@ -54,7 +54,7 @@ export const mergeScan = <T, R>(
 }
 
 export const mergeWith = <T>(streams: StreamLike<T>[], concurrency: number): OperatorPipe<T> => {
-  return (source) => (dest) => {
+  return (source, dest) => {
     const list = streams.map((s) => Fs.from(s))
     list.forEach((fs) => dest.add(() => fs.close()))
     return Fs.from<StreamLike<T>>(list)

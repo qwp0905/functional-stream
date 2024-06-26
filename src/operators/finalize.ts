@@ -1,7 +1,7 @@
 import { OperatorPipe, IAnyCallback } from "../index.js"
 
 export const finalize = <T>(callback: IAnyCallback): OperatorPipe<T> => {
-  return (source) => (dest) => {
+  return (source, dest) => {
     source.watch({
       next(event) {
         dest.publish(event)

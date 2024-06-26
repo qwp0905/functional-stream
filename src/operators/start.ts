@@ -1,7 +1,7 @@
 import { OperatorPipe } from "../index.js"
 
 export const startWith = <T>(v: T): OperatorPipe<T> => {
-  return (source) => (dest) => {
+  return (source, dest) => {
     dest.publish(v)
     source.watch({
       next(event) {

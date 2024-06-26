@@ -6,7 +6,8 @@ import {
   IMapCallback,
   IFunction1,
   IReduceCallback,
-  ITapCallback
+  ITapCallback,
+  IFunction2
 } from "./callback.js"
 import { Closable, ISubject } from "./observer.js"
 
@@ -108,5 +109,4 @@ export type StreamLike<T> =
   | ISubject<T>
   | Promise<T>
 
-export interface OperatorPipe<T, R = T>
-  extends IFunction1<ISubject<T>, IFunction1<ISubject<R>, void>> {}
+export interface OperatorPipe<T, R = T> extends IFunction2<ISubject<T>, ISubject<R>, void> {}

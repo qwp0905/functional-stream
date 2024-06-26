@@ -1,7 +1,7 @@
 import { OperatorPipe, IErrorCallback } from "../@types/index.js"
 
 export const catchError = <T>(callback: IErrorCallback): OperatorPipe<T> => {
-  return (source) => (dest) => {
+  return (source, dest) => {
     source.watch({
       next(event) {
         dest.publish(event)

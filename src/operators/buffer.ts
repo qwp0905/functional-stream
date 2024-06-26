@@ -2,7 +2,7 @@ import { IFunction0, OperatorPipe, StreamLike } from "../@types/index.js"
 import { Fs } from "../index.js"
 
 export const bufferCount = <T>(count: number): OperatorPipe<T, T[]> => {
-  return (source) => (dest) => {
+  return (source, dest) => {
     let queue: T[] = []
     source.watch({
       next(event) {
@@ -27,7 +27,7 @@ export const bufferCount = <T>(count: number): OperatorPipe<T, T[]> => {
 }
 
 export const bufferWhen = <T, R>(callback: IFunction0<StreamLike<R>>): OperatorPipe<T, T[]> => {
-  return (source) => (dest) => {
+  return (source, dest) => {
     let queue: T[] = []
 
     const trigger = Fs.from(callback())
