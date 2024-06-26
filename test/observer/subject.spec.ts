@@ -42,6 +42,10 @@ describe("subject", () => {
     const sub = new Subject()
     sub.watch({ next, error, complete })
 
+    expect(next).not.toHaveBeenCalled()
+    expect(error).not.toHaveBeenCalled()
+    expect(complete).not.toHaveBeenCalled()
+
     sub.publish(1)
     expect(next).toHaveBeenCalledTimes(1)
     expect(next).toHaveBeenLastCalledWith(1)
