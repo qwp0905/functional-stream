@@ -23,7 +23,6 @@ import {
   catchError,
   defaultIfEmpty,
   throwIfEmpty,
-  split,
   finalize,
   takeWhile,
   mergeScan,
@@ -258,10 +257,6 @@ export abstract class FsInternal<T> implements IFs<T> {
 
   pairwise(): IFs<[T, T]> {
     return this.scan<any>(([, prev], e) => [prev, e], []).skip(1)
-  }
-
-  split(delimiter: string) {
-    return this.pipe(split(delimiter) as any) as any
   }
 
   distinct<K>(callback: IMapCallback<T, K> = (e) => e as any): IFs<T> {

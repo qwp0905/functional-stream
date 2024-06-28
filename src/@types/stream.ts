@@ -66,7 +66,6 @@ export interface IFs<T> extends Closable<T> {
   startWith(v: T): IFs<T>
   endWith(v: T): IFs<T>
   pairwise(): IFs<[T, T]>
-  split(delimiter: string): IFs<T extends string ? string : never>
   distinct<K>(callback?: IMapCallback<T, K>): IFs<T>
   takeWhile(callback: IMapCallback<T, boolean>): IFs<T>
   skipWhile(callback: IMapCallback<T, boolean>): IFs<T>
