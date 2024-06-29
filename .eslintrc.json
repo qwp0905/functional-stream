@@ -19,9 +19,9 @@
     "browser": true
   },
   "ignorePatterns": [
-    "node_modules",
-    "release/**/dist",
-    "coverage"
+    "./node_modules/**/*",
+    "./release/**/*",
+    "./coverage/**/*"
   ],
   "rules": {
     "@typescript-eslint/interface-name-prefix": "off",

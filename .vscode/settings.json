@@ -63,5 +63,6 @@
     "coverage": true,
     "runAllTestsOnStartup": true
   },
-  "jest.enable": true
+  "jest.enable": true,
+  "eslint.debug": true
 }
