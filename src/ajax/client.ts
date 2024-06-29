@@ -41,7 +41,7 @@ export class AjaxClient {
     )
   }
 
-  head(url: string, config: AjaxConfig) {
+  head(url: string, config: AjaxConfig = {}) {
     return this.request<void>(url, HttpMethod.head, config)
   }
 

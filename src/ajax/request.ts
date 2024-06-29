@@ -93,15 +93,15 @@ export class AjaxRequest {
     }
 
     if (typeof FormData !== "undefined" && this.body instanceof FormData) {
-      return iterableReader(this.body)
+      return this.body
     }
 
     if (typeof URLSearchParams !== undefined && this.body instanceof URLSearchParams) {
-      return iterableReader(this.body)
+      return this.body
     }
 
     if (isArrayBuffer(this.body)) {
-      return sliceReader(this.body, this.body.byteLength)
+      return this.body
     }
 
     if (isFile(this.body)) {
@@ -117,7 +117,7 @@ export class AjaxRequest {
     }
 
     if (typeof ArrayBuffer !== undefined && ArrayBuffer.isView(this.body)) {
-      return sliceReader(this.body.buffer, this.body.buffer.byteLength)
+      return this.body.buffer
     }
 
     if (typeof this.body === "object") {
@@ -167,21 +167,6 @@ function sliceReader(buf: Slice, size: number) {
     start(controller) {
       for (let i = 0; i.lessThan(size); i += CHUNK_SIZE) {
         controller.enqueue(buf.slice(i, i.add(CHUNK_SIZE)))
-      }
-      controller.close()
-    }
-  })
-}
-
-function iterableReader(iter: Iterable<any>) {
-  if (typeof ReadableStream === "undefined") {
-    return iter
-  }
-
-  return new ReadableStream({
-    start(controller) {
-      for (const chunk of iter) {
-        controller.enqueue(chunk)
       }
       controller.close()
     }
