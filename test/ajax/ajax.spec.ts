@@ -51,7 +51,7 @@ describe("ajax", () => {
 
   it("2", async () => {
     jest.useFakeTimers()
-    await serve(async (req, res) => {
+    await serve(async (_, res) => {
       await new Promise((r) => setTimeout(r, Duration.millisecond(3000)))
       res.writeHead(200, "Ok", { "Content-Type": "application/json" })
       res.end(JSON.stringify({ error: 123 }))
