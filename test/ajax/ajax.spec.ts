@@ -1,5 +1,5 @@
 import { createServer, IncomingMessage, Server, ServerResponse } from "http"
-import { AjaxError, AjaxTimeoutError } from "../../src/ajax/index.js"
+import { AjaxError, AjaxTimeoutError, BodyTypeNotSupportError } from "../../src/ajax/index.js"
 import { Duration, Fs, IFunction2 } from "../../src/index.js"
 
 describe("ajax", () => {
@@ -57,6 +57,18 @@ describe("ajax", () => {
       .mergeAll()
       .toArray()
     expect(r3).toEqual(["{", '"', "t", "e", "s", "t", '"', ":", "t", "r", "u", "e", "}"])
+
+    const r4 = Fs.ajax
+      .post(host, Symbol())
+      .map((e) => e.getData())
+      .lastOne()
+    await expect(r4).rejects.toThrow(BodyTypeNotSupportError)
+
+    const r5 = await Fs.ajax
+      .post(host, {}, { responseType: "json" })
+      .map((e) => e.getData())
+      .lastOne()
+    expect(r5).toEqual({ test: true })
   })
 
   it("2", async () => {
@@ -150,6 +162,9 @@ describe("ajax", () => {
       .map((e) => e.getData())
       .lastOne()
     await expect(r8).rejects.toThrow(AjaxError)
+
+    const r9 = Fs.ajax.patch(host).lastOne()
+    await expect(r9).rejects.toThrow(AjaxError)
   })
 
   it("3", async () => {
