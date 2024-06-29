@@ -19,7 +19,7 @@
     "browser": true
   },
   "ignorePatterns": [
-    "./node_modules/**/*",
+    "./.yarn/**/*",
     "./release/**/*",
     "./coverage/**/*"
   ],

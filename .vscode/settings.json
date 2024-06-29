@@ -64,5 +64,4 @@
     "runAllTestsOnStartup": true
   },
   "jest.enable": true,
-  "eslint.debug": true
 }

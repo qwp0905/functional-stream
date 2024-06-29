@@ -25,6 +25,6 @@
     "./.github/**/*",
     "./.vscode/**/*",
     "./scripts/**/*",
-    "./node_modules/**/*"
+    "./.yarn/**/*"
   ]
 }
