@@ -47,6 +47,14 @@ describe("ajax", () => {
       .map((e) => e.getData())
       .lastOne()
     expect(r2).toEqual('{"test":true}')
+
+    const r3 = await Fs.ajax
+      .post("http://localhost:3000", {}, { responseType: "stream" })
+      .map((e) => e.getData())
+      .mergeAll()
+      .mergeAll()
+      .toArray()
+    expect(r3).toEqual(["{", '"', "t", "e", "s", "t", '"', ":", "t", "r", "u", "e", "}"])
   })
 
   it("2", async () => {

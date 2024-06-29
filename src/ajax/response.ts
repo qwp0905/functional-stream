@@ -56,23 +56,6 @@ async function getBody(res: Response, type?: ResponseType): Promise<any> {
   switch (content_type) {
     case "application/json":
       return res.json()
-    case "application/x-ndjson":
-      const fs = Fs.from(res.body.pipeThrough(new TextDecoderStream(charset)))
-      return Fs.new((sub) => {
-        let tmp = ""
-        return fs
-          .tap((e) => {
-            const lines = tmp.concat(e).split("\n")
-            tmp = lines.pop() ?? ""
-            lines.forEach((t) => sub.publish(t))
-          })
-          .catchErr((err) => sub.publish(err))
-          .finalize(() => {
-            tmp && sub.publish(tmp)
-            sub.commit()
-          })
-          .lastOne()
-      })
     case "application/octet-stream":
       return Fs.from(res.body.pipeThrough(new TextDecoderStream(charset)))
     case "application/x-www-form-urlencode":
