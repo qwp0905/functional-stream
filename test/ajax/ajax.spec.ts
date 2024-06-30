@@ -165,6 +165,18 @@ describe("ajax", () => {
 
     const r9 = Fs.ajax.patch(host).lastOne()
     await expect(r9).rejects.toThrow(AjaxError)
+
+    const r10 = Fs.ajax
+      .post(host, new Blob(["123"]))
+      .map((e) => e.getData())
+      .lastOne()
+    await expect(r10).resolves.toEqual("123")
+
+    const r11 = Fs.ajax
+      .post(host, new File([new Blob(["test"])], "test"))
+      .map((e) => e.getData())
+      .lastOne()
+    await expect(r11).resolves.toEqual("test")
   })
 
   it("3", async () => {
