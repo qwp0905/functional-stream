@@ -173,10 +173,10 @@ describe("ajax", () => {
     await expect(r10).resolves.toEqual("123")
 
     const r11 = Fs.ajax
-      .post(host, new File([new Blob(["test"])], "test"))
+      .post(host, new File([new Blob(["test"])], "test"), { responseType: "blob" })
       .map((e) => e.getData())
       .lastOne()
-    await expect(r11).resolves.toEqual("test")
+    await expect(r11).resolves.toEqual(new Blob(["test"]))
   })
 
   it("3", async () => {
