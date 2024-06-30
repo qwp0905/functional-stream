@@ -121,8 +121,6 @@ export class AjaxRequest {
     if (typeof this.body === "object") {
       this.headers["content-type"] = this.headers["content-type"] ?? "application/json;utf-8"
       return JSON.stringify(this.body)
-      // const marshaled = JSON.stringify(this.body)
-      // return sliceReader(marshaled, marshaled.length)
     }
 
     throw new BodyTypeNotSupportError()
