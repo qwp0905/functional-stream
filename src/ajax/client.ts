@@ -22,7 +22,7 @@ export interface AjaxConfig extends Omit<AjaxRequestConfig, "method" | "url" | "
 export class AjaxClient {
   private readonly sub: ISubject<[ISubject<AjaxResponse<any>>, AjaxRequestConfig]> = new Subject()
   constructor(private readonly config: AjaxClientConfig) {
-    if ((config.concurrency ?? 0).lessThanOrEqual(0)) {
+    if ((config.concurrency ?? 0).lessThanOrEqual(0) || !config.concurrency?.isFinite()) {
       this.sub.watch({
         next([sub, conf]) {
           ajaxCall(conf, sub)
