@@ -1,8 +1,6 @@
 import { Duration, IFunction1 } from "../index.js"
 import { BodyTypeNotSupportError } from "./error.js"
 
-const CHUNK_SIZE = 4096
-
 export type ResponseType = "arraybuffer" | "blob" | "json" | "text" | "stream"
 
 export enum HttpMethod {
@@ -89,7 +87,7 @@ export class AjaxRequest {
     }
 
     if (typeof this.body === "string") {
-      return sliceReader(this.body, this.body.length)
+      return this.body
     }
 
     if (typeof FormData !== "undefined" && this.body instanceof FormData) {
@@ -105,11 +103,11 @@ export class AjaxRequest {
     }
 
     if (isFile(this.body)) {
-      return sliceReader(this.body, this.body.size)
+      return this.body
     }
 
     if (isBlob(this.body)) {
-      return sliceReader(this.body, this.body.size)
+      return this.body
     }
 
     if (typeof ReadableStream !== undefined && this.body instanceof ReadableStream) {
@@ -122,8 +120,9 @@ export class AjaxRequest {
 
     if (typeof this.body === "object") {
       this.headers["content-type"] = this.headers["content-type"] ?? "application/json;utf-8"
-      const marshaled = JSON.stringify(this.body)
-      return sliceReader(marshaled, marshaled.length)
+      return JSON.stringify(this.body)
+      // const marshaled = JSON.stringify(this.body)
+      // return sliceReader(marshaled, marshaled.length)
     }
 
     throw new BodyTypeNotSupportError()
@@ -152,23 +151,4 @@ function isArrayBuffer(data: any): data is ArrayBuffer {
 
 function isBlob(data: any): data is Blob {
   return typeof Blob !== "undefined" && toStringEq(data, "Blob")
-}
-
-interface Slice {
-  slice(start: number, end: number): Slice
-}
-
-function sliceReader(buf: Slice, size: number) {
-  if (typeof ReadableStream === "undefined") {
-    return buf
-  }
-
-  return new ReadableStream({
-    start(controller) {
-      for (let i = 0; i.lessThan(size); i += CHUNK_SIZE) {
-        controller.enqueue(buf.slice(i, i.add(CHUNK_SIZE)))
-      }
-      controller.close()
-    }
-  })
 }
