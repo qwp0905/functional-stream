@@ -136,13 +136,11 @@ export abstract class FsInternal<T> implements IFs<T> {
   }
 
   reduce<A = T>(callback: IReduceCallback<A, T>, seed?: A): IFs<A> {
-    return this.pipe(reduce(callback, seed))
+    return this.pipe(reduce({ callback, seed, emitNext: false, emitOnEnd: true }))
   }
 
   scan<A = T>(callback: IReduceCallback<A, T>, seed?: A): IFs<A> {
-    return this.map(
-      (e, i) => (seed = i.equal(0) && seed === undefined ? (e as any) : callback(seed!, e, i))
-    )
+    return this.pipe(reduce({ callback, seed, emitNext: true, emitOnEnd: false }))
   }
 
   take(count: number): IFs<T> {

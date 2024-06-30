@@ -1,21 +1,28 @@
 import { OperatorPipe, IReduceCallback } from "../@types/index.js"
 
-export const reduce = <A, C = A>(callback: IReduceCallback<A, C>, seed?: A): OperatorPipe<C, A> => {
+export interface ReduceOptions<A, C> {
+  callback: IReduceCallback<A, C>
+  seed?: A
+  emitOnEnd: boolean
+  emitNext: boolean
+}
+
+export const reduce = <A, C = A>(options: ReduceOptions<A, C>): OperatorPipe<C, A> => {
   return (source, dest) => {
     let index = 0
+    let hasSeed = options.seed !== undefined
+    let state = options.seed
     source.watch({
       next(event) {
-        if ((index++).equal(0) && seed === undefined) {
-          return (seed = event as any)
-        }
-
-        seed = callback(seed!, event, index)
+        const i = index++
+        state = hasSeed ? options.callback(state!, event, i) : ((hasSeed = true), event as any)
+        options.emitNext && dest.publish(state!)
       },
       error(err) {
         dest.abort(err)
       },
       complete() {
-        dest.publish(seed!)
+        options.emitOnEnd && dest.publish(state!)
         dest.commit()
       }
     })
