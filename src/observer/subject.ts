@@ -149,8 +149,7 @@ export class Subject<T> implements ISubject<T> {
       return this._close()
     }
 
-    this._commit()
-    return this._close()
+    return this._commit(), this._close()
   }
 
   [Symbol.asyncIterator](): AsyncIterator<T> {
@@ -207,13 +206,11 @@ export class Subject<T> implements ISubject<T> {
         })
       },
       throw: (e) => {
-        this.close()
-        handleError(e)
+        this.close(), handleError(e)
         return Promise.reject(e)
       },
       return: () => {
-        this.close()
-        handleComplete()
+        this.close(), handleComplete()
         return Promise.resolve({ value: undefined, done: true })
       }
     }
