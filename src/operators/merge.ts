@@ -1,53 +1,56 @@
-import { StreamLike, IFs, OperatorPipe, IReduceCallback } from "../@types/index.js"
+import { StreamLike, OperatorPipe, IReduceCallback } from "../@types/index.js"
 import { Fs } from "../stream/index.js"
-import { toAsyncIter } from "../utils/index.js"
 
 export const mergeScan = <T, R>(
   callback: IReduceCallback<R, T, StreamLike<R>>,
   seed: R,
   concurrency: number
 ): OperatorPipe<T, R> => {
-  if (concurrency.greaterThan(0) && concurrency.isFinite()) {
-    return (source, dest) => {
-      let index = 0
-      const iter = toAsyncIter(source)
-      return Fs.range(concurrency)
-        .mergeMap(async () => {
-          for (let data = await iter.next(); !data.done; data = await iter.next()) {
-            const fs = Fs.from(callback(seed, data.value, index++))
-            dest.add(() => fs.close())
-            await fs.tap((e) => dest.publish((seed = e))).lastOne()
-          }
-        })
-        .discard()
+  return (source, dest) => {
+    const buffered: T[] = []
+    let activated = 0
+    let index = 0
+    let completed = false
+
+    const runComplete = () => {
+      if (!activated.equal(0)) {
+        return
+      }
+      if (!buffered.length.equal(0)) {
+        return
+      }
+      dest.commit()
+    }
+
+    const runNext = (event: T) => {
+      activated++
+      const fs = Fs.from(callback(seed, event, index++))
+      dest.add(() => fs.close())
+
+      return fs
+        .tap((e) => dest.publish((seed = e)))
         .catchErr((err) => dest.abort(err))
-        .finalize(() => dest.commit())
+        .discard()
+        .finalize(() => {
+          activated--
+          while (buffered.length.greaterThan(0) && activated.lessThan(concurrency)) {
+            runNext(buffered.shift()!)
+          }
+          completed && runComplete()
+        })
         .lastOne()
     }
-  }
 
-  return (source, dest) => {
-    const queue: IFs<R>[] = []
-    let index = 0
     source.watch({
       next(event) {
-        const fs = Fs.from(callback(seed, event, index++))
-        dest.add(() => fs.close())
-        queue.push(
-          fs
-            .tap((e) => dest.publish((seed = e)))
-            .catchErr((err) => dest.abort(err))
-            .discard()
-        )
+        concurrency.greaterThan(activated) ? runNext(event) : buffered.push(event)
       },
       error(err) {
         dest.abort(err)
       },
-      async complete() {
-        while (queue.length.greaterThan(0)) {
-          await queue.shift()!.lastOne()
-        }
-        dest.commit()
+      complete() {
+        completed = true
+        runComplete()
       }
     })
   }

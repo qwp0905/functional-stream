@@ -155,7 +155,7 @@ export abstract class FsInternal<T> implements IFs<T> {
     return this.pipe(bufferCount(count))
   }
 
-  mergeAll(concurrency: number = -1): IFs<T extends StreamLike<infer K> ? K : never> {
+  mergeAll(concurrency: number = Infinity): IFs<T extends StreamLike<infer K> ? K : never> {
     return this.mergeMap((e) => e as any, concurrency)
   }
 
@@ -171,7 +171,7 @@ export abstract class FsInternal<T> implements IFs<T> {
     return this.switchMap((e) => e as any)
   }
 
-  mergeMap<R>(callback: IMapCallback<T, StreamLike<R>>, concurrency: number = -1): IFs<R> {
+  mergeMap<R>(callback: IMapCallback<T, StreamLike<R>>, concurrency: number = Infinity): IFs<R> {
     return this.mergeScan<R>((_, cur, index) => callback(cur, index), null as R, concurrency)
   }
 
@@ -198,7 +198,11 @@ export abstract class FsInternal<T> implements IFs<T> {
     )
   }
 
-  mergeScan<R>(callback: IReduceCallback<R, T, StreamLike<R>>, seed: R, concurrency = -1): IFs<R> {
+  mergeScan<R>(
+    callback: IReduceCallback<R, T, StreamLike<R>>,
+    seed: R,
+    concurrency = Infinity
+  ): IFs<R> {
     return this.pipe(mergeScan(callback, seed, concurrency))
   }
 
@@ -324,7 +328,7 @@ export abstract class FsInternal<T> implements IFs<T> {
   }
 
   mergeWith(...streams: StreamLike<T>[]): IFs<T> {
-    return this.pipe(mergeWith(streams, -1))
+    return this.pipe(mergeWith(streams, Infinity))
   }
 
   concatWith(...streams: StreamLike<T>[]): IFs<T> {

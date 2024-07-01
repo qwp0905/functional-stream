@@ -88,6 +88,60 @@ describe("merge", () => {
         .toArray()
       await expect(r).resolves.toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
     })
+
+    it("3", async () => {
+      const i = 10000
+      const fn = jest.fn()
+      jest.useFakeTimers()
+
+      const r = Fs.range(10)
+        .bufferCount(3)
+        .concatMap((e) => Fs.of(e).delay(i))
+        .tap(fn)
+        .toArray()
+
+      await jest.advanceTimersByTimeAsync(i - 1)
+      expect(fn).not.toHaveBeenCalled()
+      await jest.advanceTimersByTimeAsync(1)
+      expect(fn).toHaveBeenCalledTimes(1)
+      expect(fn).toHaveBeenLastCalledWith([0, 1, 2], 0)
+
+      await jest.advanceTimersByTimeAsync(i - 1)
+      expect(fn).toHaveBeenCalledTimes(1)
+      await jest.advanceTimersByTimeAsync(1)
+      expect(fn).toHaveBeenCalledTimes(2)
+      expect(fn).toHaveBeenLastCalledWith([3, 4, 5], 1)
+
+      await jest.advanceTimersByTimeAsync(i - 1)
+      expect(fn).toHaveBeenCalledTimes(2)
+      await jest.advanceTimersByTimeAsync(1)
+      expect(fn).toHaveBeenCalledTimes(3)
+      expect(fn).toHaveBeenLastCalledWith([6, 7, 8], 2)
+
+      await jest.advanceTimersByTimeAsync(i - 1)
+      expect(fn).toHaveBeenCalledTimes(3)
+      await jest.advanceTimersByTimeAsync(1)
+      expect(fn).toHaveBeenCalledTimes(4)
+      expect(fn).toHaveBeenLastCalledWith([9], 3)
+
+      await jest.runAllTimersAsync()
+      expect(fn).toHaveBeenCalledTimes(4)
+      await expect(r).resolves.toEqual([[0, 1, 2], [3, 4, 5], [6, 7, 8], [9]])
+      expect(fn).toHaveBeenCalledTimes(4)
+
+      jest.clearAllTimers()
+    })
+
+    it("4", async () => {
+      const fn = jest.fn()
+      const r = Fs.empty()
+        .concatMap((e) => Fs.of(e).delay(1000))
+        .tap(fn)
+        .toArray()
+
+      await expect(r).resolves.toEqual([])
+      expect(fn).toHaveBeenCalledTimes(0)
+    })
   })
 })
 

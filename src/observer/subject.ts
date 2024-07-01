@@ -157,7 +157,7 @@ export class Subject<T> implements ISubject<T> {
     let is_done = false
     let error: Error | null = null
     const queue: T[] = []
-    const promise: [ResolveFunction<T>, RejectFunction][] = []
+    const promise: [ResolveFunction<IteratorResult<T>>, RejectFunction][] = []
 
     const handleError = (err: Error) => {
       error = err
