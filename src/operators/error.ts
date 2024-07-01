@@ -1,7 +1,7 @@
 import { IFunction1, OperatorPipe, StreamLike } from "../@types/index.js"
 import { Fs } from "../index.js"
 
-export const catchError = <T>(callback: IFunction1<unknown, StreamLike<T>>): OperatorPipe<T> => {
+export const onErrWith = <T>(callback: IFunction1<unknown, StreamLike<T>>): OperatorPipe<T> => {
   return (source, dest) => {
     source.watch({
       next: dest.publish.bind(dest),

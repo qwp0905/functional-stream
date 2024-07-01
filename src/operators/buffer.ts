@@ -49,8 +49,7 @@ export const bufferWhen = <T, R>(callback: IFunction0<StreamLike<R>>): OperatorP
     })
 
     return trigger
-      .tap(() => dest.publish(queue))
-      .tap(() => (queue = []))
+      .tap(() => (dest.publish(queue), (queue = [])))
       .catchErr(dest.abort.bind(dest))
       .lastOne()
   }

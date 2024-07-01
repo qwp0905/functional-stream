@@ -105,10 +105,7 @@ export function fromInterval(interval: number): IFs<number> {
 
 export function fromDelay(ms: number): IFs<void> {
   return Fs.new((subject) => {
-    const delay = setTimeout(() => {
-      subject.publish()
-      subject.commit()
-    }, ms)
+    const delay = setTimeout(() => (subject.publish(), subject.commit()), ms)
     subject.add(() => clearTimeout(delay))
   })
 }

@@ -20,7 +20,7 @@ import {
   reduce,
   bufferCount,
   take,
-  catchError,
+  onErrWith,
   defaultIfEmpty,
   throwIfEmpty,
   finalize,
@@ -45,10 +45,7 @@ export abstract class FsInternal<T> implements IFs<T> {
   }
 
   protected pipe<R = T>(callback: OperatorPipe<T, R>): IFs<R> {
-    return Fs.new((dest) => {
-      dest.add(this.source)
-      callback(this.source, dest)
-    })
+    return Fs.new((dest) => (dest.add(this.source), callback(this.source, dest)))
   }
 
   watch(options: IObserver<T>) {
@@ -59,16 +56,13 @@ export abstract class FsInternal<T> implements IFs<T> {
 
     this.source.watch({
       next(event) {
-        sub.publish(event)
-        out.publish(event)
+        sub.publish(event), out.publish(event)
       },
       error(err) {
-        sub.abort(err)
-        out.abort(err)
+        sub.abort(err), out.abort(err)
       },
       complete() {
-        sub.commit()
-        out.commit()
+        sub.commit(), out.commit()
       }
     })
 
@@ -212,7 +206,7 @@ export abstract class FsInternal<T> implements IFs<T> {
   }
 
   onErrWith(callback: IFunction1<unknown, StreamLike<T>>): IFs<T> {
-    return this.pipe(catchError(callback))
+    return this.pipe(onErrWith(callback))
   }
 
   catchErr(callback: IErrorCallback): IFs<T> {
@@ -238,8 +232,7 @@ export abstract class FsInternal<T> implements IFs<T> {
       .filter(([, k]) => !map.has(k))
       .map(([e, k]) => Fs.new<T>((sub) => map.set(k, sub)).startWith(e))
       .catchErr((err) => map.forEach((s) => s.abort(err)))
-      .finalize(() => map.forEach((s) => s.commit()))
-      .finalize(() => map.clear())
+      .finalize(() => map.forEach((s) => s.commit(), map.clear()))
   }
 
   timeout(each: number): IFs<T> {
@@ -290,11 +283,10 @@ export abstract class FsInternal<T> implements IFs<T> {
 
   audit<R>(callback: IMapCallback<T, StreamLike<R>>): IFs<T> {
     let last: T
-    return this.tap((e) => (last = e)).exhaustMap((e, i) =>
-      Fs.from(callback(e, i))
-        .take(1)
-        .map(() => last)
-    )
+    return this.tap((e) => (last = e))
+      .map(callback)
+      .map((e) => Fs.from(e))
+      .exhaustMap((e) => e.take(1).map(() => last))
   }
 
   throttle<R>(callback: IFunction1<T, StreamLike<R>>): IFs<T> {

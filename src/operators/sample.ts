@@ -17,8 +17,7 @@ export const sample = <T, R>(notifier: StreamLike<R>): OperatorPipe<T> => {
 
     return trigger
       .filter(() => now !== unique)
-      .tap(() => dest.publish(now as T))
-      .tap(() => (now = unique))
+      .tap(() => (dest.publish(now as T), (now = unique)))
       .catchErr(dest.abort.bind(dest))
       .lastOne()
   }

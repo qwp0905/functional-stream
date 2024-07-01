@@ -7,8 +7,7 @@ export const repeat = <T>(count: number): OperatorPipe<T> => {
 
     source.watch({
       next(event) {
-        queue.push([event, Date.now().subtract(start)])
-        dest.publish(event)
+        queue.push([event, Date.now().subtract(start)]), dest.publish(event)
       },
       error: dest.abort.bind(dest),
       complete() {
