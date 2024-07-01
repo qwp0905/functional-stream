@@ -286,7 +286,8 @@ export abstract class FsInternal<T> implements IFs<T> {
     return this.tap((e) => (last = e))
       .map(callback)
       .map((e) => Fs.from(e))
-      .exhaustMap((e) => e.take(1).map(() => last))
+      .exhaustMap((e) => e.take(1))
+      .map(() => last)
   }
 
   throttle<R>(callback: IFunction1<T, StreamLike<R>>): IFs<T> {
