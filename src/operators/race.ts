@@ -8,15 +8,7 @@ export const raceWith = <T>(streams: StreamLike<T>[]): OperatorPipe<T> => {
 
     return Fs.from<Closable<T>>(list)
       .startWith(source)
-      .mergeMap((e) => {
-        if (first) {
-          e.close()
-          return Fs.empty<T>()
-        }
-
-        first = true
-        return e
-      })
+      .mergeMap((e) => (first ? (e.close(), Fs.empty<T>()) : ((first = true), e)))
       .tap(dest.publish.bind(dest))
       .catchErr(dest.abort.bind(dest))
       .finalize(dest.commit.bind(dest))
