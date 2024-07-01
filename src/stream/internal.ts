@@ -232,7 +232,7 @@ export abstract class FsInternal<T> implements IFs<T> {
       .filter(([, k]) => !map.has(k))
       .map(([e, k]) => Fs.new<T>((sub) => map.set(k, sub)).startWith(e))
       .catchErr((err) => map.forEach((s) => s.abort(err)))
-      .finalize(() => map.forEach((s) => s.commit(), map.clear()))
+      .finalize(() => (map.forEach((s) => s.commit()), map.clear()))
   }
 
   timeout(each: number): IFs<T> {

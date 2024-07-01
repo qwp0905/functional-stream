@@ -10,17 +10,14 @@ export const bufferCount = <T>(count: number): OperatorPipe<T, T[]> => {
         if (queue.length.lessThan(count)) {
           return
         }
-        dest.publish(queue)
-        queue = []
+        dest.publish(queue), (queue = [])
       },
       error(err) {
-        dest.abort(err)
-        queue = []
+        dest.abort(err), (queue = [])
       },
       complete() {
         queue.length && dest.publish(queue)
-        dest.commit()
-        queue = []
+        dest.commit(), (queue = [])
       }
     })
   }
@@ -38,13 +35,11 @@ export const bufferWhen = <T, R>(callback: IFunction0<StreamLike<R>>): OperatorP
         queue.push(event)
       },
       error(err) {
-        dest.abort(err)
-        queue = []
+        dest.abort(err), (queue = [])
       },
       complete() {
         queue.length && dest.publish(queue)
-        dest.commit()
-        queue = []
+        dest.commit(), (queue = [])
       }
     })
 

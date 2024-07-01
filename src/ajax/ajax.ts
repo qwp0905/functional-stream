@@ -11,9 +11,7 @@ export async function ajaxCall(config: AjaxRequestConfig, subject: ISubject<Ajax
   try {
     const req = new AjaxRequest(config)
     const controller = new AbortController()
-    const timeout = setTimeout(() => {
-      controller.abort(new AjaxTimeoutError())
-    }, req.getTimeout())
+    const timeout = setTimeout(() => controller.abort(new AjaxTimeoutError()), req.getTimeout())
     subject.add(() => clearTimeout(timeout))
 
     const res = await fetch(req.getUrl(), {
