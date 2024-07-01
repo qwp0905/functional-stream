@@ -1,5 +1,4 @@
-import { Fs } from "../../src/stream/functional-stream.js"
-import { EmptyPipelineError } from "../../src/utils/errors.js"
+import { Fs, EmptyPipelineError } from "../../src/index.js"
 
 describe("empty", () => {
   it("throw", async () => {

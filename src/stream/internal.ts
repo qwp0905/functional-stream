@@ -10,10 +10,10 @@ import {
   ITapCallback,
   OperatorPipe,
   IFunction1,
-  IFunction0
+  IFunction0,
+  EmptyPipelineError
 } from "../@types/index.js"
 import { Subject } from "../observer/index.js"
-import { EmptyPipelineError } from "../utils/index.js"
 import {
   map,
   filter,

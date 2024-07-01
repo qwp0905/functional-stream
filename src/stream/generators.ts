@@ -1,11 +1,5 @@
-import { IFs, IFunction1, OrPromise } from "../@types/index.js"
-import {
-  isEventSource,
-  isHtmlElement,
-  isOnOffEventSource,
-  InvalidEventSourceError,
-  toAsyncIter
-} from "../utils/index.js"
+import { IFs, IFunction1, OrPromise, InvalidEventSourceError } from "../@types/index.js"
+import { isEventSource, isHtmlElement, isOnOffEventSource, toAsyncIter } from "../utils/index.js"
 import { Fs } from "./functional-stream.js"
 
 export function fromAsyncIterable<T>(iter: AsyncIterable<T>): IFs<T> {

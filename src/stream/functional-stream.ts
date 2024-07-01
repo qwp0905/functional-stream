@@ -1,10 +1,4 @@
-import {
-  isAsyncIterable,
-  isFunction,
-  isIterable,
-  isReadableStream,
-  NotSupportTypeError
-} from "../utils/index.js"
+import { isAsyncIterable, isFunction, isIterable, isReadableStream } from "../utils/index.js"
 import { Subject } from "../observer/index.js"
 import {
   ISubject,
@@ -13,7 +7,8 @@ import {
   StreamLike,
   IFunction1,
   OrPromise,
-  IFunction0
+  IFunction0,
+  NotSupportTypeError
 } from "../@types/index.js"
 import {
   fromAsyncIterable,

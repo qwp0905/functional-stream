@@ -3,9 +3,9 @@ import {
   IObserver,
   ISubject,
   RejectFunction,
-  ResolveFunction
+  ResolveFunction,
+  AlreadySubscribedError
 } from "../@types/index.js"
-import { AlreadySubscribedError } from "../utils/index.js"
 
 enum EventKind {
   next,

@@ -1,5 +1,5 @@
 import { Fs } from "../../src/stream/functional-stream.js"
-import { SubscriptionTimeoutError } from "../../src/utils/errors.js"
+import { SubscriptionTimeoutError } from "../../src/@types/errors.js"
 
 describe("timeout", () => {
   beforeEach(() => {
