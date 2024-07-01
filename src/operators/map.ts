@@ -7,12 +7,8 @@ export const map = <T, R>(callback: IMapCallback<T, R>): OperatorPipe<T, R> => {
       next(event) {
         dest.publish(callback(event, index++))
       },
-      error(err) {
-        dest.abort(err)
-      },
-      complete() {
-        dest.commit()
-      }
+      error: dest.abort.bind(dest),
+      complete: dest.commit.bind(dest)
     })
   }
 }

@@ -9,12 +9,8 @@ export const timeout = <T>(each: number): OperatorPipe<T> => {
         timer.refresh()
         dest.publish(event)
       },
-      error(err) {
-        dest.abort(err)
-      },
-      complete() {
-        dest.commit()
-      }
+      error: dest.abort.bind(dest),
+      complete: dest.commit.bind(dest)
     })
   }
 }

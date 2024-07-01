@@ -10,9 +10,7 @@ export const defaultIfEmpty = <T>(v: T): OperatorPipe<T> => {
         }
         dest.publish(event)
       },
-      error(err) {
-        dest.abort(err)
-      },
+      error: dest.abort.bind(dest),
       complete() {
         is_empty && dest.publish(v)
         dest.commit()
@@ -31,9 +29,7 @@ export const throwIfEmpty = <T>(err: any): OperatorPipe<T> => {
         }
         dest.publish(event)
       },
-      error(err) {
-        dest.abort(err)
-      },
+      error: dest.abort.bind(dest),
       complete() {
         if (is_empty) {
           dest.abort(err)

@@ -18,9 +18,7 @@ export const reduce = <A, C = A>(options: ReduceOptions<A, C>): OperatorPipe<C, 
         state = hasSeed ? options.callback(state!, event, i) : ((hasSeed = true), event as any)
         options.emitNext && dest.publish(state!)
       },
-      error(err) {
-        dest.abort(err)
-      },
+      error: dest.abort.bind(dest),
       complete() {
         options.emitOnEnd && dest.publish(state!)
         dest.commit()

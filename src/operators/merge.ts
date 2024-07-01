@@ -17,11 +17,11 @@ export const mergeScan = <T, R>(
     const runNext = (event: T) => {
       activated++
       const fs = Fs.from(callback(seed, event, index++))
-      dest.add(() => fs.close())
+      dest.add(fs.close.bind(fs))
 
       return fs
         .tap((e) => dest.publish((seed = e)))
-        .catchErr((err) => dest.abort(err))
+        .catchErr(dest.abort.bind(dest))
         .discard()
         .finalize(() => {
           activated--
@@ -37,9 +37,7 @@ export const mergeScan = <T, R>(
       next(event) {
         concurrency.greaterThan(activated) ? runNext(event) : buffered.push(event)
       },
-      error(err) {
-        dest.abort(err)
-      },
+      error: dest.abort.bind(dest),
       complete() {
         completed = true
         runComplete()
@@ -50,14 +48,12 @@ export const mergeScan = <T, R>(
 
 export const mergeWith = <T>(streams: StreamLike<T>[], concurrency: number): OperatorPipe<T> => {
   return (source, dest) => {
-    const list = streams.map((s) => Fs.from(s))
-    list.forEach((fs) => dest.add(() => fs.close()))
-    return Fs.from<StreamLike<T>>(list)
+    return Fs.from<StreamLike<T>>(streams)
       .startWith(source)
       .mergeAll(concurrency)
-      .tap((e) => dest.publish(e))
-      .catchErr((err) => dest.abort(err))
-      .finalize(() => dest.commit())
+      .tap(dest.publish.bind(dest))
+      .catchErr(dest.abort.bind(dest))
+      .finalize(dest.commit.bind(dest))
       .lastOne()
   }
 }

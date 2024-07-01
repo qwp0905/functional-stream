@@ -11,19 +11,15 @@ export const sample = <T, R>(notifier: StreamLike<R>): OperatorPipe<T> => {
       next(event) {
         now = event
       },
-      error(err) {
-        dest.abort(err)
-      },
-      complete() {
-        dest.commit()
-      }
+      error: dest.abort.bind(dest),
+      complete: dest.commit.bind(dest)
     })
 
     return trigger
       .filter(() => now !== unique)
       .tap(() => dest.publish(now as T))
       .tap(() => (now = unique))
-      .catchErr((err) => dest.abort(err))
+      .catchErr(dest.abort.bind(dest))
       .lastOne()
   }
 }

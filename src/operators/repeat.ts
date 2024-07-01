@@ -10,9 +10,7 @@ export const repeat = <T>(count: number): OperatorPipe<T> => {
         queue.push([event, Date.now().subtract(start)])
         dest.publish(event)
       },
-      error(err) {
-        dest.abort(err)
-      },
+      error: dest.abort.bind(dest),
       complete() {
         const elapse = Date.now().subtract(start)
         while (queue.length.greaterThan(0)) {
@@ -23,7 +21,7 @@ export const repeat = <T>(count: number): OperatorPipe<T> => {
           }
         }
 
-        const timer = setTimeout(() => dest.commit(), count.subtract(1).multiply(elapse))
+        const timer = setTimeout(dest.commit.bind(dest), count.subtract(1).multiply(elapse))
         dest.add(() => clearTimeout(timer))
       }
     })

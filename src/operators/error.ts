@@ -4,9 +4,7 @@ import { Fs } from "../index.js"
 export const catchError = <T>(callback: IFunction1<unknown, StreamLike<T>>): OperatorPipe<T> => {
   return (source, dest) => {
     source.watch({
-      next(event) {
-        dest.publish(event)
-      },
+      next: dest.publish.bind(dest),
       async error(err) {
         try {
           const fs = Fs.from(callback(err))
@@ -17,9 +15,7 @@ export const catchError = <T>(callback: IFunction1<unknown, StreamLike<T>>): Ope
           dest.abort(error)
         }
       },
-      complete() {
-        dest.commit()
-      }
+      complete: dest.commit.bind(dest)
     })
   }
 }

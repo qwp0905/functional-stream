@@ -3,20 +3,18 @@ import { OperatorPipe, IMapCallback } from "../@types/index.js"
 export const take = <T>(count: number): OperatorPipe<T> => {
   let index = 0
   return (source, dest) => {
+    if (count.lessThanOrEqual(0)) {
+      return dest.commit()
+    }
     source.watch({
       next(event) {
-        index++
         dest.publish(event)
-        if (index.equal(count)) {
+        if ((index++).equal(count.subtract(1))) {
           dest.commit()
         }
       },
-      error(err) {
-        dest.abort(err)
-      },
-      complete() {
-        dest.commit()
-      }
+      error: dest.abort.bind(dest),
+      complete: dest.commit.bind(dest)
     })
   }
 }
@@ -31,12 +29,8 @@ export const takeWhile = <T>(callback: IMapCallback<T, boolean>): OperatorPipe<T
         }
         dest.commit()
       },
-      error(err) {
-        dest.abort(err)
-      },
-      complete() {
-        dest.commit()
-      }
+      error: dest.abort.bind(dest),
+      complete: dest.commit.bind(dest)
     })
   }
 }

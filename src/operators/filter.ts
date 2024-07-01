@@ -7,12 +7,8 @@ export const filter = <T>(callback: IFilterCallback<T>): OperatorPipe<T> => {
       next(event) {
         callback(event, index++) && dest.publish(event)
       },
-      error(err) {
-        dest.abort(err)
-      },
-      complete() {
-        dest.commit()
-      }
+      error: dest.abort.bind(dest),
+      complete: dest.commit.bind(dest)
     })
   }
 }

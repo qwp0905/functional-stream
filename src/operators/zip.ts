@@ -4,7 +4,7 @@ import { toAsyncIter } from "../utils/index.js"
 export const zipWith = <T>(streams: StreamLike<any>[]): OperatorPipe<T, any[]> => {
   return (source, dest) => {
     const list = streams.map((e) => Fs.from(e))
-    list.forEach((e) => dest.add(() => e.close()))
+    list.forEach((e) => dest.add(e.close.bind(e)))
 
     const iters = [source as AsyncIterable<T>].concat(list).map((e) => toAsyncIter(e))
     const next = () => Promise.all(iters.map((e) => e.next()))
@@ -12,9 +12,9 @@ export const zipWith = <T>(streams: StreamLike<any>[]): OperatorPipe<T, any[]> =
     return Fs.from(next())
       .concatMap((seed) => Fs.loop(seed, (data) => data.some((e) => !e.done), next))
       .map((data) => data.map((e) => e.value))
-      .tap((e) => dest.publish(e))
-      .catchErr((err) => dest.abort(err))
-      .finalize(() => dest.commit())
+      .tap(dest.publish.bind(dest))
+      .catchErr(dest.abort.bind(dest))
+      .finalize(dest.commit.bind(dest))
       .lastOne()
   }
 }

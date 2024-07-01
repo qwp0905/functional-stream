@@ -4,15 +4,9 @@ export const finalize = <T>(callback: IFunction0<void>): OperatorPipe<T> => {
   return (source, dest) => {
     dest.add(callback)
     source.watch({
-      next(event) {
-        dest.publish(event)
-      },
-      error(err) {
-        dest.abort(err)
-      },
-      complete() {
-        dest.commit()
-      }
+      next: dest.publish.bind(dest),
+      error: dest.abort.bind(dest),
+      complete: dest.commit.bind(dest)
     })
   }
 }
