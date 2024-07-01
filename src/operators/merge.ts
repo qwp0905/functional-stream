@@ -12,15 +12,7 @@ export const mergeScan = <T, R>(
     let index = 0
     let completed = false
 
-    const runComplete = () => {
-      if (!activated.equal(0)) {
-        return
-      }
-      if (!buffered.length.equal(0)) {
-        return
-      }
-      dest.commit()
-    }
+    const runComplete = () => activated.equal(0) && buffered.length.equal(0) && dest.commit()
 
     const runNext = (event: T) => {
       activated++
