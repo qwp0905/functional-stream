@@ -8,10 +8,7 @@ export const take = <T>(count: number): OperatorPipe<T> => {
     }
     source.watch({
       next(event) {
-        dest.publish(event)
-        if ((index++).equal(count.subtract(1))) {
-          dest.commit()
-        }
+        dest.publish(event), (index++).equal(count.subtract(1)) && dest.commit()
       },
       error: dest.abort.bind(dest),
       complete: dest.commit.bind(dest)
@@ -24,10 +21,7 @@ export const takeWhile = <T>(callback: IMapCallback<T, boolean>): OperatorPipe<T
     let index = 0
     source.watch({
       next(event) {
-        if (callback(event, index++)) {
-          return dest.publish(event)
-        }
-        dest.commit()
+        callback(event, index++) ? dest.publish(event) : dest.commit()
       },
       error: dest.abort.bind(dest),
       complete: dest.commit.bind(dest)

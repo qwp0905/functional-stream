@@ -20,8 +20,7 @@ export const reduce = <A, C = A>(options: ReduceOptions<A, C>): OperatorPipe<C, 
       },
       error: dest.abort.bind(dest),
       complete() {
-        options.emitOnEnd && dest.publish(state!)
-        dest.commit()
+        options.emitOnEnd && dest.publish(state!), dest.commit()
       }
     })
   }

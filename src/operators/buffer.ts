@@ -16,8 +16,7 @@ export const bufferCount = <T>(count: number): OperatorPipe<T, T[]> => {
         dest.abort(err), (queue = [])
       },
       complete() {
-        queue.length && dest.publish(queue)
-        dest.commit(), (queue = [])
+        queue.length && dest.publish(queue), dest.commit(), (queue = [])
       }
     })
   }
@@ -38,8 +37,7 @@ export const bufferWhen = <T, R>(callback: IFunction0<StreamLike<R>>): OperatorP
         dest.abort(err), (queue = [])
       },
       complete() {
-        queue.length && dest.publish(queue)
-        dest.commit(), (queue = [])
+        queue.length && dest.publish(queue), dest.commit(), (queue = [])
       }
     })
 
