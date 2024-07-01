@@ -129,10 +129,7 @@ export abstract class FsInternal<T> implements IFs<T> {
   }
 
   tap(callback: ITapCallback<T>): IFs<T> {
-    return this.map((e, i) => {
-      callback(e, i)
-      return e
-    })
+    return this.map((e, i) => (callback(e, i), e))
   }
 
   reduce<A = T>(callback: IReduceCallback<A, T>, seed?: A): IFs<A> {
