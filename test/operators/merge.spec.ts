@@ -200,4 +200,10 @@ describe("mergeWith", () => {
 
     await expect(r).resolves.toEqual([1, 2, 1, 1, 2])
   })
+
+  it("2", async () => {
+    jest.useRealTimers()
+    const r = Fs.of(1).mergeWith(Fs.interval(10)).take(1).lastOne()
+    await expect(r).resolves.toEqual(1)
+  })
 })
