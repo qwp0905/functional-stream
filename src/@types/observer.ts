@@ -4,10 +4,10 @@ export interface Closable<T> extends AsyncIterable<T> {
   close(): void
 }
 
-export interface IObserver<T, R = any> {
-  next(this: R, event: T): any
-  error?(this: R, err: unknown): any
-  complete?(this: R): any
+export interface IObserver<T> {
+  next(event: T): any
+  error?(err: unknown): any
+  complete?(): any
 }
 
 export interface ISubject<T> extends Closable<T> {

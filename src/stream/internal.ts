@@ -1,6 +1,5 @@
 import {
   IFs,
-  IStreamReadOptions,
   StreamLike,
   ISubject,
   IErrorCallback,
@@ -11,7 +10,8 @@ import {
   OperatorPipe,
   IFunction1,
   IFunction0,
-  EmptyPipelineError
+  EmptyPipelineError,
+  IObserver
 } from "../@types/index.js"
 import { Subject } from "../observer/index.js"
 import {
@@ -51,7 +51,7 @@ export abstract class FsInternal<T> implements IFs<T> {
     })
   }
 
-  watch(options: IStreamReadOptions<T>) {
+  watch(options: IObserver<T>) {
     const [sub, out] = [new Subject<T>(), new Subject<T>()]
     sub.add(out)
     sub.add(this.source)

@@ -8,13 +8,7 @@ import {
   ITapCallback,
   IFunction2
 } from "./callback.js"
-import { Closable, ISubject } from "./observer.js"
-
-export interface IStreamReadOptions<T> {
-  next(data: T): any
-  error?(err: Error): any
-  complete?(): any
-}
+import { Closable, IObserver, ISubject } from "./observer.js"
 
 export interface Timestamp<T> {
   value: T
@@ -26,7 +20,7 @@ export interface TimeInterval<T> {
 }
 
 export interface IFs<T> extends Closable<T> {
-  watch(options: IStreamReadOptions<T>): void
+  watch(options: IObserver<T>): void
   close(): void
   lastOne(): Promise<T>
   firstOne(): Promise<T>
