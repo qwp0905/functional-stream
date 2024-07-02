@@ -19,6 +19,10 @@ export interface TimeInterval<T> {
   interval: number
 }
 
+export interface OperateOptions<T, R> extends IObserver<T> {
+  destination: ISubject<R>
+}
+
 export interface IFs<T> extends Closable<T> {
   watch(options: IObserver<T>): void
   close(): void
@@ -26,6 +30,7 @@ export interface IFs<T> extends Closable<T> {
   firstOne(): Promise<T>
   toArray(): Promise<T[]>
   forEach(callback: IMapCallback<T, any>): Promise<void>
+  operate<R>(options: OperateOptions<T, R>): void
 
   count(): IFs<number>
   some(callback: IFilterCallback<T>): IFs<boolean>

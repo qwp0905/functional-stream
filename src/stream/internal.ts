@@ -11,7 +11,8 @@ import {
   IFunction1,
   IFunction0,
   EmptyPipelineError,
-  IObserver
+  IObserver,
+  OperateOptions
 } from "../@types/index.js"
 import { Subject } from "../observer/index.js"
 import {
@@ -67,6 +68,11 @@ export abstract class FsInternal<T> implements IFs<T> {
     })
 
     this.source = sub
+  }
+
+  operate<R>({ destination, ...observer }: OperateOptions<T, R>): void {
+    destination.add(this.source)
+    this.source.watch(observer)
   }
 
   close(): void {
@@ -284,9 +290,7 @@ export abstract class FsInternal<T> implements IFs<T> {
   audit<R>(callback: IMapCallback<T, StreamLike<R>>): IFs<T> {
     let last: T
     return this.tap((e) => (last = e))
-      .map(callback)
-      .map((e) => Fs.from(e))
-      .exhaustMap((e) => e.take(1))
+      .exhaustMap((e, i) => Fs.from(callback(e, i)).take(1))
       .map(() => last)
   }
 

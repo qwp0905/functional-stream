@@ -5,15 +5,13 @@ export const onErrWith = <T>(callback: IFunction1<unknown, StreamLike<T>>): Oper
   return (source, dest) => {
     source.watch({
       next: dest.publish.bind(dest),
-      async error(err) {
-        try {
-          const fs = Fs.from(callback(err))
-          dest.add(() => fs.close())
-          await fs.tap((e) => dest.publish(e)).lastOne()
-          dest.commit()
-        } catch (error) {
-          dest.abort(error)
-        }
+      error(err) {
+        Fs.from(callback(err)).operate({
+          destination: dest,
+          next: dest.publish.bind(dest),
+          error: dest.abort.bind(dest),
+          complete: dest.commit.bind(dest)
+        })
       },
       complete: dest.commit.bind(dest)
     })

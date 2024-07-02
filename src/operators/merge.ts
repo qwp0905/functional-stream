@@ -16,21 +16,20 @@ export const mergeScan = <T, R>(
 
     const runNext = (event: T) => {
       activated++
-      const fs = Fs.from(callback(seed, event, index++))
-      dest.add(fs.close.bind(fs))
-
-      return fs
-        .tap((e) => dest.publish((seed = e)))
-        .catchErr(dest.abort.bind(dest))
-        .discard()
-        .finalize(() => {
+      return Fs.from(callback(seed, event, index++)).operate({
+        destination: dest,
+        next(event) {
+          dest.publish((seed = event))
+        },
+        error: dest.abort.bind(dest),
+        finalize() {
           activated--
           while (buffered.length.greaterThan(0) && activated.lessThan(concurrency)) {
             runNext(buffered.shift()!)
           }
           completed && runComplete()
-        })
-        .lastOne()
+        }
+      })
     }
 
     source.watch({

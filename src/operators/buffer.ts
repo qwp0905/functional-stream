@@ -7,10 +7,7 @@ export const bufferCount = <T>(count: number): OperatorPipe<T, T[]> => {
     source.watch({
       next(event) {
         queue.push(event)
-        if (queue.length.lessThan(count)) {
-          return
-        }
-        dest.publish(queue), (queue = [])
+        queue.length.greaterThanOrEqual(count) && (dest.publish(queue), (queue = []))
       },
       error(err) {
         dest.abort(err), (queue = [])
@@ -26,9 +23,6 @@ export const bufferWhen = <T, R>(callback: IFunction0<StreamLike<R>>): OperatorP
   return (source, dest) => {
     let queue: T[] = []
 
-    const trigger = Fs.from(callback())
-    dest.add(() => trigger.close())
-
     source.watch({
       next(event) {
         queue.push(event)
@@ -41,9 +35,12 @@ export const bufferWhen = <T, R>(callback: IFunction0<StreamLike<R>>): OperatorP
       }
     })
 
-    return trigger
-      .tap(() => (dest.publish(queue), (queue = [])))
-      .catchErr(dest.abort.bind(dest))
-      .lastOne()
+    return Fs.from(callback()).operate({
+      destination: dest,
+      next() {
+        dest.publish(queue), (queue = [])
+      },
+      error: dest.abort.bind(dest)
+    })
   }
 }

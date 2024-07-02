@@ -8,6 +8,7 @@ export interface IObserver<T> {
   next(event: T): any
   error?(err: unknown): any
   complete?(): any
+  finalize?(): any
 }
 
 export interface ISubject<T> extends Closable<T> {

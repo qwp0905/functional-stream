@@ -85,6 +85,7 @@ export class Subject<T> implements ISubject<T> {
 
   private _close() {
     this.end = true
+    const observer = this.observer
     this.observer = null
     this.queue.length = 0
     for (const finalizer of this.finalizers.values()) {
@@ -95,6 +96,7 @@ export class Subject<T> implements ISubject<T> {
         finalizer.commit()
       }
     }
+    observer?.finalize?.()
   }
 
   publish(event: T) {
