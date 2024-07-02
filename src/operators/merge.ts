@@ -52,9 +52,11 @@ export const mergeWith = <T>(streams: StreamLike<T>[], concurrency: number): Ope
     return Fs.from<StreamLike<T>>(list)
       .startWith(source)
       .mergeAll(concurrency)
-      .tap(dest.publish.bind(dest))
-      .catchErr(dest.abort.bind(dest))
-      .finalize(dest.commit.bind(dest))
-      .lastOne()
+      .operate({
+        destination: dest,
+        next: dest.publish.bind(dest),
+        error: dest.abort.bind(dest),
+        complete: dest.commit.bind(dest)
+      })
   }
 }
