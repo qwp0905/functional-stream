@@ -1,6 +1,6 @@
 {
   "name": "@qwp0905/functional-stream",
-  "version": "0.6.3",
+  "version": "0.7.0",
   "description": "",
   "type": "module",
   "main": "./release/cjs/dist/index.js",
