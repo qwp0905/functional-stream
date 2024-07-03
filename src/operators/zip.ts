@@ -12,9 +12,11 @@ export const zipWith = <T>(streams: StreamLike<any>[]): OperatorPipe<T, any[]> =
     return Fs.from(next())
       .concatMap((seed) => Fs.loop(seed, (data) => data.some((e) => !e.done), next))
       .map((data) => data.map((e) => e.value))
-      .tap(dest.publish.bind(dest))
-      .catchErr(dest.abort.bind(dest))
-      .finalize(dest.commit.bind(dest))
-      .lastOne()
+      .operate({
+        destination: dest,
+        next: dest.publish.bind(dest),
+        error: dest.abort.bind(dest),
+        complete: dest.commit.bind(dest)
+      })
   }
 }

@@ -6,7 +6,7 @@ export const onErrWith = <T>(callback: IFunction1<unknown, StreamLike<T>>): Oper
     source.watch({
       next: dest.publish.bind(dest),
       error(err) {
-        Fs.from(callback(err)).operate({
+        return Fs.from(callback(err)).operate({
           destination: dest,
           next: dest.publish.bind(dest),
           error: dest.abort.bind(dest),
