@@ -3,7 +3,7 @@ import { OperatorPipe, IMapCallback } from "../@types/index.js"
 export const take = <T>(count: number): OperatorPipe<T> => {
   let index = 0
   return (source, dest) => {
-    if (count.lessThanOrEqual(0)) {
+    if (count.lessThan(1)) {
       return dest.commit()
     }
     source.watch({
