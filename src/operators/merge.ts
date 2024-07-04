@@ -15,7 +15,7 @@ export const mergeScan = <T, R>(
     const runComplete = () => activated.equal(0) && buffered.length.equal(0) && dest.commit()
 
     const runNext = (event: T) => {
-      activated++
+      activated += 1
       return Fs.from(callback(seed, event, index++)).operate({
         destination: dest,
         next(event) {
@@ -23,7 +23,7 @@ export const mergeScan = <T, R>(
         },
         error: dest.abort.bind(dest),
         finalize() {
-          activated--
+          activated -= 1
           while (buffered.length.greaterThan(0) && activated.lessThan(concurrency)) {
             runNext(buffered.shift()!)
           }
