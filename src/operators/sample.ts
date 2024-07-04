@@ -15,7 +15,7 @@ export const sample = <T, R>(notifier: StreamLike<R>): OperatorPipe<T> => {
     return Fs.from(notifier).operate({
       destination: dest,
       next() {
-        now !== unique && dest.publish(now as T), (now = unique)
+        now !== unique && dest.publish(now), (now = unique)
       },
       error: dest.abort.bind(dest)
     })
