@@ -5,7 +5,6 @@ import { AjaxRequestConfig, HttpMethod } from "./request.js"
 import { AjaxResponse } from "./response.js"
 import { IFunction1, ISubject } from "../@types/index.js"
 import { Fs } from "../stream/index.js"
-import { toAsyncIter } from "../utils/index.js"
 
 export interface AjaxClientConfig {
   readonly base_url?: string
@@ -20,26 +19,9 @@ export interface AjaxClientConfig {
 export interface AjaxConfig extends Omit<AjaxRequestConfig, "method" | "url" | "body"> {}
 
 export class AjaxClient {
-  private readonly sub: ISubject<[ISubject<AjaxResponse<any>>, AjaxRequestConfig]> = new Subject()
-  constructor(private readonly config: AjaxClientConfig) {
-    if ((config.concurrency ?? 0).lessThanOrEqual(0) || !config.concurrency?.isFinite()) {
-      this.sub.watch({
-        next([sub, conf]) {
-          ajaxCall(conf, sub)
-        }
-      })
-      return
-    }
+  private sub: ISubject<[ISubject<AjaxResponse<any>>, AjaxRequestConfig]> | null = null
 
-    const iter = toAsyncIter(this.sub)
-    Promise.all(
-      new Array(config.concurrency).fill(null).map(async () => {
-        for (let data = await iter.next(); !data.done; data = await iter.next()) {
-          await ajaxCall(data.value[1], data.value[0])
-        }
-      })
-    )
-  }
+  constructor(private readonly config: AjaxClientConfig) {}
 
   head(url: string, config: AjaxConfig = {}) {
     return this.request<void>(url, HttpMethod.head, config)
@@ -70,6 +52,12 @@ export class AjaxClient {
     method: HttpMethod,
     config: AjaxConfig & Pick<AjaxRequestConfig, "body">
   ) {
+    if (!this.sub) {
+      Fs.from((this.sub = new Subject()))
+        .mergeMap(([sub, conf]) => ajaxCall(conf, sub), this.config.concurrency)
+        .lastOne()
+    }
+
     const merged = {
       ...config,
       method,
@@ -81,11 +69,11 @@ export class AjaxClient {
       password: config.password ?? this.config.password
     }
 
-    return Fs.new<AjaxResponse<T>>((sub) => this.sub.publish([sub, merged]))
+    return Fs.new<AjaxResponse<T>>((sub) => this.sub!.publish([sub, merged]))
   }
 
   close() {
-    return this.sub.close()
+    return this.sub?.commit()
   }
 }
 
