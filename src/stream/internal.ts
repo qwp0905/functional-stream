@@ -12,7 +12,8 @@ import {
   IFunction0,
   EmptyPipelineError,
   IObserver,
-  OperateOptions
+  OperateOptions,
+  IFunction2
 } from "../@types/index.js"
 import { Subject } from "../observer/index.js"
 import {
@@ -34,7 +35,9 @@ import {
   zipWith,
   repeat,
   sample,
-  startWith
+  startWith,
+  window,
+  windowCount
 } from "../operators/index.js"
 import { Fs } from "./functional-stream.js"
 
@@ -348,5 +351,20 @@ export abstract class FsInternal<T> implements IFs<T> {
 
   repeat(count: number): IFs<T> {
     return this.pipe(repeat(count))
+  }
+
+  window<R>(stream: StreamLike<R>): IFs<IFs<T>> {
+    return this.pipe(window(stream))
+  }
+
+  windowCount(count: number): IFs<IFs<T>> {
+    return this.pipe(windowCount(count))
+  }
+
+  sequenceEqual(
+    stream: StreamLike<T>,
+    compare: IFunction2<T, T, boolean> = (a, b) => a === b
+  ): IFs<boolean> {
+    return this.zipWith(stream).every(([a, b]) => compare(a, b))
   }
 }

@@ -97,6 +97,9 @@ export interface IFs<T> extends Closable<T> {
   ): IFs<[T, R, Q, K, J]>
   zipWith(...streams: StreamLike<any>[]): IFs<any[]>
   repeat(count: number): IFs<T>
+  window<R>(stream: StreamLike<R>): IFs<IFs<T>>
+  windowCount(count: number): IFs<IFs<T>>
+  sequenceEqual(stream: StreamLike<T>, compare?: IFunction2<T, T, boolean>): IFs<boolean>
 }
 
 export type StreamLike<T> =
