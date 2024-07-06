@@ -190,7 +190,7 @@ export abstract class FsInternal<T> implements IFs<T> {
   switchScan<R>(callback: IReduceCallback<R, T, StreamLike<R>>, seed: R): IFs<R> {
     let current = 0
     return this.tap((_, i) => (current = i)).mergeScan(
-      (acc, cur, i) => Fs.from(callback(acc, cur, i)).filter(() => current.equal(i)),
+      (acc, cur, i) => Fs.from(callback(acc, cur, i)).takeWhile(() => current.equal(i)),
       seed
     )
   }

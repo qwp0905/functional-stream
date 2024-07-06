@@ -109,3 +109,4 @@ export class Fs<T> extends FsInternal<T> implements IFs<T> {
     return defaultAjaxClient
   }
 }
+;``
