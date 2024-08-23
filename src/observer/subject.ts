@@ -51,7 +51,7 @@ export class Subject<T> implements ISubject<T> {
     this.end = true
     const observers = this.observers
     this.observers.length = 0
-    // this.queue.length = 0
+
     for (const finalizer of this.finalizers.values()) {
       this.finalizers.delete(finalizer)
       if (typeof finalizer === "function") {
@@ -63,7 +63,6 @@ export class Subject<T> implements ISubject<T> {
     for (const ob of observers) {
       ob.finalize?.()
     }
-    // observer?.finalize?.()
   }
 
   publish(event: T) {

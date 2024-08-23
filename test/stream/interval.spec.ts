@@ -107,7 +107,7 @@ describe("interval", () => {
 
   it("3", async () => {
     jest.useRealTimers()
-    const r = Fs.interval(10).startWith(100).take(1).toArray()
+    const r = Fs.interval(1000).startWith(100).take(1).toArray()
     await expect(r).resolves.toStrictEqual([100])
   })
 })
