@@ -3,91 +3,55 @@ import {
   IObserver,
   ISubject,
   RejectFunction,
-  ResolveFunction,
-  AlreadySubscribedError
+  ResolveFunction
 } from "../@types/index.js"
 
-enum EventKind {
-  next,
-  error,
-  complete
-}
-
-type Event<T> = NextEvent<T> | ErrorEvent | CompleteEvent
-
-class NextEvent<T> {
-  readonly kind = EventKind.next
-  constructor(readonly payload: T) {}
-}
-class ErrorEvent {
-  readonly kind = EventKind.error
-  constructor(readonly payload: unknown) {}
-}
-class CompleteEvent {
-  readonly kind = EventKind.complete
-}
-
 export class Subject<T> implements ISubject<T> {
-  private observer: IObserver<T> | null = null
-  private readonly queue: Event<T>[] = []
+  private observers: IObserver<T>[] = []
   private end = false
   private readonly finalizers: Set<(() => void) | ISubject<any>> = new Set()
 
   watch(observer: IObserver<T>) {
-    if (this.observer) {
-      throw new AlreadySubscribedError()
-    }
-
-    this.observer = observer
-    Promise.resolve().then(() => {
-      while (this.queue.length.greaterThan(0)) {
-        const event = this.queue.shift()!
-        switch (event.kind) {
-          case EventKind.next:
-            this._publish(event.payload)
-            continue
-          case EventKind.error:
-            return this._abort(event.payload)
-          case EventKind.complete:
-            return this._commit()
-        }
-      }
-    })
+    this.observers.push(observer)
   }
 
   private _publish(event: T) {
-    try {
-      this.observer!.next(event)
-    } catch (err) {
-      this._abort(err)
+    for (const observer of this.observers) {
+      try {
+        observer.next(event)
+      } catch (e) {
+        observer.error?.(e)
+      }
     }
   }
 
   private _abort(err: unknown) {
-    try {
-      this.observer!.error?.(err)
-    } catch (error) {
-      this.observer!.error?.(error)
-    } finally {
-      this._close()
+    for (const observer of this.observers) {
+      try {
+        observer.error?.(err)
+      } catch (e) {
+        observer.error?.(e)
+      }
     }
+    this._close()
   }
 
   private _commit() {
-    try {
-      this.observer!.complete?.()
-    } catch (err: unknown) {
-      this.observer!.error?.(err)
-    } finally {
-      this._close()
+    for (const observer of this.observers) {
+      try {
+        observer.complete?.()
+      } catch (e) {
+        observer.error?.(e)
+      }
     }
+    this._close()
   }
 
   private _close() {
     this.end = true
-    const observer = this.observer
-    this.observer = null
-    this.queue.length = 0
+    const observers = this.observers
+    this.observers.length = 0
+    // this.queue.length = 0
     for (const finalizer of this.finalizers.values()) {
       this.finalizers.delete(finalizer)
       if (typeof finalizer === "function") {
@@ -96,16 +60,14 @@ export class Subject<T> implements ISubject<T> {
         finalizer.commit()
       }
     }
-    observer?.finalize?.()
+    for (const ob of observers) {
+      ob.finalize?.()
+    }
+    // observer?.finalize?.()
   }
 
   publish(event: T) {
     if (this.end) {
-      return
-    }
-
-    if (!this.observer || this.queue.length.greaterThan(0)) {
-      this.queue.push(new NextEvent(event))
       return
     }
 
@@ -117,21 +79,11 @@ export class Subject<T> implements ISubject<T> {
       return
     }
 
-    if (!this.observer || this.queue.length.greaterThan(0)) {
-      this.queue.push(new ErrorEvent(err))
-      return
-    }
-
     return this._abort(err)
   }
 
   commit() {
     if (this.end) {
-      return
-    }
-
-    if (!this.observer || this.queue.length.greaterThan(0)) {
-      this.queue.push(new CompleteEvent())
       return
     }
 
@@ -147,7 +99,7 @@ export class Subject<T> implements ISubject<T> {
       return
     }
 
-    if (!this.observer) {
+    if (!this.observers.length) {
       return this._close()
     }
 
@@ -208,11 +160,11 @@ export class Subject<T> implements ISubject<T> {
         })
       },
       throw: (e) => {
-        this.close(), handleError(e)
+        handleError(e)
         return Promise.reject(e)
       },
       return: () => {
-        this.close(), handleComplete()
+        handleComplete()
         return Promise.resolve({ value: undefined, done: true })
       }
     }
